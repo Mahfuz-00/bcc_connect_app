@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen>
                 FadeTransition(
                   opacity: FadeAnimation,
                   child: const Image(
-                    image: AssetImage('Assets/Images/TNS-logo.png'),
+                    image: AssetImage('Assets/Images/Powered by TNS.png'),
                     height: 100,
                     width: 150,
                     alignment: Alignment.bottomCenter,
