@@ -44,6 +44,8 @@ class _RadioListTileGroupState extends State<RadioListTileGroup> {
               title: Text(
                 option,
                 style: TextStyle(
+                  fontFamily: 'default',
+                  fontWeight: FontWeight.bold,
                   fontSize: 16,
                   color:
                   _selectedOption == option ? Colors.deepPurple : Colors.green,

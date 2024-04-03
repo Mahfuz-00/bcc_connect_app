@@ -170,119 +170,119 @@ class _BCCDashboardState extends State<BCCDashboard> with SingleTickerProviderSt
         ),
       ),
       body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
-            color: Colors.grey[100],
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Welcome, BCC Admin Name',
+          child: SafeArea(
+            child: Container(
+              color: Colors.grey[100],
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Welcome, BCC Admin Name',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'default',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Container(
+                      child: TabBar(
+                        padding: EdgeInsets.zero,
+                        controller: _tabController,
+                        tabs: [
+                          Tab(
+                            child: Text(
+                              'Summit',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ),
+                          Tab(
+                            child: Text(
+                              'Fiber@Home',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      height: screenHeight*0.25,
+                      width: screenWidth,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Widget for Summit Tab
+                          buildContentForSummit(),
+                          // Widget for fiber@Home Tab
+                          buildContentForFiberAtHome(),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Pending Authentication',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 25,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Container(
-                    child: TabBar(
-                      padding: EdgeInsets.zero,
-                      controller: _tabController,
-                      tabs: [
-                        Tab(
-                          child: Text(
-                            'Summit',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            ),
-                          ),
-                        ),
-                        Tab(
-                          child: Text(
-                            'Fiber@Home',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 10),
+                    UserProfileCard(
+                      name: 'Abddus Sobhan',
+                      orgName: 'Touch and Solve',
+                      mobileNo: '00111222333',
+                      connectionType: 'New',
+                      applicationId: 'ABCDE12345',
+                      address: 'Gulsan, Dhaka',
+                      nttnprovider: 'Summit',
                     ),
-                  ),
-                  Container(
-                    height: screenHeight*0.25,
-                    width: screenWidth,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Widget for Summit Tab
-                        buildContentForSummit(),
-                        // Widget for fiber@Home Tab
-                        buildContentForFiberAtHome(),
-                      ],
+                    const SizedBox(height: 10),
+                    UserProfileCard(
+                      name: 'Md. Abdullah al Mahfuz',
+                      orgName: 'Dhaka Solution',
+                      mobileNo: '00111222444',
+                      connectionType: 'Upgrade',
+                      applicationId: 'ABCDE12388',
+                      address: 'Mirpur- 14, Dhaka',
+                      nttnprovider: 'Fiber@Home',
                     ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    'Pending Authentication',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
+                    const SizedBox(height: 10),
+                    UserProfileCard(
+                      name: 'Md. Abdul Malaque',
+                      orgName: 'BD Solution',
+                      mobileNo: '00111222666',
+                      connectionType: 'Others',
+                      applicationId: 'ABCDE12388',
+                      address: 'Mirpur D.O.S.H., Dhaka',
+                      nttnprovider: 'Summit',
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  UserProfileCard(
-                    name: 'Abddus Sobhan',
-                    orgName: 'Touch and Solve',
-                    mobileNo: '00111222333',
-                    connectionType: 'New',
-                    applicationId: 'ABCDE12345',
-                    address: 'Gulsan, Dhaka',
-                    nttnprovider: 'Summit',
-                  ),
-                  const SizedBox(height: 10),
-                  UserProfileCard(
-                    name: 'Md. Abdullah al Mahfuz',
-                    orgName: 'Dhaka Solution',
-                    mobileNo: '00111222444',
-                    connectionType: 'Upgrade',
-                    applicationId: 'ABCDE12388',
-                    address: 'Mirpur- 14, Dhaka',
-                    nttnprovider: 'Fiber@Home',
-                  ),
-                  const SizedBox(height: 10),
-                  UserProfileCard(
-                    name: 'Md. Abdul Malaque',
-                    orgName: 'BD Solution',
-                    mobileNo: '00111222666',
-                    connectionType: 'Others',
-                    applicationId: 'ABCDE12388',
-                    address: 'Mirpur D.O.S.H., Dhaka',
-                    nttnprovider: 'Summit',
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        )
+          )
       ),
       bottomNavigationBar: Container(
         height: screenHeight * 0.08,
