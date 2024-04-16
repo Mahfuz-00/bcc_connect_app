@@ -32,7 +32,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       mobileNo: 01234567890,
       connectionType: 'New',
       applicationId: 'BHWRT12345',
-      address: 'Mirpur, Dhaka-1206', requestDetails: '',
+      address: 'Mirpur, Dhaka-1206',
+      requestDetails: '',
+      linkCapacity: '2 MB',
     ),
     User(
       name: 'Md. Samiul Islam Khan',
@@ -40,7 +42,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       mobileNo: 01234567890,
       connectionType: 'Others',
       applicationId: 'BHWRT12346',
-      address: 'Mirpur-11, Dhaka-1206', requestDetails: '',
+      address: 'Mirpur-11, Dhaka-1206',
+      requestDetails: '',
+      linkCapacity: '2 MB',
     ),
     User(
       name: 'Md. Nafiul Islam Khan',
@@ -48,7 +52,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       mobileNo: 01234567890,
       connectionType: 'Upgrade',
       applicationId: 'BHWRT12348',
-      address: 'Mirpur-12, Dhaka-1206', requestDetails: '',
+      address: 'Mirpur-12, Dhaka-1206',
+      requestDetails: '',
+      linkCapacity: '2 MB',
     ),
   ];
 
@@ -60,6 +66,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     applicationId: 'BBGSIJI774',
     address: 'Banani, Dhaka',
     requestDetails: 'I want a new connection.',
+    linkCapacity: '2 MB',
   );
 
   User USER2 = User(
@@ -70,6 +77,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     applicationId: 'BBGSIJI775',
     address: 'Baridhara, Dhaka',
     requestDetails: 'My connection is not stable.',
+    linkCapacity: '2 MB',
   );
 
   User USER3 = User(
@@ -80,6 +88,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     applicationId: 'BBGSIJI776',
     address: 'Dhanmondi, Dhaka',
     requestDetails: 'I want to upgrade my connection.',
+    linkCapacity: '2 MB',
   );
 
   int _expandedIndex = -1;
@@ -417,7 +426,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                           mobileNo: 012017678,
                           connectionType: 'New',
                           applicationId: 'BBGSIJI789',
-                          address: 'Shamoli, Dhaka', requestDetails: '',
+                          address: 'Shamoli, Dhaka', requestDetails: '', linkCapacity: '2 MB',
                         ),
                         onPressed: () {
                           Navigator.push(
@@ -429,7 +438,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 mobileNo: 012017678,
                                 connectionType: 'New',
                                 applicationId: 'BBGSIJI789',
-                                address: 'Shamoli, Dhaka', requestDetails: '',
+                                address: 'Shamoli, Dhaka', requestDetails: '', linkCapacity: '2 MB',
                               ),),
                             ),
                           );

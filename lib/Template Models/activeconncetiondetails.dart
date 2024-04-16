@@ -135,6 +135,15 @@ class ActiveUserDetailsPage extends StatelessWidget {
                 ),
               ),
               Divider(),
+              Text(
+                'Address: ${user.linkCapacity}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'default',
+                ),
+              ),
+              Divider(),
               SizedBox(height: 40),
               Center(
                 child: ElevatedButton(

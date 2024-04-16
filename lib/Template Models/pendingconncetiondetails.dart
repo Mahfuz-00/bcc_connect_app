@@ -136,7 +136,16 @@ class PendingUserDetailsPage extends StatelessWidget {
               ),
               Divider(),
               Text(
-                'Description: ${user.requestDetails}',
+                'Link Capacity: ${user.linkCapacity}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'default',
+                ),
+              ),
+              Divider(),
+              Text(
+                'Remark: ${user.requestDetails}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

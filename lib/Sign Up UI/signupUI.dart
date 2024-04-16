@@ -349,7 +349,7 @@ class _SignupState extends State<Signup> {
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(),
@@ -360,38 +360,39 @@ class _SignupState extends State<Signup> {
                                       fontSize: 16,
                                       fontFamily: 'default',
                                     ),
+                                    suffixIcon: GestureDetector(
+                                      onTap: (){},
+                                      child: Container(
+                                          margin: EdgeInsets.only(right: 2),
+                                          padding: EdgeInsets.all(3),
+                                          width: 80,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[300],
+                                            borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(2),
+                                              bottomRight: Radius.circular(2),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.file_upload,
+                                                color: Color.fromRGBO(143, 150, 158, 1),),
+                                              Text('Upload',
+                                                style: TextStyle(
+                                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'default',
+                                                ),)
+                                            ],
+                                          )
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              Container(
-                                width: 350,
-                                height: 120,
-                                child: TextFormField(
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    labelText: 'Address',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                    alignLabelWithHint: true,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 10,vertical: 145),
-                                    border:  const OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(Radius.circular(5))
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),

@@ -6,6 +6,7 @@ class User {
   late String applicationId;
   late String address;
   late String requestDetails;
+  late String linkCapacity;
   bool isExpanded;
 
   User({
@@ -16,6 +17,7 @@ class User {
     required this.applicationId,
     required this.address,
     required this.requestDetails,
+    required this.linkCapacity,
     this.isExpanded = false,
   });
 }
