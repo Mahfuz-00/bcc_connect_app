@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../API Model and Service (Regions)/apiserviceregions.dart';
+import '../API Model and Service (Regions)/regionmodels.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
@@ -16,59 +18,109 @@ class ConnectionForm extends StatefulWidget {
 
 class _ConnectionFormState extends State<ConnectionForm> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? selectedLinkCapacity;
 
+  final Set<String> linkCapacityOptions = {
+    '1 MB', '2MB', '3MB', '4MB', '5MB'
+  };
+
+  late APIService apiService;
+  Future<APIService> initializeApiService() async {
+    apiService = await APIService.create();
+    return apiService;
+  }
+  List<Division> divisions = [];
+  List<District> districts = [];
+  List<Upazila> upazilas = [];
+  List<Union> unions = [];
+  List<NTTNProvider> nttnProviders = [];
   String? selectedDivision;
   String? selectedDistrict;
   String? selectedUpazila;
   String? selectedUnion;
   String? selectedNTTNProvider;
-  String? selectedLinkCapacity;
 
-  final Map<String, List<String>> districtOptions = {
-    'Dhaka': ['Dhaka', 'Gazipur'],
-    'Chattogram': ['Chattogram', 'Coxs Bazar'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    fetchDivisions();
+  }
 
-  final Map<String, List<String>> upazilaOptions = {
-    'Dhaka': ['Mirpur', 'Uttara'],
-    'Gazipur': ['Gazipur Sadar', 'Kaliakair'],
-    'Chattogram': ['Chattogram Sadar', 'Anwara'],
-    'Coxs Bazar': ['Coxs Bazar Sadar', 'Ukhia'],
-  };
+  Future<void> fetchDivisions() async {
+    try {
+      await initializeApiService();
+      final List<Division> fetchedDivisions = await apiService.fetchDivisions();
+      setState(() {
+        divisions = fetchedDivisions;
+        for (Division division in fetchedDivisions) {
+          print('Division Name: ${division.name}');
+        }
+      });
+    } catch (e) {
+      print('Error fetching divisions: $e');
+      // Handle error
+    }
+  }
 
-  final Map<String, List<String>> unionOptions = {
-    'Mirpur': ['Shah Ali', 'Rupnagar'],
-    'Uttara': ['Uttara', 'Haji Camp'],
-    'Gazipur Sadar': ['Sreepur', 'Tongi'],
-    'Kaliakair': ['Kaliakair', 'Kaliganj'],
-    'Chattogram Sadar': ['Anderkilla', 'Alkoron'],
-    'Anwara': ['Anwara', 'Azampur'],
-    'Coxs Bazar Sadar': ['Coxs Bazar', 'Lama'],
-    'Ukhia': ['Ukhia', 'Whykong'],
-  };
+  Future<void> fetchDistricts(String divisionId) async {
+    try {
+      final List<District> fetchedDistricts = await apiService.fetchDistricts(divisionId);
+      setState(() {
+        districts = fetchedDistricts;
+        for (District district in fetchedDistricts) {
+          print('Division Name: ${district.name}');
+        }
+      });
+    } catch (e) {
+      print('Error fetching districts: $e');
+      // Handle error
+    }
+  }
 
-  final Map<String, List<String>> nttnProviderOptions = {
-    'Shah Ali': ['Provider A', 'Provider B'],
-    'Rupnagar': ['Provider C', 'Provider D'],
-    'Uttara': ['Provider E', 'Provider F'],
-    'Haji Camp': ['Provider G', 'Provider H'],
-    'Sreepur': ['Provider I', 'Provider J'],
-    'Tongi': ['Provider K', 'Provider L'],
-    'Kaliakair': ['Provider M', 'Provider N'],
-    'Kaliganj': ['Provider O', 'Provider P'],
-    'Anderkilla': ['Provider Q', 'Provider R'],
-    'Alkoron': ['Provider S', 'Provider T'],
-    'Anwara': ['Provider U', 'Provider V'],
-    'Azampur': ['Provider W', 'Provider X'],
-    'Coxs Bazar': ['Provider Y', 'Provider Z'],
-    'Lama': ['Provider AA', 'Provider BB'],
-    'Ukhia': ['Provider CC', 'Provider DD'],
-    'Whykong': ['Provider EE', 'Provider FF'],
-  };
+  Future<void> fetchUpazilas(String districtId) async {
+    try {
+      final List<Upazila> fetchedUpazilas = await apiService.fetchUpazilas(districtId);
+      setState(() {
+        upazilas = fetchedUpazilas;
+        for (Upazila upazila in fetchedUpazilas) {
+          print('Division Name: ${upazila.name}');
+        }
+      });
+    } catch (e) {
+      print('Error fetching upazilas: $e');
+      // Handle error
+    }
+  }
 
-  final Set<String> linkCapacityOptions = {
-    '1 MB', '2MB', '3MB', '4MB', '5MB'
-  };
+  Future<void> fetchUnions(String upazilaId) async {
+    try {
+      final List<Union> fetchedUnions = await apiService.fetchUnions(upazilaId);
+      setState(() {
+        unions = fetchedUnions;
+        for (Union union in fetchedUnions) {
+          print('Division Name: ${union.name}');
+        }
+      });
+    } catch (e) {
+      print('Error fetching unions: $e');
+      // Handle error
+    }
+  }
+
+  Future<void> fetchNTTNProviders(String unionId) async {
+    try {
+      final List<NTTNProvider> fetchedNTTNProviders = await apiService.fetchNTTNProviders(unionId);
+      setState(() {
+        nttnProviders = fetchedNTTNProviders;
+        for (NTTNProvider NTTN in fetchedNTTNProviders) {
+          print('Division Name: ${NTTN.name}');
+        }
+      });
+    } catch (e) {
+      print('Error fetching NTTN providers: $e');
+      // Handle error
+    }
+  }
 
 /*  String fieldOptions = '';
 
@@ -253,14 +305,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth*0.9,
-                      height: screenHeight*0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight*0.075,
+                      padding: EdgeInsets.only(left: 10, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child: /*DropdownButtonFormField<String>(
                         value: selectedDivision,
                         items: districtOptions.keys.map((String division) {
                           return DropdownMenuItem<String>(
@@ -281,7 +333,29 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           });
                         },
                         decoration: InputDecoration(labelText: 'Division',border: InputBorder.none,),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select Division',
+                        dropdownItems: divisions.map((division) => division.name).toList(),
+                        initialValue: selectedDivision,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedDivision = newValue;
+                            selectedDistrict = null; // Reset
+                          });
+                          if (newValue != null) {
+                            // Find the selected division object
+                            Division selectedDivisionObject = divisions.firstWhere(
+                                  (division) => division.name == newValue,
+                              /*orElse: () => null,*/
+                            );
+                            if (selectedDivisionObject != null) {
+                              // Pass the ID of the selected division to fetchDistricts
+                              fetchDistricts(selectedDivisionObject.id);
+                            }
+                          }
+                        },
+                      )
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -290,14 +364,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth*0.9,
-                      height: screenHeight*0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight*0.075,
+                      padding: EdgeInsets.only(left: 10, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child:/* DropdownButtonFormField<String>(
                         value: selectedDistrict,
                         items: selectedDivision != null
                             ? districtOptions[selectedDivision]!.map((String district) {
@@ -320,7 +394,29 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           });
                         },
                         decoration: InputDecoration(labelText: 'District', border: InputBorder.none,),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select Districts',
+                        dropdownItems: districts.map((district) => district.name).toList(),
+                        initialValue: selectedDistrict,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedDistrict = newValue;
+                            selectedUpazila = null; // Reset
+                          });
+                          if (newValue != null) {
+                            // Find the selected division object
+                            District selectedDistrictObject = districts.firstWhere(
+                                  (district) => district.name == newValue,
+                              /*orElse: () => null,*/
+                            );
+                            if (selectedDistrictObject != null) {
+                              // Pass the ID of the selected division to fetchDistricts
+                              fetchDistricts(selectedDistrictObject.id);
+                            }
+                          }
+                        },
+                      )
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -329,14 +425,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth*0.9,
-                      height: screenHeight*0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight*0.075,
+                      padding: EdgeInsets.only(left: 10,),
                       decoration: BoxDecoration(
                         color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child: /*DropdownButtonFormField<String>(
                         value: selectedUpazila,
                         items: selectedDistrict != null
                             ? upazilaOptions[selectedDistrict]!.map((String thana) {
@@ -359,7 +455,29 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           });
                         },
                         decoration: InputDecoration(labelText: 'Upazila', border: InputBorder.none,),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select Upazilas',
+                        dropdownItems: upazilas.map((upazila) => upazila.name).toList(),
+                        initialValue: selectedUpazila,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedUpazila = newValue;
+                            selectedUnion = null; // Reset
+                          });
+                          if (newValue != null) {
+                            // Find the selected division object
+                            Upazila selectedUpazilaObject = upazilas.firstWhere(
+                                  (upazila) => upazila.name == newValue,
+                              /*orElse: () => null,*/
+                            );
+                            if (selectedUpazilaObject != null) {
+                              // Pass the ID of the selected division to fetchDistricts
+                              fetchDistricts(selectedUpazilaObject.id);
+                            }
+                          }
+                        },
+                      )
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -368,14 +486,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth*0.9,
-                      height: screenHeight*0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight*0.075,
+                      padding: EdgeInsets.only(left: 10,),
                       decoration: BoxDecoration(
                         color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child: /*DropdownButtonFormField<String>(
                         value: selectedUnion,
                         items: selectedUpazila != null
                             ? unionOptions[selectedUpazila]!.map((String union) {
@@ -398,7 +516,29 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           });
                         },
                         decoration: InputDecoration(labelText: 'Union', border: InputBorder.none,),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select Unions',
+                        dropdownItems: unions.map((union) => union.name).toList(),
+                        initialValue: selectedUnion,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedUnion = newValue;
+                            selectedNTTNProvider = null; // Reset
+                          });
+                          if (newValue != null) {
+                            // Find the selected division object
+                            Union selectedUnionObject = unions.firstWhere(
+                                  (union) => union.name == newValue,
+                              /*orElse: () => null,*/
+                            );
+                            if (selectedUnionObject != null) {
+                              // Pass the ID of the selected division to fetchDistricts
+                              fetchDistricts(selectedUnionObject.id);
+                            }
+                          }
+                        },
+                      )
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -407,14 +547,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth*0.9,
-                      height: screenHeight*0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight*0.075,
+                      padding: EdgeInsets.only(left: 10,),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child: /*DropdownButtonFormField<String>(
                         value: selectedNTTNProvider,
                         items: selectedUnion != null
                             ? nttnProviderOptions[selectedUnion]!.map((String provider) {
@@ -437,23 +577,45 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           });
                         },
                         decoration: InputDecoration(labelText: 'NTTN Provider', border: InputBorder.none,),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select NTTN Provider',
+                        dropdownItems: nttnProviders.map((nttnProvider) => nttnProvider.name).toList(),
+                        initialValue: selectedNTTNProvider,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedNTTNProvider = newValue;
+                            selectedLinkCapacity = null; // Reset
+                          });
+                          if (newValue != null) {
+                            // Find the selected division object
+                            Union selectedNTTNProviderObject = unions.firstWhere(
+                                  (nttnProvider) => nttnProvider.name == newValue,
+                              /*orElse: () => null,*/
+                            );
+                            if (selectedNTTNProviderObject != null) {
+                              // Pass the ID of the selected division to fetchDistricts
+                              fetchDistricts(selectedNTTNProviderObject.id);
+                            }
+                          }
+                        },
+                      )
                     ),
                   ),
-                  SizedBox(height: 20,),
+                  SizedBox(height: 10,),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: screenWidth * 0.9,
-                      height: screenHeight * 0.085,
-                      padding: EdgeInsets.only(left: 10),
+                      height: screenHeight * 0.075,
+                      padding: EdgeInsets.only(left: 10, top: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: DropdownButtonFormField<String>(
+                      child:/* DropdownButtonFormField<String>(
                         value: selectedLinkCapacity,
                         items: selectedNTTNProvider != null
                             ? linkCapacityOptions.map((String capacity) {
@@ -480,7 +642,17 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           labelText: 'Link Capacity',
                           border: InputBorder.none,
                         ),
-                      ),
+                      ),*/
+                      DropdownFormField(
+                        hintText: 'Select Link Capacity',
+                        dropdownItems: linkCapacityOptions.toList(),
+                        initialValue: selectedLinkCapacity,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedLinkCapacity = newValue;
+                          });
+                        },
+                      )
                     ),
                   ),
                   SizedBox(height: 20,),

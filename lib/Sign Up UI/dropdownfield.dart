@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 class DropdownFormField extends StatefulWidget {
   late final String hintText;
   late final List<DropdownMenuItem<String>> dropdownItems;
+  final Function(String?) onChanged;
 
-  DropdownFormField({required this.hintText, required this.dropdownItems});
+  DropdownFormField({
+    required this.hintText,
+    required this.dropdownItems,
+    required this.onChanged,
+  });
 
   @override
   _DropdownFormFieldState createState() => _DropdownFormFieldState();
@@ -39,21 +44,21 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
                   ),
                   contentPadding: EdgeInsets.all(17),
                   hintText: widget.hintText,
-                  hintStyle: TextStyle(fontSize: 16, fontFamily: 'default', color: Colors.black, fontWeight: FontWeight.bold),
+                  hintStyle: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'default',
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return widget.hintText;
-                  }
-                  return null;
-                },
                 value: selectedValue,
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedValue = newValue!;
                   });
+                  widget.onChanged(newValue);
                 },
-                items: widget.dropdownItems.map((DropdownMenuItem<String> item) {
+                items:
+                    widget.dropdownItems.map((DropdownMenuItem<String> item) {
                   return DropdownMenuItem<String>(
                     value: item.value,
                     child: ButtonTheme(
@@ -70,11 +75,18 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
                     ),
                   );
                 }).toList(),
-                ),// Use provided dropdown items
+              ), // Use provided dropdown items
             ],
           ),
         ),
       ),
     );
   }
+
+  void resetSelectedValue() {
+    setState(() {
+      selectedValue = null;
+    });
+  }
+
 }

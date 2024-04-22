@@ -25,12 +25,16 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
-        border: OutlineInputBorder(
+        border: InputBorder.none,
+        /*border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-        ),
+        ),*/
         hintText: widget.hintText,
         hintStyle: TextStyle(
           color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'default',
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
