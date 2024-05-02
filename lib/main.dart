@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'Connection Checker/internetconnectioncheck.dart';
+import 'Login UI/loginUI.dart';
 import 'Splashscreen UI/splashscreenUI.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
   runApp(const MyApp());
 }
 
@@ -21,10 +24,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'BCC Connect',
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.grey[100],
         colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(25, 192, 122, 1)),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: InternetCheckWrapper(
+        child: SplashScreen(),
+      ), routes: {
+      '/login': (context) => Login(),
+    },
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'regionmodels.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'searchmodel.dart';
 
 class APIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
@@ -32,7 +34,7 @@ class APIService {
     authToken = token;
   }*/
 
-  Future<List<Division>> fetchDivisions() async {
+  Future<List<DivisionSearch>> fetchDivisions() async {
     try {
       if (authToken.isEmpty) {
         print('Authen:: $authToken');
@@ -56,8 +58,8 @@ class APIService {
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'] ?? [];
           //print('Record:: $records');
-          final List<Division> divisions =
-              records.map((record) => Division.fromJson(record)).toList();
+          final List<DivisionSearch> divisions =
+          records.map((record) => DivisionSearch.fromJson(record)).toList();
           print(divisions);
           return divisions;
         } else {
@@ -83,7 +85,7 @@ class APIService {
     }
   }
 
-  Future<List<District>> fetchDistricts(String divisionId) async {
+  Future<List<DistrictSearch>> fetchDistricts(String divisionId) async {
     print(divisionId);
     try {
       if (authToken.isEmpty) {
@@ -102,7 +104,7 @@ class APIService {
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'];
           print('Record:: $records');
-          final List<District> districts =  records.map((record) => District.fromJson(record)).toList();
+          final List<DistrictSearch> districts =  records.map((record) => DistrictSearch.fromJson(record)).toList();
           print(districts);
           return districts;
         } else {
@@ -126,49 +128,49 @@ class APIService {
     }
   }
 
-  Future<List<Upazila>> fetchUpazilas(String districtId) async {
-   try{
-     if (authToken.isEmpty) {
-       // Wait for authToken to be initialized
-       await _loadAuthToken();
+  Future<List<UpazilaSearch>> fetchUpazilas(String districtId) async {
+    try{
+      if (authToken.isEmpty) {
+        // Wait for authToken to be initialized
+        await _loadAuthToken();
 
-       if (authToken.isEmpty) {
-         throw Exception('Authentication token is empty.');
-       }
-     }
-     final response = await http.get(Uri.parse('$URL/upazila/$districtId'),
-         headers: {'Authorization': 'Bearer $authToken'});
-     if (response.statusCode == 200) {
-       final Map<String, dynamic> data = jsonDecode(response.body);
+        if (authToken.isEmpty) {
+          throw Exception('Authentication token is empty.');
+        }
+      }
+      final response = await http.get(Uri.parse('$URL/upazila/$districtId'),
+          headers: {'Authorization': 'Bearer $authToken'});
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
 
-       if (data != null && data.containsKey('records')) {
-         final List<dynamic> records = data['records'];
-         print('Record:: $records');
-         final List<Upazila> upzillas =  records.map((record) => Upazila.fromJson(record)).toList();
-         print(upzillas);
-         return upzillas;
-       } else {
-         throw Exception(
-             'Invalid API response: missing Upazila data :: ${response.body}');
-       }
-     } else {
-       throw Exception('Failed to load upazilas');
-     }
-   } catch (e) {
-     if (e is FormatException) {
-       final response = await http
-           .get(Uri.parse('$URL/upazila/$districtId'));
-       print('Failed to decode JSON: ${response.body}');
-     } else {
-       final response = await http
-           .get(Uri.parse('$URL/upazila/$districtId'));
-       print('Failed to load a Upazilas: $e, ${response.statusCode}');
-     }
-     return [];
-   }
+        if (data != null && data.containsKey('records')) {
+          final List<dynamic> records = data['records'];
+          print('Record:: $records');
+          final List<UpazilaSearch> upzillas =  records.map((record) => UpazilaSearch.fromJson(record)).toList();
+          print(upzillas);
+          return upzillas;
+        } else {
+          throw Exception(
+              'Invalid API response: missing Upazila data :: ${response.body}');
+        }
+      } else {
+        throw Exception('Failed to load upazilas');
+      }
+    } catch (e) {
+      if (e is FormatException) {
+        final response = await http
+            .get(Uri.parse('$URL/upazila/$districtId'));
+        print('Failed to decode JSON: ${response.body}');
+      } else {
+        final response = await http
+            .get(Uri.parse('$URL/upazila/$districtId'));
+        print('Failed to load a Upazilas: $e, ${response.statusCode}');
+      }
+      return [];
+    }
   }
 
-  Future<List<Union>> fetchUnions(String upazilaId) async {
+  Future<List<UnionSearch>> fetchUnions(String upazilaId) async {
     try{
       if (authToken.isEmpty) {
         // Wait for authToken to be initialized
@@ -187,7 +189,7 @@ class APIService {
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'];
           print('Record:: $records');
-          final List<Union> Unions =  records.map((record) => Union.fromJson(record)).toList();
+          final List<UnionSearch> Unions =  records.map((record) => UnionSearch.fromJson(record)).toList();
           print(Unions);
           return Unions;
         } else {
@@ -211,8 +213,8 @@ class APIService {
     }
   }
 
-  Future<List<NTTNProvider>> fetchNTTNProviders(String unionId) async {
-    try {
+  Future<List<NTTNProviderResult>> fetchNTTNProviders(String unionId) async {
+    try{
       if (authToken.isEmpty) {
         // Wait for authToken to be initialized
         await _loadAuthToken();
@@ -229,9 +231,7 @@ class APIService {
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'];
           print('Record:: $records');
-          final List<NTTNProvider> NTTNs = records
-              .map((record) => NTTNProvider.fromJson(record))
-              .toList();
+          final List<NTTNProviderResult> NTTNs =  records.map((record) => NTTNProviderResult.fromJson(record)).toList();
           print(NTTNs);
           return NTTNs;
         } else {
@@ -241,18 +241,17 @@ class APIService {
       } else {
         throw Exception('Failed to load NTTN providers');
       }
-    } catch (e) {
+    } catch(e) {
       if (e is FormatException) {
-        final response =
-        await http.get(Uri.parse('$URL/nttn/provider/$unionId'));
+        final response = await http
+            .get(Uri.parse('$URL/nttn/provider/$unionId'));
         print('Failed to decode JSON: ${response.body}');
       } else {
-        final response =
-        await http.get(Uri.parse('$URL/nttn/provider/$unionId'));
+        final response = await http
+            .get(Uri.parse('$URL/nttn/provider/$unionId'));
         print('Failed to load a NTTNs: $e, ${response.statusCode}');
       }
       return [];
     }
   }
-
 }

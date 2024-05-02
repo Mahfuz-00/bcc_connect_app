@@ -1,5 +1,8 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 
+import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
 
 class PasswordChanged extends StatefulWidget {
@@ -10,6 +13,24 @@ class PasswordChanged extends StatefulWidget {
 }
 
 class _PasswordChangedState extends State<PasswordChanged> {
+  bool _isLoading = false;
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkInternetConnection();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

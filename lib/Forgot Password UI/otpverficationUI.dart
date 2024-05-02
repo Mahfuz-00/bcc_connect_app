@@ -1,6 +1,9 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
 
+import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
 import 'createnewpasswordUI.dart';
 
 class OPTVerfication extends StatefulWidget {
@@ -11,6 +14,24 @@ class OPTVerfication extends StatefulWidget {
 }
 
 class _OPTVerficationState extends State<OPTVerfication> {
+  bool _isLoading = false;
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkInternetConnection();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

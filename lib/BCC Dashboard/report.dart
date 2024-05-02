@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
-import '../Template Models/userinfocard.dart';
-import '../UserType Dashboard(Demo)/DemoAppDashboard.dart';
+
+import 'bccDashboard.dart';
 
 class BCCReport extends StatefulWidget {
   const BCCReport({super.key});
@@ -14,6 +16,12 @@ class BCCReport extends StatefulWidget {
 
 class _BCCReportState extends State<BCCReport> with SingleTickerProviderStateMixin{
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +102,7 @@ class _BCCReportState extends State<BCCReport> with SingleTickerProviderStateMix
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const BCCReport())); // Close the drawer
+                        builder: (context) => BCCReport())); // Close the drawer
               },
             ),
             Divider(),
@@ -121,7 +129,7 @@ class _BCCReportState extends State<BCCReport> with SingleTickerProviderStateMix
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const Login())); // Close the drawer
+                        builder: (context) => Login())); // Close the drawer
               },
             ),
             Divider(),
@@ -157,7 +165,7 @@ class _BCCReportState extends State<BCCReport> with SingleTickerProviderStateMix
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => BCCMainDashboard()));
+                        builder: (context) => BCCDashboard()));
               },
               child: Container(
                 width: screenWidth / 3,

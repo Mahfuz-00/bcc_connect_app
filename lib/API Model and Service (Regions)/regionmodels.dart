@@ -63,15 +63,15 @@ class Union {
 }
 
 class NTTNProvider {
-  final String id;
-  final String name;
+  final int id;
+  final String provider;
 
-  NTTNProvider({required this.id, required this.name});
+  NTTNProvider({required this.id, required this.provider});
 
   factory NTTNProvider.fromJson(Map<String, dynamic> json) {
     return NTTNProvider(
       id: json['id'],
-      name: json['name'],
+      provider: json['provider'],
     );
   }
 }

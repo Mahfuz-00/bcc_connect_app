@@ -1,17 +1,23 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model and Service (Login)/loginmodels.dart';
 import '../API Model and Service (Login)/apiservicelogin.dart';
+import '../API Model and Service (Profile)/apiserviceprofile.dart';
+import '../API Model and Service (Profile)/profilemodel.dart';
+import '../BCC Dashboard/bccDashboard.dart';
+import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
 import '../Forgot Password UI/forgotpasswordUI.dart';
+import '../ISP Dashboard/ispDashboard.dart';
+import '../NTTN Dashboard/nttnDashboard.dart';
 import '../Sign Up UI/signupUI.dart';
-import '../UserType Dashboard(Demo)/DemoAppDashboard.dart';
 
 
 class Login extends StatefulWidget {
   const Login({super.key});
-
   @override
   State<Login> createState() => _LoginState();
 }
@@ -24,6 +30,7 @@ class _LoginState extends State<Login> {
   var globalKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> globalfromkey = GlobalKey<FormState>();
   late String userType;
+  bool _isLoading = false;
 
   IconData _getIcon() {
     return _isObscured ? Icons.visibility_off : Icons.visibility;
@@ -36,6 +43,15 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +59,7 @@ class _LoginState extends State<Login> {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
     _checkLoginRequest();
+    _checkInternetConnection();
   }
 
   @override
@@ -211,7 +228,7 @@ class _LoginState extends State<Login> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (
-                                                context) => const ForgotPassword()));
+                                                context) => ForgotPassword()));
                                   },
                                   child: const Text(
                                     'Forgot Password?',
@@ -235,11 +252,38 @@ class _LoginState extends State<Login> {
                                 if (await validateAndSave(
                                     globalfromkey, context)) {
                                   //print(_loginRequest.toJSON());
-                                  Navigator.push(
+                                  print('Checking $userType');
+                                  if(userType != null){
+                                    if (userType == 'isp_staff') {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: ISPDashboard(shouldRefresh: true),)),
+                                      );
+                                    }
+                                    if (userType == 'bcc_staff') {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: BCCDashboard(),)),
+                                      );
+                                    }
+                                    if (userType == 'nttn_sbl_staff') {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: NTTNDashboard(shouldRefresh: true),)),
+                                      );
+                                    }
+                                    if (userType == 'nttn_adsl_staff') {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: NTTNDashboard(shouldRefresh: true),)),
+                                      );
+                                    }
+                                  }
+                                  /*Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (
-                                              context) => const BCCMainDashboard()));
+                                              context) => const BCCMainDashboard()));*/
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -289,7 +333,7 @@ class _LoginState extends State<Login> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const Signup()));
+                                      builder: (context) => Signup()));
                             },
                             child: const Text(
                               'Register now',
@@ -329,8 +373,9 @@ class _LoginState extends State<Login> {
         if (response != null) {
           // Handle successful login
           storeTokenLocally(response.token);
-          String userType = response.userType;
-          print(userType);
+          userType = response.userType;
+          print('UserType :: $userType');
+          _fetchUserProfile(response.token);
           return true;
         } else {
           // Handle unsuccessful login
@@ -365,10 +410,42 @@ class _LoginState extends State<Login> {
     return false;
   }
 
+  late String AuthenToken;
+  late final String? UserName;
+  late final String? OrganizationName;
+  late final String? PhotoURL;
+
   Future<void> storeTokenLocally(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
     print(prefs.getString('token'));
+  }
+
+  Future<void> _fetchUserProfile(String token) async {
+    try {
+      final apiService = await APIProfileService();
+      final profile = await apiService.fetchUserProfile(token);
+      final userProfile = UserProfile.fromJson(profile);
+
+      // Save user profile data in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      try {
+        await prefs.setString('userName', userProfile.name);
+        await prefs.setString('organizationName', userProfile.organization);
+        await prefs.setString('photoUrl', userProfile.photo);
+        UserName = prefs.getString('userName');
+        OrganizationName = prefs.getString('organizationName');
+        PhotoURL = prefs.getString('photoUrl');
+        print('User Name: $UserName');
+        print('User profile saved successfully');
+      } catch (e) {
+        print('Error saving user profile: $e');
+      }
+
+    } catch (e) {
+      print('Error fetching user profile: $e');
+      // Handle error as needed
+    }
   }
 
 }

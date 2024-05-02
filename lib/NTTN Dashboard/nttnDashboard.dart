@@ -1,19 +1,23 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../API Model and Service(NTTN_Connection)/apiserviceconnectionnttn.dart';
 import '../BCC Dashboard/report.dart';
+import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
+import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
-import '../Template Models/activeconncetiondetails.dart';
-import '../Template Models/activeconnectiontiles.dart';
-import '../Template Models/pendingconncetiondetails.dart';
-import '../Template Models/pendingconnectiontiles.dart';
-import '../Template Models/userinfo.dart';
-import '../Template Models/userinfocard.dart';
-import '../UserType Dashboard(Demo)/DemoAppDashboard.dart';
+import '../Search UI/searchUI.dart';
+import '../Template Models/nttnActiveConnectionDetails.dart';
+import '../Template Models/nttnConnectionMiniTiles.dart';
+import '../Template Models/nttnPendingConncetionDetails.dart';
 
 class NTTNDashboard extends StatefulWidget {
-  const NTTNDashboard({super.key});
+  final bool shouldRefresh;
+
+  const NTTNDashboard({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
   State<NTTNDashboard> createState() => _NTTNDashboardState();
@@ -24,74 +28,161 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   final ScrollController scrollController = ScrollController();
   final GlobalKey requestTextKey = GlobalKey();
   final GlobalKey acceptedTextKey = GlobalKey();
+  bool _isLoading = false;
+  bool _pageLoading = true;
+  List<Widget> pendingConnectionRequests = [];
+  List<Widget> acceptedConnectionRequests = [];
+  bool _isFetched = false;
+  int? CountPending;
+  int? CountActive;
 
-  List<User> _people = [
-    User(
-      name: 'Md. Sajjad Hasan',
-      orgName: 'Touch and Solve',
-      mobileNo: 01234567890,
-      connectionType: 'New',
-      applicationId: 'BHWRT12345',
-      address: 'Mirpur, Dhaka-1206',
-      requestDetails: '',
-      linkCapacity: '2 MB',
-    ),
-    User(
-      name: 'Md. Samiul Islam Khan',
-      orgName: 'Google',
-      mobileNo: 01234567890,
-      connectionType: 'Others',
-      applicationId: 'BHWRT12346',
-      address: 'Mirpur-11, Dhaka-1206',
-      requestDetails: '',
-      linkCapacity: '2 MB',
-    ),
-    User(
-      name: 'Md. Nafiul Islam Khan',
-      orgName: 'Facebook',
-      mobileNo: 01234567890,
-      connectionType: 'Upgrade',
-      applicationId: 'BHWRT12348',
-      address: 'Mirpur-12, Dhaka-1206',
-      requestDetails: '',
-      linkCapacity: '2 MB',
-    ),
-  ];
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+  }
 
-  User USER1 = User(
-    name: 'Md Hakim',
-    orgName: 'Kajol Enterprise',
-    mobileNo: 01234567800,
-    connectionType: 'New',
-    applicationId: 'BBGSIJI774',
-    address: 'Banani, Dhaka',
-    requestDetails: 'I want a new connection.',
-    linkCapacity: '2 MB',
-  );
+  Future<void> fetchConnectionApplications() async {
+    if (_isFetched) return;
+    try {
+      final apiService = await NTTNConnectionAPIService.create();
 
-  User USER2 = User(
-    name: 'Md Saddam Hussain',
-    orgName: 'Sagor Enterprise',
-    mobileNo: 01234567630,
-    connectionType: 'Others',
-    applicationId: 'BBGSIJI775',
-    address: 'Baridhara, Dhaka',
-    requestDetails: 'My connection is not stable.',
-    linkCapacity: '2 MB',
-  );
+      // Fetch dashboard data
+      final Map<String, dynamic> dashboardData =
+          await apiService.fetchConnections();
+      if (dashboardData == null || dashboardData.isEmpty) {
+        // No data available or an error occurred
+        print(
+            'No data available or error occurred while fetching dashboard data');
+        return;
+      }
 
-  User USER3 = User(
-    name: 'Md Iqbal Hasan',
-    orgName: 'Iqbal Enterprise',
-    mobileNo: 01753456780,
-    connectionType: 'Upgrade',
-    applicationId: 'BBGSIJI776',
-    address: 'Dhanmondi, Dhaka',
-    requestDetails: 'I want to upgrade my connection.',
-    linkCapacity: '2 MB',
-  );
+      print(dashboardData);
+
+      final Map<String, dynamic>? counts = dashboardData['records']['total'];
+      print(counts);
+      setState(() {
+        CountActive = counts?['active'];
+        CountPending = counts?['inactive'];
+        print('SBL Active: $CountActive');
+        print('SBL Pending: $CountPending');
+      });
+
+      final Map<String, dynamic> records = dashboardData['records'];
+      if (records == null || records.isEmpty) {
+        // No records available
+        print('No records available');
+        return;
+      }
+
+      final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
+      print('Pending: $pendingRequestsData');
+      final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
+      print('Accepted: $acceptedRequestsData');
+
+      // Map pending requests to widgets
+      final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
+        return ConnectionsTile(
+          Name: request['name'],
+          OrganizationName: request['organization'],
+          MobileNo: request['mobile'],
+          ConnectionType: request['connection_type'],
+          ApplicationID: request['application_id'].toString(),
+          Location: request['location'],
+          Status: request['status'],
+          LinkCapacity: request['link'],
+          Remark: request['remark'],
+          onPressed: () {
+            print('Pending tapped');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PendingConnectionDetailsPage(
+                  Name: request['name'],
+                  OrganizationName: request['organization'],
+                  MobileNo: request['mobile'],
+                  ConnectionType: request['connection_type'],
+                  ApplicationID: request['application_id'].toString(),
+                  Location: request['location'],
+                  Status: request['status'],
+                  LinkCapacity: request['link'],
+                  Remark: request['remark'],
+                ),
+              ),
+            );
+          },
+        );
+      }).toList();
+
+      // Map accepted requests to widgets
+      final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
+        return ConnectionsTile(
+          Name: request['name'],
+          OrganizationName: request['organization'],
+          MobileNo: request['mobile'],
+          ConnectionType: request['connection_type'],
+          ApplicationID: request['application_id'].toString(),
+          Location: request['location'],
+          Status: request['status'],
+          LinkCapacity: request['link'],
+          Remark: request['remark'],
+          onPressed: () {
+            print('Active tapped');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ActiveConnectionDetailsPage(
+                  Name: request['name'],
+                  OrganizationName: request['organization'],
+                  MobileNo: request['mobile'],
+                  ConnectionType: request['connection_type'],
+                  ApplicationID: request['application_id'].toString(),
+                  Location: request['location'],
+                  Status: request['status'],
+                  LinkCapacity: request['link'],
+                  Remark: request['remark'],
+                ),
+              ),
+            );
+          },
+        );
+      }).toList();
+
+      setState(() {
+        pendingConnectionRequests = pendingWidgets;
+        acceptedConnectionRequests = acceptedWidgets;
+      });
+      _isFetched = true;
+    } catch (e) {
+      print('Error fetching connection requests: $e');
+      // Handle error as needed
+    }
+  }
 
   int _expandedIndex = -1;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkInternetConnection();
+    if (widget.shouldRefresh) {
+      // Refresh logic here, e.g., fetch data again
+      Future.delayed(Duration(seconds: 3), () {
+        // After 5 seconds, set isLoading to false to stop showing the loading indicator
+        setState(() {
+          _pageLoading = false;
+        });
+      });
+      if (!_isFetched) {
+        fetchConnectionApplications();
+        _isFetched = true; // Set _isFetched to true after the first call
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +195,10 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
         titleSpacing: 5,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white,),
+          icon: const Icon(
+            Icons.menu,
+            color: Colors.white,
+          ),
           onPressed: () {
             _scaffoldKey.currentState!.openDrawer();
           },
@@ -121,10 +215,16 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_rounded, color: Colors.white,),
+            icon: const Icon(
+              Icons.notifications_rounded,
+              color: Colors.white,
+            ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white,),
+            icon: const Icon(
+              Icons.search,
+              color: Colors.white,
+            ),
             onPressed: () {},
           ),
         ],
@@ -148,7 +248,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     radius: 30,
                   ),
                   Text(
-                    'User Name',
+                    'Welcome',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 25,
@@ -158,7 +258,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Organization Name',
+                    '',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -175,12 +275,14 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NTTNDashboard())); // Close the drawer
+                        builder: (context) =>
+                            NTTNDashboard())); // Close the drawer
               },
             ),
             Divider(),
@@ -190,7 +292,8 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
                 Navigator.pop(context);
                 scrollToRequestText();
@@ -203,7 +306,8 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
                 Navigator.pop(context);
                 scrollToAcceptedText();
@@ -216,12 +320,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const BCCReport()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => BCCReport()));
               },
             ),
             Divider(),
@@ -231,12 +334,15 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Information()));
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return Information();
+                  },
+                ));
               },
             ),
             Divider(),
@@ -246,223 +352,270 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
+                    fontFamily: 'default',
+                  )),
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const Login())); // Close the drawer
+                        builder: (context) => Login())); // Close the drawer
               },
             ),
             Divider(),
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        controller: scrollController,
-        child: SafeArea(
-          child: Container(
-            color: Colors.grey[100],
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Welcome, NTTN Admin Name',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
+      body: _pageLoading
+          ? Center(
+              // Show circular loading indicator while waiting
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              controller: scrollController,
+              child: SafeArea(
+                child: Container(
+                  color: Colors.grey[100],
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Center(
+                          child: Text(
+                            'Welcome',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                            child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Material(
+                              elevation: 3,
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                width: screenWidth * 0.45,
+                                height: screenHeight * 0.2,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10)),
+                                  color: Colors.deepPurple,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(CountActive.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 50,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        )),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text('Total Active Connection',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ))
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Material(
+                              elevation: 3,
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                width: screenWidth * 0.45,
+                                height: screenHeight * 0.2,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10)),
+                                  color: Colors.greenAccent,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(CountPending.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 50,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        )),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text('New Pending Connection',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ))
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          key: requestTextKey,
+                          child: const Text('Pending Application',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              )),
+                        ),
+                        Divider(),
+                        const SizedBox(height: 5),
+                        Container(
+                          //height: screenHeight*0.25,
+                          child: FutureBuilder<void>(
+                              future: fetchConnectionApplications(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Return a loading indicator while waiting for data
+                                  return Container(
+                                    height: 200, // Adjust height as needed
+                                    width:
+                                        screenWidth, // Adjust width as needed
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  // Handle errors
+                                  return buildNoRequestsWidget(
+                                      screenWidth, 'Error: ${snapshot.error}');
+                                } else if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  if (pendingConnectionRequests.isNotEmpty) {
+                                    // If data is loaded successfully, display the ListView
+                                    return Container(
+                                      child: ListView.separated(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: pendingConnectionRequests
+                                                    .length >
+                                                10
+                                            ? 10
+                                            : pendingConnectionRequests.length,
+                                        itemBuilder: (context, index) {
+                                          // Display each connection request using ConnectionRequestInfoCard
+                                          return pendingConnectionRequests[
+                                              index];
+                                        },
+                                        separatorBuilder: (context, index) =>
+                                            const SizedBox(height: 10),
+                                      ),
+                                    );
+                                  } else {
+                                    // Handle the case when there are no pending connection requests
+                                    return buildNoRequestsWidget(screenWidth,
+                                        'There is no new connection request at this moment.');
+                                  }
+                                }
+                                // Return a default widget if none of the conditions above are met
+                                return SizedBox(); // You can return an empty SizedBox or any other default widget
+                              }),
+                        ),
+                        Divider(),
+                        const SizedBox(height: 5),
+                        Container(
+                          key: acceptedTextKey,
+                          child: const Text('Active Connections',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              )),
+                        ),
+                        Divider(),
+                        const SizedBox(height: 5),
+                        Container(
+                          //height: screenHeight*0.25,
+                          child: FutureBuilder<void>(
+                              future: fetchConnectionApplications(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Return a loading indicator while waiting for data
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  // Handle errors
+                                  return buildNoRequestsWidget(
+                                      screenWidth, 'Error: ${snapshot.error}');
+                                } else if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  if (acceptedConnectionRequests.isEmpty) {
+                                    // Handle the case when there are no pending connection requests
+                                    return buildNoRequestsWidget(
+                                        screenWidth, 'No Active connection.');
+                                  } else {
+                                    // If data is loaded successfully, display the ListView
+                                    return Container(
+                                      child: ListView.separated(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: acceptedConnectionRequests
+                                                    .length >
+                                                10
+                                            ? 10
+                                            : acceptedConnectionRequests.length,
+                                        itemBuilder: (context, index) {
+                                          // Display each connection request using ConnectionRequestInfoCard
+                                          return acceptedConnectionRequests[
+                                              index];
+                                        },
+                                        separatorBuilder: (context, index) =>
+                                            const SizedBox(height: 10),
+                                      ),
+                                    );
+                                  }
+                                }
+                                return SizedBox();
+                              }),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Material(
-                            elevation: 3,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: screenWidth * 0.45,
-                              height: screenHeight * 0.2,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                color: Colors.deepPurple,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('250',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 50,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      )),
-                                  SizedBox(height: 15,),
-                                  Text('Total Active Connection',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      ))
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10,),
-                          Material(
-                            elevation: 3,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: screenWidth * 0.45,
-                              height: screenHeight * 0.2,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                color: Colors.greenAccent,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('140',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 50,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      )),
-                                  SizedBox(height: 15,),
-                                  Text('New Pending Connection',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      ))
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                  ),
-                  SizedBox(height: 20,),
-                  Container(
-                    key: requestTextKey,
-                    child: const Text('Pending Application',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        )),
-                  ),
-                  const SizedBox(height: 5),
-                  UserListTile(
-                    user: USER3,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PendingUserDetailsPage(user: USER3),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  UserListTile(
-                    user: USER1,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PendingUserDetailsPage(user: USER1),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  UserListTile(
-                    user: USER2,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PendingUserDetailsPage(user: USER2),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    key: acceptedTextKey,
-                    child: const Text('Connections',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        )),
-                  ),
-                  SizedBox(height:20),
-                  Column(
-                    children: [
-                      ActiveUserListTile(
-                        user: User(
-                          name: 'Salahuddin',
-                          orgName: 'Salahuddin Software',
-                          mobileNo: 012017678,
-                          connectionType: 'New',
-                          applicationId: 'BBGSIJI789',
-                          address: 'Shamoli, Dhaka', requestDetails: '', linkCapacity: '2 MB',
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ActiveUserDetailsPage(user: User(
-                                name: 'Salahuddin',
-                                orgName: 'Salahuddin Software',
-                                mobileNo: 012017678,
-                                connectionType: 'New',
-                                applicationId: 'BBGSIJI789',
-                                address: 'Shamoli, Dhaka', requestDetails: '', linkCapacity: '2 MB',
-                              ),),
-                            ),
-                          );
-                        },
-                      ),
-                      ActiveUserListTile(
-                        user: USER1,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ActiveUserDetailsPage(user: USER1),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
       bottomNavigationBar: Container(
         height: screenHeight * 0.08,
         color: const Color.fromRGBO(25, 192, 122, 1),
@@ -472,10 +625,13 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BCCMainDashboard()));
+                Future.delayed(Duration(seconds: 0), () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              NTTNDashboard(shouldRefresh: true)));
+                });
               },
               child: Container(
                 width: screenWidth / 3,
@@ -506,16 +662,22 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
               ),
             ),
             GestureDetector(
-              onTap: (){},
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return SearchUser();
+                  },
+                ));
+              },
               behavior: HitTestBehavior.translucent,
               child: Container(
                 decoration: BoxDecoration(
                     border: Border(
-                      left: BorderSide(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                    )),
+                  left: BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                )),
                 width: screenWidth / 3,
                 padding: EdgeInsets.all(7.5),
                 child: Column(
@@ -544,20 +706,21 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             ),
             GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: (){
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Information()));
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return Information();
+                  },
+                ));
               },
               child: Container(
                 decoration: BoxDecoration(
                     border: Border(
-                      left: BorderSide(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                    )),
+                  left: BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                )),
                 width: screenWidth / 3,
                 padding: EdgeInsets.all(7.5),
                 child: Column(
@@ -590,117 +753,10 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     );
   }
 
-  Widget _buildPanel() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _people[index].isExpanded = isExpanded;
-        });
-      },
-      children: _people.map<ExpansionPanel>((User user) {
-        return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
-              child: ListTile(
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: isExpanded ? 16 : 12,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: screenWidth * 0.05),
-                    if (!isExpanded) ...[
-                      Expanded(
-                        child: Text(
-                          user.orgName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ),
-                    ],
-                    Divider(
-                      height: 10,
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-          body: Container(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.3,
-                        height:
-                        MediaQuery.of(context).size.height *
-                            0.15,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 1,
-                            color: Colors.black,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(20)),
-                        ),
-                        child: const Icon(
-                          Icons.person,
-                          size: 100,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Name: ${user.name}'),
-                      Text('Organization: ${user.orgName}'),
-                      Text('Mobile No: ${user.mobileNo}'),
-                      Text('Connection Type: ${user.connectionType}'),
-                      Text('Application ID: ${user.applicationId}'),
-                      Text('Address: ${user.address}'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          isExpanded: user.isExpanded,
-        );
-      }).toList(),
-    );
-  }
-
-
   void scrollToRequestText() {
     // Find the RenderObject for the text widget
     final RenderBox? renderBox =
-    requestTextKey.currentContext?.findRenderObject() as RenderBox?;
+        requestTextKey.currentContext?.findRenderObject() as RenderBox?;
 
     // Check if the RenderObject is valid
     if (renderBox != null) {
@@ -719,7 +775,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   void scrollToAcceptedText() {
     // Find the RenderObject for the text widget
     final RenderBox? renderBox =
-    acceptedTextKey.currentContext?.findRenderObject() as RenderBox?;
+        acceptedTextKey.currentContext?.findRenderObject() as RenderBox?;
 
     // Check if the RenderObject is valid
     if (renderBox != null) {

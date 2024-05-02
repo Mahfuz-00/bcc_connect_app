@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:footer/footer.dart';
@@ -9,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../API Model and Service (Sign Up)/apiserviceregister.dart';
 import '../API Model and Service (Sign Up)/registermodels.dart';
+import '../Connection Checker/connectionchecker.dart';
 import '../Login UI/loginUI.dart';
 import 'dropdownfield.dart';
 
@@ -35,6 +37,7 @@ class _SignupState extends State<Signup> {
   File? _imageFile;
   var globalKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> globalfromkey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   List<DropdownMenuItem<String>> types = [
     DropdownMenuItem(child: Text("Nationwide"), value: "Nationwide"),
@@ -52,9 +55,19 @@ class _SignupState extends State<Signup> {
     return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
   }
 
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _checkInternetConnection();
     _registerRequest = RegisterRequestmodel(
       fullName: '',
       organization: '',
@@ -85,6 +98,7 @@ class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       //resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: SafeArea(
@@ -572,6 +586,10 @@ class _SignupState extends State<Signup> {
             MaterialPageRoute(builder: (context) => Login()),
                 (route) => false, // This will remove all routes from the stack
           );
+          const snackBar = SnackBar(
+            content: Text('Registration Submitted!'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
       }).catchError((error) {
         // Handle registration error

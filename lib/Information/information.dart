@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../Connection Checker/connectionchecker.dart';
 import '../Login UI/loginUI.dart';
-import '../UserType Dashboard(Demo)/DemoAppDashboard.dart';
 
 class Information extends StatefulWidget {
   const Information({super.key});
@@ -24,9 +24,9 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
         backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
         titleSpacing: 5,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white,),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white,),
           onPressed: () {
-            _scaffoldKey.currentState!.openDrawer();
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -37,89 +37,6 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
             fontSize: 20,
             fontFamily: 'default',
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_rounded, color: Colors.white,),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white,),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(25, 192, 122, 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    child: Icon(
-                      Icons.person,
-                      size: 35,
-                    ),
-                    radius: 30,
-                  ),
-                  Text(
-                    'User Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Organization Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text('Home',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const BCCMainDashboard())); // Close the drawer
-              },
-            ),
-            Divider(),
-            ListTile(
-              title: Text('Logout',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',)),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Login())); // Close the drawer
-              },
-            ),
-            Divider(),
-          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -179,7 +96,7 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
                 ),
                 SizedBox(height: 10),
                 Text('BCC administrators oversee the project\'s progress and monitor various aspects of connection provisioning. Key functionalities available to BCC admin users include:\n\n'
-                'NTTN Provider Number of Connection Overview:\n' 'Provides insights into the number of active connections managed by each NTTN provider (e.g., Summit and Fiber@Home), as well as the count of pending connection requests.\n\n'
+                'NTTN Provider Number of Connection Overview:\n' 'Provides insights into the number of active connections managed by each NTTN provider (e.g., SecureNet Bangladesh Limited and Advanced Digital Solution Limited), as well as the count of pending connection requests.\n\n'
                 'Latest Request Display:\n' 'Offers visibility into the most recent connection requests submitted by ISPs.\n',
                   style: TextStyle(
                     color: Colors.black87,
@@ -198,7 +115,7 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
                   ),
                 ),
                 SizedBox(height: 10),
-                Text('NTTN provider users, representing entities such as Summit or Fiber@Home, enjoy specialized features tailored to their operational needs. These include:\n\n'
+                Text('NTTN provider users, representing entities such as SecureNet Bangladesh Limited or Advanced Digital Solution Limited, enjoy specialized features tailored to their operational needs. These include:\n\n'
                   'Connection Management:\n' 'Enables NTTN providers to track the total number of connections serviced, as well as pending connection requests awaiting approval.\n\n'
                   'Pending Request List:\n' 'Presents a detailed overview of pending connection requests, allowing NTTN providers to review request specifics and make informed decisions regarding acceptance or declination.\n\n'
                   'Connection List:\n' 'Offers comprehensive insights into existing connections, including detailed connection information and status updates.\n\n'
@@ -213,125 +130,6 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
               ],
             ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        height: screenHeight * 0.08,
-        color: const Color.fromRGBO(25, 192, 122, 1),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BCCMainDashboard()));
-              },
-              child: Container(
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.home,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Home',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: (){},
-              behavior: HitTestBehavior.translucent,
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                    )),
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.search,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Search',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: (){},
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                    )),
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.info,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Information',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

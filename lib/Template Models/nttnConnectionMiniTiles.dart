@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 
-import 'userinfo.dart';
 
-class UserListTile extends StatelessWidget {
-  final User user;
+class ConnectionsTile extends StatelessWidget {
+  final String Name;
+  final String OrganizationName;
+  final String MobileNo;
+  final String ConnectionType;
+  final String ApplicationID;
+  final String Location;
+  final String Status;
+  final String LinkCapacity;
+  final String Remark;
   final VoidCallback onPressed;
 
-  const UserListTile({
+  const ConnectionsTile({
     Key? key,
-    required this.user,
+    required this.Name,
+    required this.OrganizationName,
+    required this.MobileNo,
+    required this.ConnectionType,
+    required this.ApplicationID,
+    required this.Location,
+    required this.Status,
+    required this.LinkCapacity,
+    required this.Remark,
     required this.onPressed,
   }) : super(key: key);
 
@@ -33,14 +48,14 @@ class UserListTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: ListTile(
-              title: Text(user.name,
+              title: Text(Name,
                 style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
                 fontFamily: 'default',
               ),),
-              subtitle: Text(user.orgName,
+              subtitle: Text(OrganizationName,
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.bold,

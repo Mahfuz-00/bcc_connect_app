@@ -1,6 +1,8 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 
+import '../Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
 import '../Sign Up UI/signupUI.dart';
 
@@ -17,24 +19,41 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> FadeAnimation;
   late Animation<Offset> SlideAnimation;
   late Animation<Offset> animatedpadding;
-
+  bool _isLoading = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Ensure Flutter is initialized
+    WidgetsFlutterBinding.ensureInitialized();
+    // Perform any asynchronous initialization here
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1500));
 
-    SlideAnimation = Tween(begin: const Offset(0, 3), end: const Offset(0, 0)).animate(
-        CurvedAnimation(parent: animationController, curve: Curves.easeInOutCirc));
-    FadeAnimation = Tween(begin: 1.0, end: 0.0).animate(CurvedAnimation(parent: animationController, curve: Curves.easeInOut));
-    animatedpadding = Tween(begin: const Offset(0, 0.3), end:Offset.zero).animate(CurvedAnimation(parent: animationController, curve: Curves.easeIn));
+    SlideAnimation = Tween(begin: const Offset(0, 3), end: const Offset(0, 0))
+        .animate(CurvedAnimation(
+            parent: animationController, curve: Curves.easeInOutCirc));
+    FadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
+        CurvedAnimation(parent: animationController, curve: Curves.easeInOut));
+    animatedpadding = Tween(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+            CurvedAnimation(parent: animationController, curve: Curves.easeIn));
 
     Future.delayed(const Duration(seconds: 5), () {
       animationController.forward();
     });
 
+    _checkInternetConnection();
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
   }
 
   @override
@@ -46,6 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    // Return the main app screen
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
@@ -123,10 +143,11 @@ class _SplashScreenState extends State<SplashScreen>
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Login()));
+                                    builder: (context) => InternetCheckWrapper(child: Login(),),));
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                            backgroundColor:
+                                const Color.fromRGBO(25, 192, 122, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                               //side: BorderSide(color: Colors.black, width: 2),
@@ -150,13 +171,14 @@ class _SplashScreenState extends State<SplashScreen>
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Signup()));
+                                    builder: (context) => InternetCheckWrapper(child: Signup(),)));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(color: Colors.black, width: 2),
+                              side: const BorderSide(
+                                  color: Colors.black, width: 2),
                             ),
                             //elevation: 3,
                             fixedSize: const Size(350, 70),
