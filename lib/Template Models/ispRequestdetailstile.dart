@@ -38,13 +38,13 @@ class ConnectionRequestInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildRow('Connection Type:', ConnectionType),
-            _buildRow('NTTN Provider:', NTTNProvider),
-            _buildRow('Application ID:', ApplicationID),
-            _buildRow('Mobile No:', MobileNo),
-            _buildRow('Location:', Location),
-            _buildRowTime('Time:', Time),
-            _buildRow('Status:', Status),
+            _buildRow('Connection Type', ConnectionType),
+            _buildRow('NTTN Provider', NTTNProvider),
+            _buildRow('Application ID', ApplicationID),
+            _buildRow('Mobile No', MobileNo),
+            _buildRow('Location', Location),
+            _buildRowTime('Time', Time),
+            _buildRow('Status', Status),
           ],
         ),
       ),
@@ -72,6 +72,17 @@ Widget _buildRow(String label, String value) {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          ":",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -127,6 +138,17 @@ Widget _buildRowTime(String label, String value) {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          ":",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

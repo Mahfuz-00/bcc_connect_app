@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'Connection Checker/internetconnectioncheck.dart';
-import 'Login UI/loginUI.dart';
 import 'Splashscreen UI/splashscreenUI.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
   runApp(const MyApp());
 }
 
@@ -16,7 +12,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Color.fromRGBO(25, 192, 122, 1), // Change the status bar color here
     ));
 
@@ -25,14 +21,10 @@ class MyApp extends StatelessWidget {
       title: 'BCC Connect',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.grey[100],
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(25, 192, 122, 1)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(25, 192, 122, 1)),
         useMaterial3: true,
       ),
-      home: InternetCheckWrapper(
-        child: SplashScreen(),
-      ), routes: {
-      '/login': (context) => Login(),
-    },
+      home: const SplashScreen(),
     );
   }
 }

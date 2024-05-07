@@ -140,10 +140,10 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => InternetCheckWrapper(child: Login(),),));
+                                    builder: (context) => Login(),));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
@@ -168,10 +168,10 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => InternetCheckWrapper(child: Signup(),)));
+                                    builder: (context) => Signup()));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,

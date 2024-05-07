@@ -1,11 +1,12 @@
 import 'package:bcc_connect_app/API%20Model%20and%20Service%20(Connection%20From)/apiserviceconnection.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model and Service (Connection From)/connectionmodel.dart';
 import '../API Model and Service (Regions)/apiserviceregions.dart';
 import '../API Model and Service (Regions)/regionmodels.dart';
-import '../Connection Checker/connectionchecker.dart';
+import '../API Service (Log Out)/apiServiceLogOut.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import '../Information/information.dart';
@@ -54,20 +55,28 @@ class _ConnectionFormState extends State<ConnectionForm> {
   String? selectedUnion;
   String? selectedNTTNProvider;
   bool _isLoading = false;
+  late String userName = '';
+  late String organizationName = '';
+  late String photoUrl = '';
 
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
+  Future<void> loadUserProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName') ?? '';
+      organizationName = prefs.getString('organizationName') ?? '';
+      photoUrl = prefs.getString('photoUrl') ?? '';
+      photoUrl = 'https://bcc.touchandsolve.com'+ photoUrl;
+      print('User Name: $userName');
+      print('Organization Name: $organizationName');
+      print('Photo URL: $photoUrl');
+      print('User profile got it!!!!');
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _checkInternetConnection();
+    loadUserProfile();
     _connectionRequest = ConnectionRequestModel(
       requestType: "",
       divisionId: "",
@@ -108,6 +117,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
         for (District district in fetchedDistricts) {
           print('District Name: ${district.name}');
         }
+        print(districts);
       });
     } catch (e) {
       print('Error fetching districts: $e');
@@ -166,562 +176,271 @@ class _ConnectionFormState extends State<ConnectionForm> {
     }
   }
 
-/*  String fieldOptions = '';
-
-  List<DropdownMenuItem<String>> dropdownItems1 = [
-    DropdownMenuItem(child: Text("Option 1"), value: "Option 1"),
-    DropdownMenuItem(child: Text("Option 2"), value: "Option 2"),
-    DropdownMenuItem(child: Text("Option 3"), value: "Option 3"),
-  ];*/
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            _scaffoldKey.currentState!.openDrawer();
-          },
-        ),
-        title: const Text(
-          'Connection Form',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            fontFamily: 'default',
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
+    return InternetChecker(
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+          leading: IconButton(
             icon: const Icon(
-              Icons.notifications_rounded,
+              Icons.menu,
               color: Colors.white,
             ),
+            onPressed: () {
+              _scaffoldKey.currentState!.openDrawer();
+            },
           ),
-          IconButton(
-            icon: const Icon(
-              Icons.search,
+          title: const Text(
+            'Connection Form',
+            style: TextStyle(
               color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontFamily: 'default',
             ),
-            onPressed: () {},
           ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(25, 192, 122, 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    child: Icon(
-                      Icons.person,
-                      size: 35,
-                    ),
-                    radius: 30,
-                  ),
-                  Text(
-                    'User Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Organization Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text('Home',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',
-                  )),
-              onTap: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                             ISPDashboard())); // Close the drawer
-              },
-            ),
-            Divider(),
-            ListTile(
-              title: Text('Information',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',
-                  )),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return Information();
-                  },
-                ));
-              },
-            ),
-            Divider(),
-            ListTile(
-              title: Text('Logout',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',
-                  )),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                             Login())); // Close the drawer
-              },
-            ),
-            Divider(),
-          ],
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.grey[100],
-            padding: EdgeInsets.symmetric(vertical: 30),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('Connection Request',
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(25, 192, 122, 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 60, // Adjust width as needed
+                      height: 60, // Adjust height as needed
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(photoUrl),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      userName,
                       style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default')),
-                  SizedBox(height: 5),
-                  Text('Please fill up the form',
-                      style: TextStyle(fontSize: 20, fontFamily: 'default')),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text('Request Type',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default')),
-                      ],
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
-                    child: RadioListTileGroup(
-                      options: ['New Connection', 'Upgrade', 'Others'],
-                      selectedOption: _requestType,
-                      onChanged: (String value) {
-                        setState(() {
-                          _requestType = value ?? '';
-                          print('Selected option: $_requestType');
-                        });
-                        // You can perform any other actions here based on the selected option
-                      },
+                    SizedBox(height: 10),
+                    Text(
+                      organizationName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: /*DropdownButtonFormField<String>(
-                        value: selectedDivision,
-                        items: districtOptions.keys.map((String division) {
-                          return DropdownMenuItem<String>(
-                            value: division,
-                            child: Text(division,
+                  ],
+                ),
+              ),
+              ListTile(
+                title: Text('Home',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
+                    )),
+                onTap: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                               ISPDashboard())); // Close the drawer
+                },
+              ),
+              Divider(),
+              ListTile(
+                title: Text('Information',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
+                    )),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return Information();
+                    },
+                  ));
+                },
+              ),
+              Divider(),
+              ListTile(
+                title: Text('Logout',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
+                    )),
+                onTap: () async {
+                  // Clear user data from SharedPreferences
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('userName');
+                  await prefs.remove('organizationName');
+                  await prefs.remove('photoUrl');
+                  // Create an instance of LogOutApiService
+                  var logoutApiService = await LogOutApiService.create();
+
+                  // Wait for authToken to be initialized
+                  logoutApiService.authToken;
+
+                  // Call the signOut method on the instance
+                  if (await logoutApiService.signOut()) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                  builder: (context) => Login())); // Close the drawer
+                  }// Close the drawer
+                },
+              ),
+              Divider(),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              color: Colors.grey[100],
+              padding: EdgeInsets.symmetric(vertical: 30),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text('Connection Request',
+                        style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default')),
+                    SizedBox(height: 5),
+                    Text('Please fill up the form',
+                        style: TextStyle(fontSize: 20, fontFamily: 'default')),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text('Request Type',
+                              textAlign: TextAlign.left,
                               style: TextStyle(
-                                color: Colors.black ,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default')),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
+                      child: RadioListTileGroup(
+                        options: ['New Connection', 'Upgrade', 'Others'],
+                        selectedOption: _requestType,
+                        onChanged: (String value) {
                           setState(() {
-                            selectedDivision = newValue;
-                            selectedDistrict = null; // Reset district on division change
+                            _requestType = value ?? '';
+                            print('Selected option: $_requestType');
                           });
+                          // You can perform any other actions here based on the selected option
                         },
-                        decoration: InputDecoration(labelText: 'Division',border: InputBorder.none,),
-                      ),*/
-                            DropdownFormField(
-                          hintText: 'Select Division',
-                          dropdownItems: divisions
-                              .map((division) => division.name)
-                              .toList(),
-                          initialValue: selectedDivision,
-                          onChanged: (newValue) {
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: /*DropdownButtonFormField<String>(
+                          value: selectedDivision,
+                          items: districtOptions.keys.map((String division) {
+                            return DropdownMenuItem<String>(
+                              value: division,
+                              child: Text(division,
+                                style: TextStyle(
+                                  color: Colors.black ,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
                             setState(() {
-                              selectedDistrict = null; // Reset
-                              selectedUpazila = null; // Reset
-                              selectedUnion = null; // Reset
-                              selectedNTTNProvider = null; // Reset
                               selectedDivision = newValue;
-                              //It Takes Name String
-                              /*_divisionID = newValue ?? '';
-                            print(_divisionID);*/
+                              selectedDistrict = null; // Reset district on division change
                             });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              Division selectedDivisionObject =
-                                  divisions.firstWhere(
-                                (division) => division.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedDivisionObject != null) {
-                                //It Takes ID Int
-                                _divisionID = selectedDivisionObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchDistricts(selectedDivisionObject.id);
-                              }
-                            }
                           },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: /* DropdownButtonFormField<String>(
-                        value: selectedDistrict,
-                        items: selectedDivision != null
-                            ? districtOptions[selectedDivision]!.map((String district) {
-                          return DropdownMenuItem<String>(
-                            value: district,
-                            child: Text(district,
-                              style: TextStyle(
-                                color: Colors.black ,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),),
-                          );
-                        }).toList()
-                            : [],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedDistrict = newValue;
-                            selectedUpazila = null; // Reset thana on district change
-                          });
-                        },
-                        decoration: InputDecoration(labelText: 'District', border: InputBorder.none,),
-                      ),*/
-                            DropdownFormField(
-                          hintText: 'Select District',
-                          dropdownItems: districts
-                              .map((district) => district.name)
-                              .toList(),
-                          initialValue: selectedDistrict,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedUpazila = null; // Reset
-                              selectedUnion = null; // Reset
-                              selectedNTTNProvider = null; // Reset
-                              selectedDistrict = newValue;
-                              /*_districtID = newValue ?? '';
-                            print(_districtID);*/
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              District selectedDistrictObject =
-                                  districts.firstWhere(
-                                (district) => district.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedDistrictObject != null) {
-                                _districtID = selectedDistrictObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchUpazilas(selectedDistrictObject.id);
+                          decoration: InputDecoration(labelText: 'Division',border: InputBorder.none,),
+                        ),*/
+                              DropdownFormField(
+                            hintText: 'Select Division',
+                            dropdownItems: divisions
+                                .map((division) => division.name)
+                                .toList(),
+                            initialValue: selectedDivision,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedDistrict = null; // Reset
+                                selectedUpazila = null; // Reset
+                                selectedUnion = null; // Reset
+                                selectedNTTNProvider = null; // Reset
+                                selectedDivision = newValue;
+                                districts.clear();
+                                districts = [];
+                                //It Takes Name String
+                                /*_divisionID = newValue ?? '';
+                              print(_divisionID);*/
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                Division selectedDivisionObject =
+                                    divisions.firstWhere(
+                                  (division) => division.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedDivisionObject != null) {
+                                  //It Takes ID Int
+                                  _divisionID = selectedDivisionObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchDistricts(selectedDivisionObject.id);
+                                }
                               }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(
-                          left: 10, top: 5
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: /*DropdownButtonFormField<String>(
-                        value: selectedUpazila,
-                        items: selectedDistrict != null
-                            ? upazilaOptions[selectedDistrict]!.map((String thana) {
-                          return DropdownMenuItem<String>(
-                            value: thana,
-                            child: Text(thana,
-                              style: TextStyle(
-                                color: Colors.black ,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),),
-                          );
-                        }).toList()
-                            : [],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedUpazila = newValue;
-                            selectedUnion = null; // Reset union on thana change
-                          });
-                        },
-                        decoration: InputDecoration(labelText: 'Upazila', border: InputBorder.none,),
-                      ),*/
-                            DropdownFormField(
-                          hintText: 'Select Upazila',
-                          dropdownItems:
-                              upazilas.map((upazila) => upazila.name).toList(),
-                          initialValue: selectedUpazila,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedUnion = null; // Reset
-                              selectedNTTNProvider = null; // Reset
-                              selectedUpazila = newValue;
-                              /* _upazilaID = newValue ?? '';
-                            print(_upazilaID);*/
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              Upazila selectedUpazilaObject =
-                                  upazilas.firstWhere(
-                                (upazila) => upazila.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedUpazilaObject != null) {
-                                _upazilaID = selectedUpazilaObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchUnions(selectedUpazilaObject.id);
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(
-                          left: 10, top: 5
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: /*DropdownButtonFormField<String>(
-                        value: selectedUnion,
-                        items: selectedUpazila != null
-                            ? unionOptions[selectedUpazila]!.map((String union) {
-                          return DropdownMenuItem<String>(
-                            value: union,
-                            child: Text(union,
-                              style: TextStyle(
-                                color: Colors.black ,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),),
-                          );
-                        }).toList()
-                            : [],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedUnion = newValue;
-                            selectedNTTNProvider = null;
-                          });
-                        },
-                        decoration: InputDecoration(labelText: 'Union', border: InputBorder.none,),
-                      ),*/
-                            DropdownFormField(
-                          hintText: 'Select Union',
-                          dropdownItems:
-                              unions.map((union) => union.name).toList(),
-                          initialValue: selectedUnion,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedNTTNProvider = null; // Reset
-                              selectedUnion = newValue;
-                              /*_unionID = newValue ?? '';
-                            print(_unionID);*/
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              Union selectedUnionObject = unions.firstWhere(
-                                (union) => union.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedUnionObject != null) {
-                                _unionID = selectedUnionObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchNTTNProviders(selectedUnionObject.id);
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(
-                          left: 10, top: 5
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: /*DropdownButtonFormField<String>(
-                        value: selectedNTTNProvider,
-                        items: selectedUnion != null
-                            ? nttnProviderOptions[selectedUnion]!.map((String provider) {
-                          return DropdownMenuItem<String>(
-                            value: provider,
-                            child: Text(provider,
-                              style: TextStyle(
-                                color: Colors.black ,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),
-                            ),
-                          );
-                        }).toList()
-                            : [],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedNTTNProvider = newValue;
-                          });
-                        },
-                        decoration: InputDecoration(labelText: 'NTTN Provider', border: InputBorder.none,),
-                      ),*/
-                            DropdownFormField(
-                          hintText: 'Select NTTN Provider',
-                          dropdownItems: nttnProviders
-                              .map((nttnProvider) => nttnProvider.provider)
-                              .toList(),
-                          initialValue: selectedNTTNProvider,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedNTTNProvider = newValue;
-                              print(selectedNTTNProvider);
-                              /*  _NTTNID = newValue ?? '';
-                            print(_NTTNID);*/
-                              selectedLinkCapacity = null; // Reset
-                            });
-                            if (newValue == null) {
-                              print('I am null');
-                            }
-                            if (newValue != null) {
-                              print(newValue);
-                              NTTNProvider selectedNTTNProviderObject =
-                                  nttnProviders.firstWhere(
-                                (nttnProvider) => nttnProvider.provider == newValue,
-                              );
-                              print(
-                                  'Selected NTTN Provider ID: ${selectedNTTNProviderObject.id}');
-                              if (selectedNTTNProviderObject != null) {
-                                print(
-                                    'Selected NTTN Provider ID: ${selectedNTTNProviderObject.id}');
-                                setState(() {
-                                  _NTTNID = selectedNTTNProviderObject.id;
-                                });
-                               /* _NTTNPhoneNumber = selectedNTTNProviderObject
-                                    .phonenumber; // Update _NTTNID*/
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  if (selectedNTTNProvider != null)
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -735,251 +454,541 @@ class _ConnectionFormState extends State<ConnectionForm> {
                             border: Border.all(color: Colors.grey),
                           ),
                           child: /* DropdownButtonFormField<String>(
-                        value: selectedLinkCapacity,
-                        items: selectedNTTNProvider != null
-                            ? linkCapacityOptions.map((String capacity) {
-                          return DropdownMenuItem<String>(
-                            value: capacity,
-                            child: Text(
-                              capacity,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'default',
-                              ),
-                            ),
-                          );
-                        }).toList()
-                            : [],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedLinkCapacity = newValue;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Link Capacity',
-                          border: InputBorder.none,
-                        ),
-                      ),*/
+                          value: selectedDistrict,
+                          items: selectedDivision != null
+                              ? districtOptions[selectedDivision]!.map((String district) {
+                            return DropdownMenuItem<String>(
+                              value: district,
+                              child: Text(district,
+                                style: TextStyle(
+                                  color: Colors.black ,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),),
+                            );
+                          }).toList()
+                              : [],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedDistrict = newValue;
+                              selectedUpazila = null; // Reset thana on district change
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'District', border: InputBorder.none,),
+                        ),*/
                               DropdownFormField(
-                            hintText: 'Select Link Capacity',
-                            dropdownItems: linkCapacityOptions.toList(),
-                            initialValue: selectedLinkCapacity,
+                            hintText: 'Select District',
+                            dropdownItems: districts
+                                .map((district) => district.name)
+                                .toList(),
+                            initialValue: selectedDistrict,
                             onChanged: (newValue) {
                               setState(() {
-                                selectedLinkCapacity = newValue;
-                                _linkCapacityID = newValue ?? '';
-                                print(_linkCapacityID);
+                                print(selectedDistrict);
+                                selectedUpazila = null; // Reset
+                                selectedUnion = null; // Reset
+                                selectedNTTNProvider = null; // Reset
+                                selectedDistrict = newValue;
+                                /*_districtID = newValue ?? '';
+                              print(_districtID);*/
                               });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                District selectedDistrictObject =
+                                    districts.firstWhere(
+                                  (district) => district.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedDistrictObject != null) {
+                                  _districtID = selectedDistrictObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchUpazilas(selectedDistrictObject.id);
+                                }
+                              }
                             },
                           )),
                     ),
-                  SizedBox(
-                    height: 25,
-                  ),
-                  Container(
-                    width: screenWidth * 0.9,
-                    height: 120,
-                    child: TextFormField(
-                      controller: _remark,
-                      enabled: selectedLinkCapacity != null,
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter some remarks';
-                        }
-                        return null;
-                      },
-                      style: const TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        labelText: 'Remarks',
-                        labelStyle: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          fontFamily: 'default',
-                        ),
-                        alignLabelWithHint: true,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 145),
-                        border: const OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
-                      ),
+                    SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: Material(
+                    Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromRGBO(25, 192, 122, 1),
-                          fixedSize: Size(
-                              MediaQuery.of(context).size.width * 0.9,
-                              MediaQuery.of(context).size.height * 0.08),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(
+                            left: 10, top: 5
                           ),
-                        ),
-                        onPressed: _remark.text.isNotEmpty
-                            ? () {
-                                _connectionRequestForm();
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: /*DropdownButtonFormField<String>(
+                          value: selectedUpazila,
+                          items: selectedDistrict != null
+                              ? upazilaOptions[selectedDistrict]!.map((String thana) {
+                            return DropdownMenuItem<String>(
+                              value: thana,
+                              child: Text(thana,
+                                style: TextStyle(
+                                  color: Colors.black ,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),),
+                            );
+                          }).toList()
+                              : [],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedUpazila = newValue;
+                              selectedUnion = null; // Reset union on thana change
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Upazila', border: InputBorder.none,),
+                        ),*/
+                              DropdownFormField(
+                            hintText: 'Select Upazila',
+                            dropdownItems:
+                                upazilas.map((upazila) => upazila.name).toList(),
+                            initialValue: selectedUpazila,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedUnion = null; // Reset
+                                selectedNTTNProvider = null; // Reset
+                                selectedUpazila = newValue;
+                                /* _upazilaID = newValue ?? '';
+                              print(_upazilaID);*/
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                Upazila selectedUpazilaObject =
+                                    upazilas.firstWhere(
+                                  (upazila) => upazila.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedUpazilaObject != null) {
+                                  _upazilaID = selectedUpazilaObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchUnions(selectedUpazilaObject.id);
+                                }
                               }
-                            : null,
-                        child: const Text('Submit',
-                            style: TextStyle(
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(
+                            left: 10, top: 5
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: /*DropdownButtonFormField<String>(
+                          value: selectedUnion,
+                          items: selectedUpazila != null
+                              ? unionOptions[selectedUpazila]!.map((String union) {
+                            return DropdownMenuItem<String>(
+                              value: union,
+                              child: Text(union,
+                                style: TextStyle(
+                                  color: Colors.black ,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),),
+                            );
+                          }).toList()
+                              : [],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedUnion = newValue;
+                              selectedNTTNProvider = null;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Union', border: InputBorder.none,),
+                        ),*/
+                              DropdownFormField(
+                            hintText: 'Select Union',
+                            dropdownItems:
+                                unions.map((union) => union.name).toList(),
+                            initialValue: selectedUnion,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedNTTNProvider = null; // Reset
+                                selectedUnion = newValue;
+                                /*_unionID = newValue ?? '';
+                              print(_unionID);*/
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                Union selectedUnionObject = unions.firstWhere(
+                                  (union) => union.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedUnionObject != null) {
+                                  _unionID = selectedUnionObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchNTTNProviders(selectedUnionObject.id);
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(
+                            left: 10, top: 5
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: /*DropdownButtonFormField<String>(
+                          value: selectedNTTNProvider,
+                          items: selectedUnion != null
+                              ? nttnProviderOptions[selectedUnion]!.map((String provider) {
+                            return DropdownMenuItem<String>(
+                              value: provider,
+                              child: Text(provider,
+                                style: TextStyle(
+                                  color: Colors.black ,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            );
+                          }).toList()
+                              : [],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedNTTNProvider = newValue;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'NTTN Provider', border: InputBorder.none,),
+                        ),*/
+                              DropdownFormField(
+                            hintText: 'Select NTTN Provider',
+                            dropdownItems: nttnProviders
+                                .map((nttnProvider) => nttnProvider.provider)
+                                .toList(),
+                            initialValue: selectedNTTNProvider,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedNTTNProvider = newValue;
+                                print(selectedNTTNProvider);
+                                /*  _NTTNID = newValue ?? '';
+                              print(_NTTNID);*/
+                                selectedLinkCapacity = null; // Reset
+                              });
+                              if (newValue == null) {
+                                print('I am null');
+                              }
+                              if (newValue != null) {
+                                print(newValue);
+                                NTTNProvider selectedNTTNProviderObject =
+                                    nttnProviders.firstWhere(
+                                  (nttnProvider) => nttnProvider.provider == newValue,
+                                );
+                                print(
+                                    'Selected NTTN Provider ID: ${selectedNTTNProviderObject.id}');
+                                if (selectedNTTNProviderObject != null) {
+                                  print(
+                                      'Selected NTTN Provider ID: ${selectedNTTNProviderObject.id}');
+                                  setState(() {
+                                    _NTTNID = selectedNTTNProviderObject.id;
+                                  });
+                                 /* _NTTNPhoneNumber = selectedNTTNProviderObject
+                                      .phonenumber; // Update _NTTNID*/
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    if (selectedNTTNProvider != null)
+                      Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                            width: screenWidth * 0.9,
+                            height: screenHeight * 0.075,
+                            padding: EdgeInsets.only(left: 10, top: 5),
+                            decoration: BoxDecoration(
                               color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: /* DropdownButtonFormField<String>(
+                          value: selectedLinkCapacity,
+                          items: selectedNTTNProvider != null
+                              ? linkCapacityOptions.map((String capacity) {
+                            return DropdownMenuItem<String>(
+                              value: capacity,
+                              child: Text(
+                                capacity,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            );
+                          }).toList()
+                              : [],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedLinkCapacity = newValue;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Link Capacity',
+                            border: InputBorder.none,
+                          ),
+                        ),*/
+                                DropdownFormField(
+                              hintText: 'Select Link Capacity',
+                              dropdownItems: linkCapacityOptions.toList(),
+                              initialValue: selectedLinkCapacity,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedLinkCapacity = newValue;
+                                  _linkCapacityID = newValue ?? '';
+                                  print(_linkCapacityID);
+                                });
+                              },
                             )),
                       ),
+                    SizedBox(
+                      height: 25,
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  )
-                ],
+                    Container(
+                      width: screenWidth * 0.9,
+                      height: 120,
+                      child: TextFormField(
+                        controller: _remark,
+                        enabled: selectedLinkCapacity != null,
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter some remarks';
+                          }
+                          return null;
+                        },
+                        style: const TextStyle(
+                          color: Color.fromRGBO(143, 150, 158, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'default',
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelText: 'Remarks',
+                          labelStyle: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ),
+                          alignLabelWithHint: true,
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 145),
+                          border: const OutlineInputBorder(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10))),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(25, 192, 122, 1),
+                            fixedSize: Size(
+                                MediaQuery.of(context).size.width * 0.9,
+                                MediaQuery.of(context).size.height * 0.08),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _remark.text.isNotEmpty
+                              ? () {
+                                  _connectionRequestForm();
+                                }
+                              : null,
+                          child: const Text('Submit',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              )),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    )
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: Container(
-        height: screenHeight * 0.08,
-        color: const Color.fromRGBO(25, 192, 122, 1),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ISPDashboard(shouldRefresh: true,)));
-              },
-              child: Container(
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.home,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Home',
-                      style: TextStyle(
+        bottomNavigationBar: Container(
+          height: screenHeight * 0.08,
+          color: const Color.fromRGBO(25, 192, 122, 1),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ISPDashboard(shouldRefresh: true,)));
+                },
+                child: Container(
+                  width: screenWidth / 3,
+                  padding: EdgeInsets.all(5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.home,
+                        size: 30,
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {},
-              behavior: HitTestBehavior.translucent,
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                  left: BorderSide(
-                    color: Colors.black,
-                    width: 1.0,
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        'Home',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: 'default',
+                        ),
+                      ),
+                    ],
                   ),
-                )),
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.search,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Search',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return Information();
-                  },
-                ));
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                  left: BorderSide(
-                    color: Colors.black,
-                    width: 1.0,
+              GestureDetector(
+                onTap: () {},
+                behavior: HitTestBehavior.translucent,
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                    left: BorderSide(
+                      color: Colors.black,
+                      width: 1.0,
+                    ),
+                  )),
+                  width: screenWidth / 3,
+                  padding: EdgeInsets.all(5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.search,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        'Search',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: 'default',
+                        ),
+                      ),
+                    ],
                   ),
-                )),
-                width: screenWidth / 3,
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.info,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Information',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
-          ],
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return Information();
+                    },
+                  ));
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                    left: BorderSide(
+                      color: Colors.black,
+                      width: 1.0,
+                    ),
+                  )),
+                  width: screenWidth / 3,
+                  padding: EdgeInsets.all(5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.info,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        'Information',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: 'default',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1016,6 +1025,17 @@ class _ConnectionFormState extends State<ConnectionForm> {
           .then((response) {
         // Handle successful request
         print('Connection request sent successfully!!');
+        if(response == 'Connection Request Already Exist'){
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => ISPDashboard()),
+                (route) => false, // This will remove all routes from the stack
+          );
+          const snackBar = SnackBar(
+            content: Text('Request already Sumbitted, please wait for it to be reviewed!'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
         if (response != null && response == "Connection Request Submitted") {
           Navigator.pushAndRemoveUntil(
             context,

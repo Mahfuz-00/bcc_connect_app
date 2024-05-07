@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../API Model and Service (Sign Up)/apiserviceregister.dart';
 import '../API Model and Service (Sign Up)/registermodels.dart';
-import '../Connection Checker/connectionchecker.dart';
+import '../Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
 import 'dropdownfield.dart';
 
@@ -38,6 +38,20 @@ class _SignupState extends State<Signup> {
   var globalKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> globalfromkey = GlobalKey<FormState>();
   bool _isLoading = false;
+  double _imageHeight = 0;
+  double _imageWidth = 0;
+
+  // Function to load image dimensions
+  Future<void> _getImageDimensions() async {
+    if (_imageFile != null) {
+      final data = await _imageFile!.readAsBytes();
+      final image = await decodeImageFromList(data);
+      setState(() {
+        _imageHeight = image.height.toDouble();
+        _imageWidth = image.width.toDouble();
+      });
+    }
+  }
 
   List<DropdownMenuItem<String>> types = [
     DropdownMenuItem(child: Text("Nationwide"), value: "Nationwide"),
@@ -97,462 +111,467 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      //resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
-            color: Colors.grey[100],
-            child: Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                      child: Column(children: [
-                    const Text(
-                      'Hello! Register to get started!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color.fromRGBO(25, 192, 122, 1),
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Sign in to see how we manage',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                    const SizedBox(height: 50),
-                    Form(
-                      key: globalfromkey,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              controller: _fullNameController,
-                              validator: (input) {
-                                if (input == null || input.isEmpty) {
-                                  return 'Please enter your full name';
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Full Name',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
+    return InternetChecker(
+      child: PopScope(
+        canPop: false,
+        child: Scaffold(
+          backgroundColor: Colors.grey[100],
+          //resizeToAvoidBottomInset: false,
+          body: SingleChildScrollView(
+            child: SafeArea(
+              child: Container(
+                color: Colors.grey[100],
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 100.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                          child: Column(children: [
+                        const Text(
+                          'Hello! Register to get started!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color.fromRGBO(25, 192, 122, 1),
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
                           ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              controller: _organizationController,
-                              validator: (input) {
-                                if (input == null || input.isEmpty) {
-                                  return 'Please enter your organization name';
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Organization Name',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Sign in to see how we manage',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
                           ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              controller: _designationController,
-                              validator: (input) {
-                                if (input == null || input.isEmpty) {
-                                  return 'Please enter your designation';
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Designation',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              keyboardType: TextInputType.emailAddress,
-                              onSaved: (input) =>
-                                  _registerRequest.email = input!,
-                              validator: (input) {
-                                if (input == null || !input.contains('@')) {
-                                  return "Please enter a valid email address";
-                                }
-                                return null;
-                              },
-                              controller: _emailController,
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Email',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              validator: (input) {
-                                if (input == null || input.isEmpty) {
-                                  return 'Please enter your mobile number name';
-                                }
-                                if (input.length != 11) {
-                                  return 'Mobile number must be 11 digits';
-                                }
-                                return null; // Return null if the input is valid
-                              },
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Mobile Number',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              keyboardType: TextInputType.text,
-                              onSaved: (input) =>
-                                  _registerRequest.password = input!,
-                              validator: (input) => input!.length < 6
-                                  ? "Password should be more than 6 characters"
-                                  : null,
-                              controller: _passwordController,
-                              obscureText: _isObscuredPassword,
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Password',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(_getIconPassword()),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isObscuredPassword =
-                                          !_isObscuredPassword;
-                                      _passwordController.text =
-                                          _passwordController.text;
-                                    });
+                        ),
+                        const SizedBox(height: 50),
+                        Form(
+                          key: globalfromkey,
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  controller: _fullNameController,
+                                  validator: (input) {
+                                    if (input == null || input.isEmpty) {
+                                      return 'Please enter your full name';
+                                    }
+                                    return null;
                                   },
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              keyboardType: TextInputType.text,
-                              onSaved: (input) =>
-                                  _registerRequest.password = input!,
-                              validator: (input) => input!.length < 6
-                                  ? "Password should be more than 6 characters"
-                                  : null,
-                              controller: _confirmPasswordController,
-                              obscureText: _isObscuredConfirmPassword,
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'Confirm Password',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(_getIconConfirmPassword()),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isObscuredConfirmPassword =
-                                          !_isObscuredConfirmPassword;
-                                      _confirmPasswordController.text =
-                                          _confirmPasswordController.text;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          DropdownFormField(
-                            hintText: 'Type of User',
-                            dropdownItems: types,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedUserType = value ?? '';
-                                //print('New: $_selectedUserType');
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          Container(
-                            width: 350,
-                            height: 70,
-                            child: TextFormField(
-                              controller: _licenseNumberController,
-                              validator: (input) {
-                                if (input == null || input.isEmpty) {
-                                  return 'Please enter your license number';
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: 'License Number',
-                                labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            width: 350,
-                            height: 80,
-                            child: InkWell(
-                              onTap: _selectImage,
-                              child: InputDecorator(
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                      borderSide:
-                                          Divider.createBorderSide(context)),
-                                  labelText: 'Add Profile Picture',
-                                  labelStyle: TextStyle(
-                                    color: Colors.black87,
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
                                     fontFamily: 'default',
                                   ),
-                                  errorMaxLines: null,
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors
-                                            .red), // Customize error border color
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Full Name',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _imageFile != null
-                                          ? Image.file(
-                                              _imageFile!,
-                                              width: 60,
-                                              height: 60,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Icon(Icons.image,
-                                              size: 60, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  controller: _organizationController,
+                                  validator: (input) {
+                                    if (input == null || input.isEmpty) {
+                                      return 'Please enter your organization name';
+                                    }
+                                    return null;
+                                  },
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Organization Name',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
                                     ),
-                                    SizedBox(width: 8),
-                                    Text('Upload',
-                                        style: TextStyle(color: Colors.blue)),
-                                    // Customize upload text style
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 50),
-                    ElevatedButton(
-                        onPressed: _registerUser,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(25, 192, 122, 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          fixedSize: Size(350, 70),
-                        ),
-                        child: const Text('Register',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontFamily: 'default',
-                            ))),
-                  ])),
-                  Footer(
-                    backgroundColor: Color.fromRGBO(246, 246, 246, 255),
-                    alignment: Alignment.bottomCenter,
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Already have an account?  ',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  controller: _designationController,
+                                  validator: (input) {
+                                    if (input == null || input.isEmpty) {
+                                      return 'Please enter your designation';
+                                    }
+                                    return null;
+                                  },
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Designation',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                ),
                               ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  keyboardType: TextInputType.emailAddress,
+                                  onSaved: (input) =>
+                                      _registerRequest.email = input!,
+                                  validator: (input) {
+                                    if (input == null || !input.contains('@')) {
+                                      return "Please enter a valid email address";
+                                    }
+                                    return null;
+                                  },
+                                  controller: _emailController,
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Email',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (input) {
+                                    if (input == null || input.isEmpty) {
+                                      return 'Please enter your mobile number name';
+                                    }
+                                    if (input.length != 11) {
+                                      return 'Mobile number must be 11 digits';
+                                    }
+                                    return null; // Return null if the input is valid
+                                  },
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Mobile Number',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  keyboardType: TextInputType.text,
+                                  onSaved: (input) =>
+                                      _registerRequest.password = input!,
+                                  validator: (input) => input!.length < 6
+                                      ? "Password should be more than 6 characters"
+                                      : null,
+                                  controller: _passwordController,
+                                  obscureText: _isObscuredPassword,
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Password',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(_getIconPassword()),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isObscuredPassword =
+                                              !_isObscuredPassword;
+                                          _passwordController.text =
+                                              _passwordController.text;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  keyboardType: TextInputType.text,
+                                  onSaved: (input) =>
+                                      _registerRequest.password = input!,
+                                  validator: (input) => input!.length < 6
+                                      ? "Password should be more than 6 characters"
+                                      : null,
+                                  controller: _confirmPasswordController,
+                                  obscureText: _isObscuredConfirmPassword,
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Confirm Password',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(_getIconConfirmPassword()),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isObscuredConfirmPassword =
+                                              !_isObscuredConfirmPassword;
+                                          _confirmPasswordController.text =
+                                              _confirmPasswordController.text;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              DropdownFormField(
+                                hintText: 'Type of User',
+                                dropdownItems: types,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedUserType = value ?? '';
+                                    //print('New: $_selectedUserType');
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                width: 350,
+                                height: 70,
+                                child: TextFormField(
+                                  controller: _licenseNumberController,
+                                  validator: (input) {
+                                    if (input == null || input.isEmpty) {
+                                      return 'Please enter your license number';
+                                    }
+                                    return null;
+                                  },
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(),
+                                    labelText: 'License Number',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                width: (_imageWidth != 0 ? (_imageWidth + 10).clamp(0, 350) : 350),
+                                height: (_imageHeight != 0 ? (_imageHeight + 10).clamp(0, 200) : 80),
+                                child: InkWell(
+                                  onTap: _selectImage,
+                                  child: InputDecorator(
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                          borderSide:
+                                              Divider.createBorderSide(context)),
+                                      labelText: 'Add Profile Picture',
+                                      labelStyle: TextStyle(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        fontFamily: 'default',
+                                      ),
+                                      errorMaxLines: null,
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors
+                                                .red), // Customize error border color
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _imageFile != null
+                                              ? Image.file(
+                                                  _imageFile!,
+                                                  width: null,
+                                                  height: null,
+                                                  fit: BoxFit.contain,
+                                                )
+                                              : Icon(Icons.image,
+                                                  size: 60, color: Colors.grey),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text('Upload',
+                                            style: TextStyle(color: Colors.blue)),
+                                        // Customize upload text style
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        ElevatedButton(
+                            onPressed: _registerUser,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.fromRGBO(25, 192, 122, 1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              fixedSize: Size(350, 70),
                             ),
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Login()));
-                              },
-                              child: const Text(
-                                'Login now',
+                            child: const Text('Register',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color.fromRGBO(25, 192, 122, 1),
-                                  fontSize: 15,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                   fontFamily: 'default',
+                                ))),
+                      ])),
+                      Footer(
+                        backgroundColor: Color.fromRGBO(246, 246, 246, 255),
+                        alignment: Alignment.bottomCenter,
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Already have an account?  ',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
                                 ),
-                              ),
-                            )
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Login()));
+                                  },
+                                  child: const Text(
+                                    'Login now',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(25, 192, 122, 1),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -623,6 +642,7 @@ class _SignupState extends State<Signup> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+      await _getImageDimensions();
     }
   }
 

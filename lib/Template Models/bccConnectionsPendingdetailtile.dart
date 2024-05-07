@@ -38,13 +38,13 @@ class BCCConnectionsInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildRow('Name:', Name),
-            _buildRow('Organization Name:', OrganizationName),
-            _buildRow('Mobile No:', MobileNo),
-            _buildRow('Provider:', Provider),
-            _buildRow('Connection Type:', ConnectionType),
-            _buildRowApplicationID('Application ID:', ApplicationID),
-            _buildRow('Status:', Status),
+            _buildRow('Name', Name),
+            _buildRow('Organization Name', OrganizationName),
+            _buildRow('Mobile No', MobileNo),
+            _buildRow('Provider', Provider),
+            _buildRow('Connection Type', ConnectionType),
+            _buildRowApplicationID('Application ID', ApplicationID),
+            _buildRow('Status', Status),
           ],
         ),
       ),
@@ -72,6 +72,17 @@ Widget _buildRow(String label, String value) {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          ":",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -118,6 +129,17 @@ Widget _buildRowApplicationID(String label, int value) {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          ":",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

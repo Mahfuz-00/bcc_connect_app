@@ -57,16 +57,6 @@ class PendingConnectionDetailsPage extends StatelessWidget {
             fontFamily: 'default',
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_rounded),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -102,23 +92,23 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20),
-              _buildRow('Name:', Name),
+              _buildRow('Name', Name),
               Divider(),
-              _buildRow('Organiztion Name:', OrganizationName),
+              _buildRow('Organiztion Name', OrganizationName),
               Divider(),
-              _buildRow('Mobile No:', MobileNo),
+              _buildRow('Mobile No', MobileNo),
               Divider(),
-              _buildRow('Connection Type:', ConnectionType),
+              _buildRow('Connection Type', ConnectionType),
               Divider(),
-              _buildRow('Application ID:', ApplicationID),
+              _buildRow('Application ID', ApplicationID),
               Divider(),
-              _buildRow('Location:', Location),
+              _buildRow('Location', Location),
               Divider(),
-              _buildRow('Status:', Status),
+              _buildRow('Status', Status),
               Divider(),
-              _buildRow('Link Capacity:', LinkCapacity),
+              _buildRow('Link Capacity', LinkCapacity),
               Divider(),
-              _buildRow('Remark:', Remark),
+              _buildRow('Remark', Remark),
               Divider(),
               SizedBox(height: 40),
               Row(
@@ -135,6 +125,11 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                     onPressed: () {
                       action = 'accepted';
                       handleAcceptOrReject(action);
+                      const snackBar = SnackBar(
+                        content: Text('Processing...'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      Future.delayed(Duration(seconds: 2), () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
@@ -143,6 +138,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                         content: Text('Request Accepted!'),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      });
                     },
                     child: Text('Accept',
                         style: TextStyle(
@@ -165,14 +161,21 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                     onPressed: () {
                       action = 'rejected';
                       handleAcceptOrReject(action);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
-                      );
                       const snackBar = SnackBar(
-                        content: Text('Request Rejected!'),
+                        content: Text('Processing...'),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      Future.delayed(Duration(seconds: 2), () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              NTTNDashboard(shouldRefresh: true)),
+                        );
+                        const snackBar = SnackBar(
+                          content: Text('Request Rejected!'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      });
                     },
                     child: Text('Decline',
                         style: TextStyle(
@@ -212,6 +215,17 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            ":",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),

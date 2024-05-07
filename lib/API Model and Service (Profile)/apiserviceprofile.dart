@@ -27,6 +27,7 @@ class APIProfileService {
   }*/
 
   Future<Map<String, dynamic>> fetchUserProfile(String authToken) async {
+    print('Authen: $authToken');
     //final String token = await authToken; // Wait for the authToken to complete
     try{
         if (authToken.isEmpty) {
@@ -42,12 +43,14 @@ class APIProfileService {
           // Add other headers if needed
         },
       );
+        print(response.statusCode);
 
       print(response.body);
       if (response.statusCode == 200) {
         print('Profile Loaded successfully.');
         // If the server returns a 200 OK response, parse the JSON
         Map<String, dynamic> userProfile = json.decode(response.body);
+        print(response.body);
         return userProfile['records'];
       } else {
         // If the server did not return a 200 OK response,

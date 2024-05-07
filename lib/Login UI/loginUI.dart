@@ -8,7 +8,6 @@ import '../API Model and Service (Login)/apiservicelogin.dart';
 import '../API Model and Service (Profile)/apiserviceprofile.dart';
 import '../API Model and Service (Profile)/profilemodel.dart';
 import '../BCC Dashboard/bccDashboard.dart';
-import '../Connection Checker/connectionchecker.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../Forgot Password UI/forgotpasswordUI.dart';
 import '../ISP Dashboard/ispDashboard.dart';
@@ -31,6 +30,7 @@ class _LoginState extends State<Login> {
   GlobalKey<FormState> globalfromkey = GlobalKey<FormState>();
   late String userType;
   bool _isLoading = false;
+  bool _isButtonClicked = false;
 
   IconData _getIcon() {
     return _isObscured ? Icons.visibility_off : Icons.visibility;
@@ -43,15 +43,6 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +50,6 @@ class _LoginState extends State<Login> {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
     _checkLoginRequest();
-    _checkInternetConnection();
   }
 
   @override
@@ -71,287 +61,295 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: globalKey,
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Container(
-          color: Colors.grey[100],
-          child: Padding(
-            padding: const EdgeInsets.only(top: 100.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      //alignment: Alignment.center,
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Welcome Again!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color.fromRGBO(25, 192, 122, 1),
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default'),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Sign in to see how we manage',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color.fromRGBO(143, 150, 158, 1),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            ),
-                          ),
-                          const SizedBox(height: 50),
-                          Form(
-                            key: globalfromkey,
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 350,
-                                  height: 70,
-                                  child: TextFormField(
-                                    controller: _emailController,
-                                    keyboardType: TextInputType.emailAddress,
-                                    onSaved: (input) =>
-                                    _loginRequest.Email = input!,
-                                    validator: (input) {
-                                      if (input!.isEmpty) {
-                                        return 'Please enter your email address';
-                                      }
-                                      final emailRegex = RegExp(
-                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                      if (!emailRegex.hasMatch(input)) {
-                                        return 'Please enter a valid email address';
-                                      }
-                                      return null;
-                                    },
-                                    style: const TextStyle(
-                                      color: Color.fromRGBO(143, 150, 158, 1),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'default',
-                                    ),
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      fillColor: Color.fromRGBO(
-                                          247, 248, 250, 1),
-                                      border: OutlineInputBorder(),
-                                      labelText: 'Enter your Email',
-                                      labelStyle: TextStyle(
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        fontFamily: 'default',
-                                      ),
-                                    ),
-                                  ),
+    return InternetChecker(
+      child: PopScope(
+        canPop: false,
+        child: Scaffold(
+          key: globalKey,
+          resizeToAvoidBottomInset: false,
+          body: SafeArea(
+            child: Container(
+              color: Colors.grey[100],
+              child: Padding(
+                padding: const EdgeInsets.only(top: 100.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          //alignment: Alignment.center,
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Welcome Again!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Color.fromRGBO(25, 192, 122, 1),
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default'),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Sign in to see how we manage',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
                                 ),
-                                const SizedBox(height: 15),
-                                Container(
-                                  width: 350,
-                                  height: 85,
-                                  child: Column(
-                                    children: [
-                                      TextFormField(
-                                        keyboardType: TextInputType.text,
+                              ),
+                              const SizedBox(height: 50),
+                              Form(
+                                key: globalfromkey,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 350,
+                                      height: 70,
+                                      child: TextFormField(
+                                        controller: _emailController,
+                                        keyboardType: TextInputType.emailAddress,
                                         onSaved: (input) =>
-                                        _loginRequest.Password = input!,
-                                        validator: (input) =>
-                                        input!.length < 6
-                                            ? "Password should be more than 3 characters"
-                                            : null,
-                                        controller: _passwordController,
-                                        obscureText: _isObscured,
+                                        _loginRequest.Email = input!,
+                                        validator: (input) {
+                                          if (input!.isEmpty) {
+                                            return 'Please enter your email address';
+                                          }
+                                          final emailRegex = RegExp(
+                                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                          if (!emailRegex.hasMatch(input)) {
+                                            return 'Please enter a valid email address';
+                                          }
+                                          return null;
+                                        },
                                         style: const TextStyle(
-                                          color: Color.fromRGBO(
-                                              143, 150, 158, 1),
+                                          color: Color.fromRGBO(143, 150, 158, 1),
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           fontFamily: 'default',
                                         ),
-                                        decoration: InputDecoration(
+                                        decoration: const InputDecoration(
                                           filled: true,
-                                          fillColor: const Color.fromRGBO(
+                                          fillColor: Color.fromRGBO(
                                               247, 248, 250, 1),
-                                          border: const OutlineInputBorder(),
-                                          labelText: 'Enter your password',
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Enter your Email',
                                           labelStyle: TextStyle(
                                             color: Colors.black87,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
                                             fontFamily: 'default',
                                           ),
-                                          suffixIcon: IconButton(
-                                            icon: Icon(_getIcon()),
-                                            onPressed: () {
-                                              setState(() {
-                                                _isObscured = !_isObscured;
-                                                _passwordController.text =
-                                                    _passwordController.text;
-                                              });
-                                            },
-                                          ),
-                                          errorStyle: TextStyle(height: 0),
                                         ),
                                       ),
-                                      if (_passwordController.text.isNotEmpty &&
-                                          _passwordController.text.length < 8)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 8.0),
-                                          child: Text(
-                                            "Password should be more than 8 characters",
-                                            style: TextStyle(color: Colors.red),
+                                    ),
+                                    const SizedBox(height: 15),
+                                    Container(
+                                      width: 350,
+                                      height: 85,
+                                      child: Column(
+                                        children: [
+                                          TextFormField(
+                                            keyboardType: TextInputType.text,
+                                            onSaved: (input) =>
+                                            _loginRequest.Password = input!,
+                                            validator: (input) =>
+                                            input!.length < 6
+                                                ? "Password should be more than 3 characters"
+                                                : null,
+                                            controller: _passwordController,
+                                            obscureText: _isObscured,
+                                            style: const TextStyle(
+                                              color: Color.fromRGBO(
+                                                  143, 150, 158, 1),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'default',
+                                            ),
+                                            decoration: InputDecoration(
+                                              filled: true,
+                                              fillColor: const Color.fromRGBO(
+                                                  247, 248, 250, 1),
+                                              border: const OutlineInputBorder(),
+                                              labelText: 'Enter your password',
+                                              labelStyle: TextStyle(
+                                                color: Colors.black87,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                fontFamily: 'default',
+                                              ),
+                                              suffixIcon: IconButton(
+                                                icon: Icon(_getIcon()),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _isObscured = !_isObscured;
+                                                    _passwordController.text =
+                                                        _passwordController.text;
+                                                  });
+                                                },
+                                              ),
+                                              errorStyle: TextStyle(height: 0),
+                                            ),
                                           ),
-                                        ),
-                                    ],
-                                  ),
+                                          if (_passwordController.text.isNotEmpty &&
+                                              _passwordController.text.length < 8)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8.0),
+                                              child: Text(
+                                                "Password should be more than 8 characters",
+                                                style: TextStyle(color: Colors.red),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 30.0),
-                              child: Container(
-                                alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (
-                                                context) => ForgotPassword()));
-                                  },
-                                  child: const Text(
-                                    'Forgot Password?',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Color.fromRGBO(143, 150, 158, 1),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'default',
+                              ),
+                              Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 30.0),
+                                  child: Container(
+                                    alignment: Alignment.centerRight,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (
+                                                    context) => ForgotPassword()));
+                                      },
+                                      child: const Text(
+                                        'Forgot Password?',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(143, 150, 158, 1),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(
+                                height: 25,
+                              ),
+                              ElevatedButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      _isButtonClicked = true; // Button clicked, show circular progress indicator
+                                    });
+                                    if (await validateAndSave(
+                                        globalfromkey, context)) {
+                                      //print(_loginRequest.toJSON());
+                                      print('Checking $userType');
+                                      if(userType != null){
+                                        if (userType == 'isp_staff') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true)),
+                                          );
+                                        }
+                                        if (userType == 'bcc_staff') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => BCCDashboard()),
+                                          );
+                                        }
+                                        if (userType == 'nttn_sbl_staff') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
+                                          );
+                                        }
+                                        if (userType == 'nttn_adsl_staff') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
+                                          );
+                                        }
+                                      }
+                                    }
+                                    setState(() {
+                                      _isButtonClicked = false; // Validation complete, hide circular progress indicator
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromRGBO(
+                                        25, 192, 122, 1),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    fixedSize: const Size(350, 70),
+                                  ),
+                                  child: _isButtonClicked
+                                      ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                      : const Text('Login',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontFamily: 'default',
+                                      ))),
+                            ],
                           ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          ElevatedButton(
-                              onPressed: () async {
-                                if (await validateAndSave(
-                                    globalfromkey, context)) {
-                                  //print(_loginRequest.toJSON());
-                                  print('Checking $userType');
-                                  if(userType != null){
-                                    if (userType == 'isp_staff') {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: ISPDashboard(shouldRefresh: true),)),
-                                      );
-                                    }
-                                    if (userType == 'bcc_staff') {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: BCCDashboard(),)),
-                                      );
-                                    }
-                                    if (userType == 'nttn_sbl_staff') {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: NTTNDashboard(shouldRefresh: true),)),
-                                      );
-                                    }
-                                    if (userType == 'nttn_adsl_staff') {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => InternetCheckWrapper(child: NTTNDashboard(shouldRefresh: true),)),
-                                      );
-                                    }
-                                  }
-                                  /*Navigator.push(
+                        ),
+                      ),
+                    ),
+                    //SizedBox(height: 20),
+                    Footer(
+                      backgroundColor: const Color.fromRGBO(246, 246, 246, 255),
+                      alignment: Alignment.bottomCenter,
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Don\'t have an account?  ',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (
-                                              context) => const BCCMainDashboard()));*/
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromRGBO(
-                                    25, 192, 122, 1),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                fixedSize: const Size(350, 70),
-                              ),
-                              child: const Text('Login',
+                                          builder: (context) => Signup()));
+                                },
+                                child: const Text(
+                                  'Register now',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    color: Color.fromRGBO(25, 192, 122, 1),
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
                                     fontFamily: 'default',
-                                  ))),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                //SizedBox(height: 20),
-                Footer(
-                  backgroundColor: const Color.fromRGBO(246, 246, 246, 255),
-                  alignment: Alignment.bottomCenter,
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Don\'t have an account?  ',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color.fromRGBO(143, 150, 158, 1),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Signup()));
-                            },
-                            child: const Text(
-                              'Register now',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color.fromRGBO(25, 192, 122, 1),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -437,6 +435,8 @@ class _LoginState extends State<Login> {
         OrganizationName = prefs.getString('organizationName');
         PhotoURL = prefs.getString('photoUrl');
         print('User Name: $UserName');
+        print('Organization Name: $OrganizationName');
+        print('Photo URL: $PhotoURL');
         print('User profile saved successfully');
       } catch (e) {
         print('Error saving user profile: $e');

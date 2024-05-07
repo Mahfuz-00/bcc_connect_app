@@ -5,14 +5,9 @@ import '../API Model and Service (Search)/apiservicefilter.dart';
 import '../API Model and Service (Search)/apiservicesearchregion.dart';
 import '../API Model and Service (Search)/connectionmodel.dart';
 import '../API Model and Service (Search)/searchmodel.dart';
-import '../BCC Dashboard/bccDashboard.dart';
-import '../Connection Checker/connectionchecker.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../Connection Form (ISP)/dropdownfield.dart';
-import '../ISP Dashboard/ispDashboard.dart';
 import '../ISP Dashboard/templateerrorcontainer.dart';
-import '../Information/information.dart';
-import '../Login UI/loginUI.dart';
 import '../Template Models/searchResultTile.dart';
 
 class SearchUser extends StatefulWidget {
@@ -57,20 +52,11 @@ class _SearchUserState extends State<SearchUser> {
   // Store the response data in a list
   List<Connections> filteredConnections = [];
 
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isInternetAvailable = true;
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     fetchDivisions();
-    _checkInternetConnection();
   }
 
 
@@ -183,352 +169,354 @@ class _SearchUserState extends State<SearchUser> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: Colors.white,
+    return InternetChecker(
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_outlined,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'Search',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            fontFamily: 'default',
+          title: const Text(
+            'Search',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontFamily: 'default',
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            color: Colors.grey[100],
-            padding: EdgeInsets.symmetric(vertical: 30),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('Search ISP Connection(s)',
-                      style: TextStyle(
-                          fontSize: 25,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              color: Colors.grey[100],
+              padding: EdgeInsets.symmetric(vertical: 30),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text('Search ISP Connection(s)',
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default')),
+                    SizedBox(height: 5),
+                    Text('Select an Optimal filter to search ISP Connections(s)',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'default',
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'default')),
-                  SizedBox(height: 5),
-                  Text('Select an Optimal filter to search ISP Connections(s)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'default',
-                        fontWeight: FontWeight.bold,
-                      )),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Division',
-                          dropdownItems: divisions
-                              .map((division) => division.name)
-                              .toList(),
-                          initialValue: selectedDivision,
-                          onChanged: (newValue) {
-                            setState(() {
-                              //It Takes Name String
-                              selectedDistrict = null; // Reset
-                              districts.clear();
-                              print(selectedDistrict);
-                              print(districts);
-                              selectedUpazila = null; // Reset
-                              selectedUnion = null; // Reset
-                              selectedNTTNProvider = null; // Reset
-                              print('Selected District: ${selectedDistrict}');
-                              selectedDivision = newValue;
-                              if(_isLoading){
-                                CircularProgressIndicator();
-                              }
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              DivisionSearch selectedDivisionObject =
-                              divisions.firstWhere(
-                                    (division) => division.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedDivisionObject != null) {
-                                //It Takes ID Int
-                                _divisionID = selectedDivisionObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchDistricts(selectedDivisionObject.id);
-                              }
-                            }
-                          },
                         )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'District',
-                          dropdownItems: districts
-                              .map((district) => district.name)
-                              .toList(),
-                          initialValue: selectedDistrict,
-                          onChanged: (newValue) {
-                            setState(() {
-                              print(districts);
-                              print(selectedDistrict);
-                              selectedUpazila = null; // Reset
-                              selectedUnion = null; // Reset
-                              selectedNTTNProvider = null; // Reset
-                              selectedDistrict = newValue;
-                              if(_isLoading){
-                                CircularProgressIndicator();
-                              }
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              DistrictSearch selectedDistrictObject =
-                              districts.firstWhere(
-                                    (district) => district.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedDistrictObject != null) {
-                                _districtID = selectedDistrictObject.id;
-                                fetchUpazilas(selectedDistrictObject.id);
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(
-                          left: 10, top: 5
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Upazila',
-                          dropdownItems:
-                          upazilas.map((upazila) => upazila.name).toList(),
-                          initialValue: selectedUpazila,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedUnion = null; // Reset
-                              selectedUpazila = newValue;
-                              if(_isLoading){
-                                CircularProgressIndicator();
-                              }
-                              /* _upazilaID = newValue ?? '';
-                        print(_upazilaID);*/
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              UpazilaSearch selectedUpazilaObject =
-                              upazilas.firstWhere(
-                                    (upazila) => upazila.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedUpazilaObject != null) {
-                                _upazilaID = selectedUpazilaObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                fetchUnions(selectedUpazilaObject.id);
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(
-                          left: 10, top: 5
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Union',
-                          dropdownItems:
-                          unions.map((union) => union.name).toList(),
-                          initialValue: selectedUnion,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedNTTNProvider = null; // Reset
-                              selectedUnion = newValue;
-                              if(_isLoading){
-                                CircularProgressIndicator();
-                              }
-                              /*_unionID = newValue ?? '';
-                        print(_unionID);*/
-                            });
-                            if (newValue != null) {
-                              // Find the selected division object
-                              UnionSearch selectedUnionObject = unions.firstWhere(
-                                    (union) => union.name == newValue,
-                                /*orElse: () => null,*/
-                              );
-                              if (selectedUnionObject != null) {
-                                _unionID = selectedUnionObject.id;
-                                // Pass the ID of the selected division to fetchDistricts
-                                /*fetchNTTNProviders(selectedUnionObject.id);*/
-                              }
-                            }
-                          },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: Material(
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromRGBO(25, 192, 122, 1),
-                          fixedSize: Size(
-                              MediaQuery.of(context).size.width * 0.9,
-                              MediaQuery.of(context).size.height * 0.08),
-                          shape: RoundedRectangleBorder(
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
                           ),
-                        ),
-                        onPressed: selectedDivision != null
-                            ? () {
-                                setState(() {
-                                  print('Tapped');
-                                  filterNTTNConnections();
-                                  _providerInfo = Column(
-                                    children: [
-                                      Text(
-                                        'Provider Information',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontFamily: 'default',
-                                          fontWeight: FontWeight.bold,
+                          child: DropdownFormField(
+                            hintText: 'Division',
+                            dropdownItems: divisions
+                                .map((division) => division.name)
+                                .toList(),
+                            initialValue: selectedDivision,
+                            onChanged: (newValue) {
+                              setState(() {
+                                //It Takes Name String
+                                selectedDistrict = null; // Reset
+                                districts.clear();
+                                print(selectedDistrict);
+                                print(districts);
+                                selectedUpazila = null; // Reset
+                                selectedUnion = null; // Reset
+                                selectedNTTNProvider = null; // Reset
+                                print('Selected District: ${selectedDistrict}');
+                                selectedDivision = newValue;
+                                if(_isLoading){
+                                  CircularProgressIndicator();
+                                }
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                DivisionSearch selectedDivisionObject =
+                                divisions.firstWhere(
+                                      (division) => division.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedDivisionObject != null) {
+                                  //It Takes ID Int
+                                  _divisionID = selectedDivisionObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchDistricts(selectedDivisionObject.id);
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'District',
+                            dropdownItems: districts
+                                .map((district) => district.name)
+                                .toList(),
+                            initialValue: selectedDistrict,
+                            onChanged: (newValue) {
+                              setState(() {
+                                print(districts);
+                                print(selectedDistrict);
+                                selectedUpazila = null; // Reset
+                                selectedUnion = null; // Reset
+                                selectedNTTNProvider = null; // Reset
+                                selectedDistrict = newValue;
+                                if(_isLoading){
+                                  CircularProgressIndicator();
+                                }
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                DistrictSearch selectedDistrictObject =
+                                districts.firstWhere(
+                                      (district) => district.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedDistrictObject != null) {
+                                  _districtID = selectedDistrictObject.id;
+                                  fetchUpazilas(selectedDistrictObject.id);
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(
+                            left: 10, top: 5
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'Upazila',
+                            dropdownItems:
+                            upazilas.map((upazila) => upazila.name).toList(),
+                            initialValue: selectedUpazila,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedUnion = null; // Reset
+                                selectedUpazila = newValue;
+                                if(_isLoading){
+                                  CircularProgressIndicator();
+                                }
+                                /* _upazilaID = newValue ?? '';
+                          print(_upazilaID);*/
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                UpazilaSearch selectedUpazilaObject =
+                                upazilas.firstWhere(
+                                      (upazila) => upazila.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedUpazilaObject != null) {
+                                  _upazilaID = selectedUpazilaObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  fetchUnions(selectedUpazilaObject.id);
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(
+                            left: 10, top: 5
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'Union',
+                            dropdownItems:
+                            unions.map((union) => union.name).toList(),
+                            initialValue: selectedUnion,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedNTTNProvider = null; // Reset
+                                selectedUnion = newValue;
+                                if(_isLoading){
+                                  CircularProgressIndicator();
+                                }
+                                /*_unionID = newValue ?? '';
+                          print(_unionID);*/
+                              });
+                              if (newValue != null) {
+                                // Find the selected division object
+                                UnionSearch selectedUnionObject = unions.firstWhere(
+                                      (union) => union.name == newValue,
+                                  /*orElse: () => null,*/
+                                );
+                                if (selectedUnionObject != null) {
+                                  _unionID = selectedUnionObject.id;
+                                  // Pass the ID of the selected division to fetchDistricts
+                                  /*fetchNTTNProviders(selectedUnionObject.id);*/
+                                }
+                              }
+                            },
+                          )),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(25, 192, 122, 1),
+                            fixedSize: Size(
+                                MediaQuery.of(context).size.width * 0.9,
+                                MediaQuery.of(context).size.height * 0.08),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: selectedDivision != null
+                              ? () {
+                                  setState(() {
+                                    print('Tapped');
+                                    filterNTTNConnections();
+                                    _providerInfo = Column(
+                                      children: [
+                                        Text(
+                                          'Provider Information',
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontFamily: 'default',
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 10,),
-                                      Container(
-                                        //height: screenHeight*0.25,
-                                        child: FutureBuilder<void>(
-                                            future: filterNTTNConnections(),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                                // Return a loading indicator while waiting for data
-                                                return Container(
-                                                  height: 200, // Adjust height as needed
-                                                  width: screenWidth, // Adjust width as needed
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(10),
-                                                  ),
-                                                  child: Center(
-                                                    child: CircularProgressIndicator(),
-                                                  ),
-                                                );
-                                              } else if (snapshot.hasError) {
-                                                // Handle errors
-                                                return buildNoRequestsWidget(screenWidth, 'Error: ${snapshot.error}');
-                                              } else if (snapshot.connectionState == ConnectionState.done) {
-                                                if (searchresults.isNotEmpty) {
-                                                  // If data is loaded successfully, display the ListView
+                                        SizedBox(height: 10,),
+                                        Container(
+                                          //height: screenHeight*0.25,
+                                          child: FutureBuilder<void>(
+                                              future: filterNTTNConnections(),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                                  // Return a loading indicator while waiting for data
                                                   return Container(
-                                                    child: ListView.separated(
-                                                      shrinkWrap: true,
-                                                      physics: NeverScrollableScrollPhysics(),
-                                                      itemCount: /*pendingConnectionRequests.length > 10
-                                      ? 10
-                                      :*/ searchresults.length,
-                                                      itemBuilder: (context, index) {
-                                                        // Display each connection request using ConnectionRequestInfoCard
-                                                        return searchresults[index];
-                                                      },
-                                                      separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                                    height: 200, // Adjust height as needed
+                                                    width: screenWidth, // Adjust width as needed
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius: BorderRadius.circular(10),
+                                                    ),
+                                                    child: Center(
+                                                      child: CircularProgressIndicator(),
                                                     ),
                                                   );
-                                                } else {
-                                                  // Handle the case when there are no pending connection requests
-                                                  return buildNoRequestsWidget(screenWidth, 'You don\'t have any pending connection requests at this time.');
+                                                } else if (snapshot.hasError) {
+                                                  // Handle errors
+                                                  return buildNoRequestsWidget(screenWidth, 'Error: ${snapshot.error}');
+                                                } else if (snapshot.connectionState == ConnectionState.done) {
+                                                  if (searchresults.isNotEmpty) {
+                                                    // If data is loaded successfully, display the ListView
+                                                    return Container(
+                                                      child: ListView.separated(
+                                                        shrinkWrap: true,
+                                                        physics: NeverScrollableScrollPhysics(),
+                                                        itemCount: /*pendingConnectionRequests.length > 10
+                                        ? 10
+                                        :*/ searchresults.length,
+                                                        itemBuilder: (context, index) {
+                                                          // Display each connection request using ConnectionRequestInfoCard
+                                                          return searchresults[index];
+                                                        },
+                                                        separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    // Handle the case when there are no pending connection requests
+                                                    return buildNoRequestsWidget(screenWidth, 'You don\'t have any pending connection requests at this time.');
+                                                  }
                                                 }
+                                                // Return a default widget if none of the conditions above are met
+                                                return SizedBox(); // You can return an empty SizedBox or any other default widget
                                               }
-                                              // Return a default widget if none of the conditions above are met
-                                              return SizedBox(); // You can return an empty SizedBox or any other default widget
-                                            }
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                });
-                              }
-                            : null,
-                        child: const Text('Search',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
+                                      ],
+                                    );
+                                  });
+                                }
+                              : null,
+                          child: const Text('Search',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              )),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  if (_providerInfo != null)
-                    _providerInfo!,
-                ],
+                    SizedBox(
+                      height: 20,
+                    ),
+                    if (_providerInfo != null)
+                      _providerInfo!,
+                  ],
+                ),
               ),
             ),
           ),

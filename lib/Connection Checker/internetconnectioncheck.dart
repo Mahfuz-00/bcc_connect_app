@@ -1,80 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
 
-class InternetCheckWrapper extends StatefulWidget {
+class InternetChecker extends StatefulWidget {
   final Widget child;
-  const InternetCheckWrapper({super.key, required this.child});
 
+  const InternetChecker({Key? key, required this.child}) : super(key: key);
 
   @override
-  State<InternetCheckWrapper> createState() => _InternetCheckWrapperState();
+  _InternetCheckerState createState() => _InternetCheckerState();
 }
 
-class _InternetCheckWrapperState extends State<InternetCheckWrapper> {
-  late bool isconnected = false;
+class _InternetCheckerState extends State<InternetChecker> {
+  late Connectivity _connectivity;
+  late bool _isConnected;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    checkInternetConnection();
+    _connectivity = Connectivity();
+    _isConnected = true; // Assume initially connected
+    _initConnectivity();
+    _connectivity.onConnectivityChanged.listen((result) {
+      setState(() {
+        _isConnected = (result != ConnectivityResult.none);
+      });
+    });
   }
 
-  Future<void> checkInternetConnection() async {
-    var connectionResult = (Connectivity().checkConnectivity());
+  Future<void> _initConnectivity() async {
+    final result = await _connectivity.checkConnectivity();
     setState(() {
-      isconnected = connectionResult != ConnectivityResult.none;
-    }
-    );
+      _isConnected = (result != ConnectivityResult.none);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return isconnected ? widget.child : internetConnectionErrorDialog();
-  }
-
-  Widget internetConnectionErrorDialog(){
-    return Scaffold(
-      body: Center(
-        child: AlertDialog(
-          title: Text(
-            'Oops!!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 35,
-              fontFamily: 'bangla-font',
-              color: Colors.black,
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+    if (!_isConnected) {
+      return Scaffold(
+        backgroundColor: Colors.grey[100],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Internet Connection Failed!',
+                'Internet connection not found',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 20,
-                  fontFamily: 'bangla-font',
-                  color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontFamily: 'default'
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               ElevatedButton(
-                  onPressed: () {
-                    checkInternetConnection();
-                  },
-                  child: Text(
-                      'Retry',
-                  )
-              )
+                onPressed: _initConnectivity,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Colors.black, width: 1),
+                  ),
+                  //elevation: 3,
+                  fixedSize: const Size(150, 30),
+                ),
+                child: Text('Retry',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(25, 192, 122, 1),
+                      fontFamily: 'default'
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return widget.child;
+    }
   }
 }
-
-

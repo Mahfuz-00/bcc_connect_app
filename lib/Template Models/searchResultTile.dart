@@ -35,17 +35,17 @@ class SearchConnectionsInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildProviderRow('Name:', Name),
+            buildProviderRow('Name', Name),
             const SizedBox(height: 5), // Space between rows
-            buildProviderRow('Organization:', OrganizationName),
+            buildProviderRow('Organization', OrganizationName),
             const SizedBox(height: 5), // Space between rows
-            buildProviderRow('Mobile No:', MobileNo),
+            buildProviderRow('Mobile No', MobileNo),
             const SizedBox(height: 5),
-            buildProviderRow('Connection Type:', ConnectionType),
+            buildProviderRow('Connection Type', ConnectionType),
             const SizedBox(height: 5),
-            buildProviderRow('Provider:', Provider),
+            buildProviderRow('Provider', Provider),
             const SizedBox(height: 5),
-            buildProviderRow('Status:', Status),
+            buildProviderRow('Status', Status),
           ],
         ),
       ),
@@ -67,6 +67,17 @@ Widget buildProviderRow(String label, String value) {
               letterSpacing: 1.3,
               fontWeight: FontWeight.bold,
               fontFamily: 'default'
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          ":",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
