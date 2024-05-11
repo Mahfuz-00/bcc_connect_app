@@ -42,7 +42,14 @@ class APIProfilePictureUpdate {
       var request = http.MultipartRequest('POST', Uri.parse(URL));
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Accept'] = 'application/json';
-      request.files.add(await http.MultipartFile.fromPath('photo', image.path));
+      print(image);
+      var imageStream = http.ByteStream(image!.openRead());
+      var length = await image.length();
+      var multipartFile = http.MultipartFile('photo', imageStream, length,
+          filename: image.path.split('/').last);
+      print(multipartFile);
+      request.files.add(multipartFile);
+      //request.files.add(await http.MultipartFile.fromPath('photo', image.path));
 
       var response = await request.send();
 

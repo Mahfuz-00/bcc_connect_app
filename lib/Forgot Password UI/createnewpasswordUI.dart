@@ -38,13 +38,13 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             child: Container(
               color: Colors.grey[100],
               child: Padding(
-                padding: const EdgeInsets.only(top: 100.0),
+                padding: const EdgeInsets.only(top: 30.0),
                 child: Column(
                   children: [
-                    /*Container(
+                    Container(
                       alignment: Alignment.topLeft,
                       child: Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: EdgeInsets.only(left: 30),
                         child: Container(
                           padding: EdgeInsets.only(left: 8),
                           decoration: BoxDecoration(
@@ -61,7 +61,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                           ),
                         ),
                       ),
-                    ),*/
+                    ),
+                    SizedBox(height: 30,),
                     Expanded(
                       child: Center(
                         child: Container(

@@ -10,7 +10,7 @@ import '../ISP Request and Review List (Full)/ispRequestList.dart';
 import '../ISP Request and Review List (Full)/ispReviewedList.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
-import '../Profile Info Editor/profileInfoEditorPage.dart';
+import '../Profile UI/profileUI.dart';
 import '../Template Models/ispRequestdetailstile.dart';
 import 'templateerrorcontainer.dart';
 
@@ -332,6 +332,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                               fontFamily: 'default',
                             )),
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -349,6 +350,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                               fontFamily: 'default',
                             )),
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -417,6 +419,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                               fontFamily: 'default',
                             )),
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -450,7 +453,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                           // Call the signOut method on the instance
                           if (await logoutApiService.signOut()) {
                             Navigator.pop(context);
-                            Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
@@ -479,7 +482,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black,
-                                  fontSize: 25,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'default',
                                 ),

@@ -1,7 +1,39 @@
-import '../Profile Info Editor/profileInfoEditorPage.dart';
+import '../Profile UI/profileUI.dart';
 import 'package:flutter/material.dart';
 
-class PasswordChange extends StatelessWidget {
+class PasswordChange extends StatefulWidget {
+  @override
+  State<PasswordChange> createState() => _PasswordChangeState();
+}
+
+class _PasswordChangeState extends State<PasswordChange> {
+  late TextEditingController _currentPasswordController;
+  late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+  bool _isObscuredCurrentPassword = true;
+  bool _isObscuredPassword = true;
+  bool _isObscuredConfirmPassword = true;
+
+  IconData _getIconCurrentPassword() {
+    return _isObscuredCurrentPassword ? Icons.visibility_off : Icons.visibility;
+  }
+
+  IconData _getIconPassword() {
+    return _isObscuredPassword ? Icons.visibility_off : Icons.visibility;
+  }
+
+  IconData _getIconConfirmPassword() {
+    return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPasswordController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,7 +43,7 @@ class PasswordChange extends StatelessWidget {
         title: Text(
           'Change Password',
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
             fontFamily: 'default',
@@ -19,8 +51,8 @@ class PasswordChange extends StatelessWidget {
         ),
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
-            color: Colors.black,
+            Icons.arrow_back_ios,
+            color: Colors.white,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -44,8 +76,15 @@ class PasswordChange extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              TextField(
-                obscureText: true,
+              TextFormField(
+                keyboardType: TextInputType.text,
+               /* onSaved: (input) =>
+                _registerRequest.password = input!,*/
+                validator: (input) => input!.length < 8
+                    ? "Password should be more than 8 characters"
+                    : null,
+                controller: _currentPasswordController,
+                obscureText: _isObscuredCurrentPassword,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter current password',
@@ -67,8 +106,15 @@ class PasswordChange extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              TextField(
-                obscureText: true,
+              TextFormField(
+                keyboardType: TextInputType.text,
+                /* onSaved: (input) =>
+                _registerRequest.password = input!,*/
+                validator: (input) => input!.length < 8
+                    ? "Password should be more than 8 characters"
+                    : null,
+                controller: _passwordController,
+                obscureText: _isObscuredPassword,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter new password',
@@ -90,8 +136,15 @@ class PasswordChange extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              TextField(
-                obscureText: true,
+              TextFormField(
+                keyboardType: TextInputType.text,
+                /* onSaved: (input) =>
+                _registerRequest.password = input!,*/
+                validator: (input) => input!.length < 8
+                    ? "Password should be more than 8 characters"
+                    : null,
+                controller: _confirmPasswordController,
+                obscureText: _isObscuredConfirmPassword,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Confirm new password',
@@ -137,4 +190,9 @@ class PasswordChange extends StatelessWidget {
       ),
     );
   }
+
+  bool checkConfirmPassword() {
+    return _passwordController.text == _confirmPasswordController.text;
+  }
+
 }

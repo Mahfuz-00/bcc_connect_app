@@ -10,7 +10,7 @@ import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
-import '../Profile Info Editor/profileInfoEditorPage.dart';
+import '../Profile UI/profileUI.dart';
 import '../Template Models/ispRequestdetailstile.dart';
 import 'ispRequestList.dart';
 

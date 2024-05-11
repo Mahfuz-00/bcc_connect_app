@@ -39,10 +39,41 @@ class _OPTVerficationState extends State<OPTVerfication> {
             child: Container(
               color: Colors.grey[100],
               child: Padding(
-                padding: const EdgeInsets.only(top: 100.0),
+                padding: const EdgeInsets.only(top: 30.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Color.fromRGBO(25, 192, 122, 1), width: 2),
+                          // Border properties
+                          borderRadius:
+                          BorderRadius.circular(10), // Optional: Rounded border
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            // Handle back button press here
+                            Navigator.pop(
+                                context); // This will pop the current route off the navigator stack
+                          },
+                          icon: Icon(Icons.arrow_back_ios),
+                          iconSize: 30,
+                          padding: EdgeInsets.all(10),
+                          splashRadius: 30,
+                          color: Color.fromRGBO(25, 192, 122, 1),
+                          splashColor: Colors.grey,
+                          highlightColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
                     Expanded(
                       child: Center(
                         child: Container(

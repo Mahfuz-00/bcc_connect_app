@@ -187,12 +187,12 @@ class _ConnectionFormState extends State<ConnectionForm> {
         appBar: AppBar(
           backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
           leading: IconButton(
-            icon: const Icon(
-              Icons.menu,
+            icon: Icon(
+              Icons.arrow_back_ios,
               color: Colors.white,
             ),
             onPressed: () {
-              _scaffoldKey.currentState!.openDrawer();
+              Navigator.pop(context);
             },
           ),
           title: const Text(
@@ -203,118 +203,6 @@ class _ConnectionFormState extends State<ConnectionForm> {
               fontSize: 20,
               fontFamily: 'default',
             ),
-          ),
-        ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(25, 192, 122, 1),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 60, // Adjust width as needed
-                      height: 60, // Adjust height as needed
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(photoUrl),
-                        ),
-                      ),
-                    ),
-                    Text(
-                      userName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      organizationName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                title: Text('Home',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                onTap: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                               ISPDashboard())); // Close the drawer
-                },
-              ),
-              Divider(),
-              ListTile(
-                title: Text('Information',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) {
-                      return Information();
-                    },
-                  ));
-                },
-              ),
-              Divider(),
-              ListTile(
-                title: Text('Logout',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                onTap: () async {
-                  // Clear user data from SharedPreferences
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('userName');
-                  await prefs.remove('organizationName');
-                  await prefs.remove('photoUrl');
-                  // Create an instance of LogOutApiService
-                  var logoutApiService = await LogOutApiService.create();
-
-                  // Wait for authToken to be initialized
-                  logoutApiService.authToken;
-
-                  // Call the signOut method on the instance
-                  if (await logoutApiService.signOut()) {
-                  Navigator.pop(context);
-                  Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                  builder: (context) => Login())); // Close the drawer
-                  }// Close the drawer
-                },
-              ),
-              Divider(),
-            ],
           ),
         ),
         body: SafeArea(
@@ -863,131 +751,6 @@ class _ConnectionFormState extends State<ConnectionForm> {
                 ),
               ),
             ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          height: screenHeight * 0.08,
-          color: const Color.fromRGBO(25, 192, 122, 1),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ISPDashboard(shouldRefresh: true,)));
-                },
-                child: Container(
-                  width: screenWidth / 3,
-                  padding: EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.home,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        'Home',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                behavior: HitTestBehavior.translucent,
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border(
-                    left: BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                  )),
-                  width: screenWidth / 3,
-                  padding: EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.search,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        'Search',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) {
-                      return Information();
-                    },
-                  ));
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border(
-                    left: BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                  )),
-                  width: screenWidth / 3,
-                  padding: EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.info,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        'Information',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ),

@@ -255,15 +255,18 @@ class _SignupState extends State<Signup> {
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.emailAddress,
-                                  onSaved: (input) =>
-                                      _registerRequest.email = input!,
+                                  controller: _emailController,
                                   validator: (input) {
-                                    if (input == null || !input.contains('@')) {
-                                      return "Please enter a valid email address";
+                                    if (input!.isEmpty) {
+                                      return 'Please enter your email address';
+                                    }
+                                    final emailRegex = RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                    if (!emailRegex.hasMatch(input)) {
+                                      return 'Please enter a valid email address';
                                     }
                                     return null;
                                   },
-                                  controller: _emailController,
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
                                     fontSize: 10,
@@ -329,10 +332,9 @@ class _SignupState extends State<Signup> {
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
-                                  onSaved: (input) =>
-                                      _registerRequest.password = input!,
-                                  validator: (input) => input!.length < 6
-                                      ? "Password should be more than 6 characters"
+                                  //onSaved: (input) => _registerRequest.password = input!,
+                                  validator: (input) => input!.length < 8
+                                      ? "Password should be more than 7 characters"
                                       : null,
                                   controller: _passwordController,
                                   obscureText: _isObscuredPassword,
@@ -373,10 +375,9 @@ class _SignupState extends State<Signup> {
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
-                                  onSaved: (input) =>
-                                      _registerRequest.password = input!,
-                                  validator: (input) => input!.length < 6
-                                      ? "Password should be more than 6 characters"
+                                  //onSaved: (input) => _registerRequest.password = input!,
+                                  validator: (input) => input!.length < 8
+                                      ? "Password should be more than 7 characters"
                                       : null,
                                   controller: _confirmPasswordController,
                                   obscureText: _isObscuredConfirmPassword,

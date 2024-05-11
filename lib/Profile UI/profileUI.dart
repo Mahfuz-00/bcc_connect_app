@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 
-import 'package:bcc_connect_app/Profile%20Info%20Editor/passwordChange.dart';
+import 'package:bcc_connect_app/Profile UI/passwordChange.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -72,6 +72,22 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
     name = userProfile!.name;
     print(userProfile!.name);
     print(userProfile!.id);
+
+    try {
+      await prefs.setString('userName', userProfile!.name);
+      await prefs.setString('organizationName', userProfile!.organization);
+      await prefs.setString('photoUrl', userProfile!.photo);
+      final String? UserName = prefs.getString('userName');
+      final String? OrganizationName = prefs.getString('organizationName');
+      final String? PhotoURL = prefs.getString('photoUrl');
+      print('User Name: $UserName');
+      print('Organization Name: $OrganizationName');
+      print('Photo URL: $PhotoURL');
+      print('User profile saved successfully');
+    } catch (e) {
+      print('Error saving user profile: $e');
+    }
+
   }
 
   @override
@@ -116,15 +132,8 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
           //resizeToAvoidBottomInset: false,
           appBar: AppBar(
             backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            title: Text('Profile Overview',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              ),),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white,),
+              icon: Icon(Icons.arrow_back_ios, color: Colors.white,),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -134,6 +143,13 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                 );
               },
             ),
+            title: Text('Profile Overview',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'default',
+              ),),
           ),
           body: _pageLoading
               ? Center(child: CircularProgressIndicator()) // Show indicator
@@ -466,7 +482,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                         fontSize: 20,
                         height: 1.6,
                         letterSpacing: 1.3,
-                        fontWeight: FontWeight.bold,
+                       // fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                       ),
                     ),
@@ -591,11 +607,17 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                       final apiService = await APIServiceUpdateUser.create();
                       final result =
                           await apiService.updateUserProfile(userProfileUpdate);
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProfileInfoEdit(
+                                  shouldRefresh:
+                                  true)));
                       // Handle the result as needed, e.g., show a toast message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(result)),
-                      );
-                      Navigator.of(context).pop(); // Close the dialog
+                      );// Close the dialog
                     }
                   },
                   child: Text('Update',
@@ -729,6 +751,8 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
   Future<void> _updateProfilePicture(File imageFile) async {
     try {
       final apiService = await APIProfilePictureUpdate.create();
+      print(imageFile.path);
+      print(imageFile);
       final response = await apiService.updateProfilePicture(image: imageFile);
       print('Profile picture update status: ${response.status}');
       print('Message: ${response.message}');

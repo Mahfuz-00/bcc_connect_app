@@ -157,8 +157,8 @@ class _LoginState extends State<Login> {
                                             onSaved: (input) =>
                                             _loginRequest.Password = input!,
                                             validator: (input) =>
-                                            input!.length < 6
-                                                ? "Password should be more than 3 characters"
+                                            input!.length < 8
+                                                ? "Password should be more than 7 characters"
                                                 : null,
                                             controller: _passwordController,
                                             obscureText: _isObscured,
@@ -200,7 +200,7 @@ class _LoginState extends State<Login> {
                                               padding: const EdgeInsets.only(
                                                   left: 8.0),
                                               child: Text(
-                                                "Password should be more than 8 characters",
+                                                "Password should be more than 7 characters",
                                                 style: TextStyle(color: Colors.red),
                                               ),
                                             ),

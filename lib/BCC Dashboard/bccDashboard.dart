@@ -10,7 +10,7 @@ import '../API Service (Log Out)/apiServiceLogOut.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Login UI/loginUI.dart';
-import '../Profile Info Editor/profileInfoEditorPage.dart';
+import '../Profile UI/profileUI.dart';
 import '../Template Models/bccConnectionsPendingdetailtile.dart';
 
 class BCCDashboard extends StatefulWidget {
@@ -206,13 +206,6 @@ class _BCCDashboardState extends State<BCCDashboard>
                         color: Colors.white,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {},
-                    ),
                   ],
                 ),
                 drawer: Drawer(
@@ -335,7 +328,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                           // Call the signOut method on the instance
                           if (await logoutApiService.signOut()) {
                             Navigator.pop(context);
-                            Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>

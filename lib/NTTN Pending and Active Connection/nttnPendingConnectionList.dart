@@ -11,7 +11,7 @@ import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
-import '../Profile Info Editor/profileInfoEditorPage.dart';
+import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 import '../Template Models/nttnActiveConnectionDetails.dart';
 import '../Template Models/nttnConnectionMiniTiles.dart';
