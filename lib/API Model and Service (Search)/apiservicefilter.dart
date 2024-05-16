@@ -29,6 +29,7 @@ class SearchFilterAPIService {
 
   Future<Map<String, dynamic>> filterNTTNConnection(Map<String, dynamic> requestData) async {
     print(requestData);
+    print(authToken);
     try {
       if (authToken.isEmpty) {
         print('Authen:: $authToken');
@@ -42,7 +43,7 @@ class SearchFilterAPIService {
       final response = await http.post(
         Uri.parse('$baseUrl/filter/nttn/connection'),
         headers: {'Authorization': 'Bearer $authToken'},
-        body: jsonEncode(requestData),
+        body: requestData,
       );
 
       if (response.statusCode == 200) {

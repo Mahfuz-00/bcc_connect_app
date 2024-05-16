@@ -33,6 +33,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   List<Widget> pendingConnectionRequests = [];
   List<Widget> acceptedConnectionRequests = [];
   bool _isFetched = false;
+  bool _errorOccurred = false;
   int? CountPending;
   int? CountActive;
   late String userName = '';
@@ -148,10 +149,12 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       setState(() {
         pendingConnectionRequests = pendingWidgets;
         acceptedConnectionRequests = acceptedWidgets;
+        print(acceptedConnectionRequests);
         _isFetched = true;
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
+      _isFetched = true;
       // Handle error as needed
     }
   }
@@ -160,11 +163,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('userName') ?? '';
-      organizationName = prefs.getString('organizationName') ?? '';
+      //organizationName = prefs.getString('organizationName') ?? '';
       photoUrl = prefs.getString('photoUrl') ?? '';
       photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
       print('User Name: $userName');
-      print('Organization Name: $organizationName');
+      //print('Organization Name: $organizationName');
       print('Photo URL: $photoUrl');
       print('User profile got it!!!!');
     });
@@ -308,13 +311,6 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                         color: Colors.white,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {},
-                    ),
                   ],
                 ),
                 drawer: Drawer(
@@ -349,7 +345,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                               ),
                             ),
                             SizedBox(height: 10),
-                            Text(
+                         /*   Text(
                               organizationName,
                               style: TextStyle(
                                 color: Colors.white,
@@ -357,7 +353,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'default',
                               ),
-                            ),
+                            ),*/
                           ],
                         ),
                       ),
@@ -445,7 +441,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      ProfileInfoEdit())); // Close the drawer
+                                      ProfileUI())); // Close the drawer
                         },
                       ),
                       Divider(),
@@ -669,7 +665,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                             ],
                                           ),
                                         );
-                                      } else {
+                                      }else {
                                         // Handle the case when there are no pending connection requests
                                         return buildNoRequestsWidget(
                                             screenWidth,

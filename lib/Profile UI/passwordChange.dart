@@ -1,3 +1,5 @@
+import 'package:bcc_connect_app/API%20Model%20and%20Service%20(User%20Info%20Update)/apiServicePasswordUpdate.dart';
+
 import '../Profile UI/profileUI.dart';
 import 'package:flutter/material.dart';
 
@@ -55,7 +57,10 @@ class _PasswordChangeState extends State<PasswordChange> {
             color: Colors.white,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ProfileUI(shouldRefresh: true,)),
+            );
           },
         ),
       ),
@@ -78,10 +83,11 @@ class _PasswordChangeState extends State<PasswordChange> {
               SizedBox(height: 10),
               TextFormField(
                 keyboardType: TextInputType.text,
-               /* onSaved: (input) =>
+                /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 8 characters"
+                validator: (input) =>
+                input!.length < 8
+                    ? "Password should be more than 7 characters"
                     : null,
                 controller: _currentPasswordController,
                 obscureText: _isObscuredCurrentPassword,
@@ -110,8 +116,9 @@ class _PasswordChangeState extends State<PasswordChange> {
                 keyboardType: TextInputType.text,
                 /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 8 characters"
+                validator: (input) =>
+                input!.length < 8
+                    ? "Password should be more than 7 characters"
                     : null,
                 controller: _passwordController,
                 obscureText: _isObscuredPassword,
@@ -140,8 +147,9 @@ class _PasswordChangeState extends State<PasswordChange> {
                 keyboardType: TextInputType.text,
                 /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 8 characters"
+                validator: (input) =>
+                input!.length < 8
+                    ? "Password should be more than 7 characters"
                     : null,
                 controller: _confirmPasswordController,
                 obscureText: _isObscuredConfirmPassword,
@@ -163,14 +171,20 @@ class _PasswordChangeState extends State<PasswordChange> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                      fixedSize: Size(MediaQuery.of(context).size.width * 0.8,
-                          MediaQuery.of(context).size.height * 0.08),
+                      fixedSize: Size(MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.8,
+                          MediaQuery
+                              .of(context)
+                              .size
+                              .height * 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      _updatePassword();
                     },
                     child: Text(
                       'Update',
@@ -194,5 +208,45 @@ class _PasswordChangeState extends State<PasswordChange> {
   bool checkConfirmPassword() {
     return _passwordController.text == _confirmPasswordController.text;
   }
+
+  void _updatePassword() async {
+   if(checkConfirmPassword()){
+     String currentPassword = _currentPasswordController.text;
+     String newPassword = _passwordController.text;
+     String confirmPassword = _confirmPasswordController.text;
+
+     try {
+       APIServicePasswordUpdate apiService = await APIServicePasswordUpdate
+           .create();
+       final response = await apiService.updatePassword(
+         currentPassword: currentPassword,
+         newPassword: newPassword,
+         passwordConfirmation: confirmPassword,
+       ).then((response) {
+         print("Submitted");
+         if (response != null && response == "User Registration Successfully") {
+           Navigator.pushReplacement(
+             context,
+             MaterialPageRoute(builder: (context) => ProfileUI()),
+           );
+           const snackBar = SnackBar(
+             content: Text('Registration Submitted!'),
+           );
+           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+         }
+       }).catchError((error) {
+         // Handle registration error
+         print(error);
+         const snackBar = SnackBar(
+           content: Text('Registration failed!'),
+         );
+         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+       });
+     } catch (e) {
+       print('Error updating password: $e');
+     }
+   }
+  }
+
 
 }

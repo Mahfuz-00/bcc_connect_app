@@ -283,7 +283,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                ProfileInfoEdit())); // Close the drawer
+                                ProfileUI())); // Close the drawer
                   },
                 ),
                 Divider(),

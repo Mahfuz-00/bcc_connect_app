@@ -132,7 +132,7 @@ class _BCCDashboardState extends State<BCCDashboard>
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
-      // Handle error as needed
+      _isFetched = false;
     }
   }
 
@@ -300,7 +300,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      ProfileInfoEdit())); // Close the drawer
+                                      ProfileUI())); // Close the drawer
                         },
                       ),
                       Divider(),
@@ -352,7 +352,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                         children: [
                           Center(
                             child: Text(
-                              'Welcome, $userName',
+                              'Connection Status',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.black,

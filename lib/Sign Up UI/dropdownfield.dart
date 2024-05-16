@@ -21,11 +21,13 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Material(
       elevation: 0,
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        width: 350,
+        width: screenWidth*0.9,
         height: 60,
         child: Form(
           key: _dropdownFormKey,

@@ -61,6 +61,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return InternetChecker(
       child: PopScope(
         canPop: false,
@@ -107,7 +109,7 @@ class _LoginState extends State<Login> {
                                 child: Column(
                                   children: [
                                     Container(
-                                      width: 350,
+                                      width: screenWidth*0.9,
                                       height: 70,
                                       child: TextFormField(
                                         controller: _emailController,
@@ -148,7 +150,7 @@ class _LoginState extends State<Login> {
                                     ),
                                     const SizedBox(height: 15),
                                     Container(
-                                      width: 350,
+                                      width: screenWidth*0.9,
                                       height: 85,
                                       child: Column(
                                         children: [
@@ -256,22 +258,29 @@ class _LoginState extends State<Login> {
                                             MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true)),
                                           );
                                         }
-                                        if (userType == 'bcc_staff') {
+                                        else if (userType == 'bcc_staff') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(builder: (context) => BCCDashboard()),
                                           );
                                         }
-                                        if (userType == 'nttn_sbl_staff') {
+                                        else if (userType == 'nttn_sbl_staff') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
                                           );
                                         }
-                                        if (userType == 'nttn_adsl_staff') {
+                                        else if (userType == 'nttn_adsl_staff') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
+                                          );
+                                        }
+                                        else {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Incorrect Email and Password.'),
+                                            ),
                                           );
                                         }
                                       }
@@ -286,7 +295,7 @@ class _LoginState extends State<Login> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    fixedSize: const Size(350, 70),
+                                    fixedSize: Size(screenWidth*0.9, 70),
                                   ),
                                   child: _isButtonClicked
                                       ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
@@ -387,7 +396,7 @@ class _LoginState extends State<Login> {
       } catch (e) {
         // Handle login error
         String errorMessage = 'Incorrect Email and Password.';
-        if (e.toString().contains('Invalid User')) {
+        if (e.toString().contains('Invalid User') || !e.toString().contains('isp_staff') || e.toString().contains('bcc_staff') || e.toString().contains('nttn_sbl_staff') || e.toString().contains('nttn_adsl_staff') ) {
           errorMessage = 'Please enter a valid email address.';
         }
         else if (e.toString().contains('Invalid Credentials')) {

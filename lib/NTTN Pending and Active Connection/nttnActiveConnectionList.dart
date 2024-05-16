@@ -287,7 +287,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                ProfileInfoEdit())); // Close the drawer
+                                ProfileUI())); // Close the drawer
                   },
                 ),
                 Divider(),

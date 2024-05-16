@@ -66,10 +66,14 @@ class APIServiceForgotPassword{
       if (response.statusCode == 200) {
         // Handle the response here, if needed
         print('Forgot password OTP sent successfully.');
+        print('Response body: ${response.body}');
       } else {
         // Handle other status codes here
         print('Failed to send forgot password OTP. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
+        var jsonResponse = jsonDecode(response.body);
+        print('User registered successfully!');
+        return jsonResponse['message'];
       }
     } catch (e) {
       // Handle any exceptions that occur during the request

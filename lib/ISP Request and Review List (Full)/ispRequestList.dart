@@ -276,7 +276,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ProfileInfoEdit())); // Close the drawer
+                            builder: (context) => ProfileUI())); // Close the drawer
                   },
                 ),
                 Divider(),

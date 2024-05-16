@@ -487,7 +487,7 @@ class _SearchUserState extends State<SearchUser> {
                                                     );
                                                   } else {
                                                     // Handle the case when there are no pending connection requests
-                                                    return buildNoRequestsWidget(screenWidth, 'You don\'t have any pending connection requests at this time.');
+                                                    return buildNoRequestsWidget(screenWidth, 'No Connection Found!');
                                                   }
                                                 }
                                                 // Return a default widget if none of the conditions above are met

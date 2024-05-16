@@ -111,6 +111,8 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return InternetChecker(
       child: PopScope(
         canPop: false,
@@ -155,7 +157,7 @@ class _SignupState extends State<Signup> {
                           child: Column(
                             children: [
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _fullNameController,
@@ -187,7 +189,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _organizationController,
@@ -219,7 +221,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _designationController,
@@ -251,7 +253,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.emailAddress,
@@ -289,7 +291,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _phoneController,
@@ -328,7 +330,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
@@ -371,7 +373,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
@@ -425,7 +427,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 20),
                               Container(
-                                width: 350,
+                                width: screenWidth*0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _licenseNumberController,
@@ -457,7 +459,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: (_imageWidth != 0 ? (_imageWidth + 10).clamp(0, 350) : 350),
+                                width: (_imageWidth != 0 ? (_imageWidth + 10).clamp(0, screenWidth*0.9) : screenWidth*0.9),
                                 height: (_imageHeight != 0 ? (_imageHeight + 10).clamp(0, 200) : 80),
                                 child: InkWell(
                                   onTap: _selectImage,
@@ -516,7 +518,7 @@ class _SignupState extends State<Signup> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              fixedSize: Size(350, 70),
+                              fixedSize: Size(screenWidth*0.9, 70),
                             ),
                             child: const Text('Register',
                                 textAlign: TextAlign.center,
@@ -583,6 +585,10 @@ class _SignupState extends State<Signup> {
 
   void _registerUser() {
     if (validateAndSave() && checkConfirmPassword()) {
+      const snackBar = SnackBar(
+        content: Text(
+            'Processing'),
+      );
       final registerRequest = RegisterRequestmodel(
         fullName: _fullNameController.text,
         organization: _organizationController.text,
@@ -601,10 +607,9 @@ class _SignupState extends State<Signup> {
         print("Submitted");
         if (response != null && response == "User Registration Successfully") {
           clearForm();
-          Navigator.pushAndRemoveUntil(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Login()),
-                (route) => false, // This will remove all routes from the stack
           );
           const snackBar = SnackBar(
             content: Text('Registration Submitted!'),

@@ -16,17 +16,17 @@ import '../API Model and Service (User Info Update)/userInfoUpdateModel.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
-class ProfileInfoEdit extends StatefulWidget {
+class ProfileUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const ProfileInfoEdit({Key? key, this.shouldRefresh = false})
+  const ProfileUI({Key? key, this.shouldRefresh = false})
       : super(key: key);
 
   @override
-  State<ProfileInfoEdit> createState() => _ProfileInfoEditState();
+  State<ProfileUI> createState() => _ProfileUIState();
 }
 
-class _ProfileInfoEditState extends State<ProfileInfoEdit> {
+class _ProfileUIState extends State<ProfileUI> {
   bool _isObscuredPassword = true;
   bool _isObscuredConfirmPassword = true;
   late TextEditingController _fullNameController;
@@ -135,12 +135,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios, color: Colors.white,),
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ISPDashboard(
-                          shouldRefresh: true)),
-                );
+                Navigator.pop(context);
               },
             ),
             title: Text('Profile Overview',
@@ -275,7 +270,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                                       _buildDataCouple(Icons.mail, 'Email',
                                           userProfile!.email),
                                       Divider(),
-                                      GestureDetector(
+                                /*      GestureDetector(
                                         onTap: () {
                                           Navigator.pushReplacement(
                                               context,
@@ -317,7 +312,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                                             ],
                                           ),
                                         ),
-                                      )
+                                      )*/
                                     ],
                                   ),
                                 ),
@@ -611,7 +606,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileInfoEdit(
+                              builder: (context) => ProfileUI(
                                   shouldRefresh:
                                   true)));
                       // Handle the result as needed, e.g., show a toast message
@@ -647,6 +642,7 @@ class _ProfileInfoEditState extends State<ProfileInfoEdit> {
     controller.addListener(() {
       // This function will be called whenever the text changes
       String updatedValue = controller.text;
+
       // Do something with the updated value
       print("Updated value: $updatedValue");
     });

@@ -33,6 +33,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
   bool _isFetched = false;
   bool _isLoading = false;
   bool _pageLoading = true;
+  bool _errorOccurred = false;
 
   late String userName = '';
   late String organizationName = '';
@@ -80,7 +81,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
       });
 
       // Simulate fetching data for 5 seconds
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 3));
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       for (var index = 0; index < pendingRequestsData.length; index++) {
@@ -126,6 +127,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
+      _isFetched = true;
       // Handle error as needed
     }
   }
@@ -423,7 +425,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ProfileInfoEdit(
+                                  builder: (context) => ProfileUI(
                                       shouldRefresh:
                                           true))); // Close the drawer
                         },

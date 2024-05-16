@@ -99,7 +99,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
         divisions = fetchedDivisions;
         for (Division division in fetchedDivisions) {
           print('Division Name: ${division.name}');
-          print('Division Name: ${division.id}');
+          print('Division ID: ${division.id}');
         }
       });
     } catch (e) {
@@ -148,7 +148,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
         unions = fetchedUnions;
         for (Union union in fetchedUnions) {
           print('Union Name: ${union.name}');
-          print('Union Name: ${union.id}');
+          print('Union ID: ${union.id}');
         }
       });
     } catch (e) {
@@ -768,6 +768,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
     print('Remark: ${_remark.text}');
     // Validate and save form data
     if (_validateAndSave()) {
+      const snackBar = SnackBar(
+        content: Text(
+            'Processing'),
+      );
       print('triggered Validation');
       // Initialize connection request model
       _connectionRequest = ConnectionRequestModel(
@@ -789,21 +793,25 @@ class _ConnectionFormState extends State<ConnectionForm> {
         // Handle successful request
         print('Connection request sent successfully!!');
         if(response == 'Connection Request Already Exist'){
-          Navigator.pushAndRemoveUntil(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ISPDashboard()),
-                (route) => false, // This will remove all routes from the stack
+            MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true,)),
           );
           const snackBar = SnackBar(
             content: Text('Request already Sumbitted, please wait for it to be reviewed!'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
+        if(response == 'Please at first request a connection request'){
+          const snackBar = SnackBar(
+            content: Text('Create New Connection First!'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
         if (response != null && response == "Connection Request Submitted") {
-          Navigator.pushAndRemoveUntil(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ISPDashboard()),
-            (route) => false, // This will remove all routes from the stack
+            MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true,)),
           );
           const snackBar = SnackBar(
             content: Text('Request Submitted!'),

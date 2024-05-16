@@ -33,11 +33,26 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword.create();
     apiService.sendForgotPasswordOTP(email);
-    // Navigate to OTP verification screen
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => OPTVerfication()),
     );
+/*    apiService.sendForgotPasswordOTP(email).then((response) {
+      if(response != null){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => OPTVerfication()),
+        );
+      }
+    }).catchError((error) {
+      // Handle registration error
+      print(error);
+      const snackBar = SnackBar(
+        content: Text('Invalid Email'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });*/
+    // Navigate to OTP verification screen
   }
 
   @override
