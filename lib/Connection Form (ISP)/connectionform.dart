@@ -32,10 +32,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
   late String _unionID;
   late int _NTTNID = 0;
   late String _NTTNPhoneNumber;
-  late String _linkCapacityID;
+  late String _linkCapacityID = '';
   late TextEditingController _remark = TextEditingController();
 
-  final Set<String> linkCapacityOptions = {'1 MB', '2MB', '3MB', '4MB', '5MB'};
+  final Set<String> linkCapacityOptions = {'5 MB', '10 MB', '15 MB', 'Others'};
 
   late APIService apiService;
 
@@ -54,10 +54,18 @@ class _ConnectionFormState extends State<ConnectionForm> {
   String? selectedUpazila;
   String? selectedUnion;
   String? selectedNTTNProvider;
-  bool _isLoading = false;
+  bool isLoadingDivision = false;
+  bool isLoadingDistrict = false;
+  bool isLoadingUpzila = false;
+  bool isLoadingUnion = false;
+  bool isLoadingNTTNProvider = false;
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
+  bool _isButtonClicked = false;
+  late String providerValues = '';
+  bool isSelected = false;
+  late TextEditingController _linkcapcitycontroller = TextEditingController();
 
   Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -65,7 +73,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
       userName = prefs.getString('userName') ?? '';
       organizationName = prefs.getString('organizationName') ?? '';
       photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com'+ photoUrl;
+      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
       print('User Name: $userName');
       print('Organization Name: $organizationName');
       print('Photo URL: $photoUrl');
@@ -78,7 +86,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
     super.initState();
     loadUserProfile();
     _connectionRequest = ConnectionRequestModel(
-      requestType: "",
+/*      requestType: "",*/
       divisionId: "",
       districtId: "",
       upazilaId: "",
@@ -92,6 +100,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   Future<void> fetchDivisions() async {
+    setState(() {
+      isLoadingDivision =
+          true; // Set isLoading to false when fetching completes (whether successfully or with error)
+    });
     try {
       await initializeApiService();
       final List<Division> fetchedDivisions = await apiService.fetchDivisions();
@@ -101,6 +113,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
           print('Division Name: ${division.name}');
           print('Division ID: ${division.id}');
         }
+        isLoadingDivision =
+            false; // Set isLoading to false when fetching completes (whether successfully or with error)
       });
     } catch (e) {
       print('Error fetching divisions: $e');
@@ -109,6 +123,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   Future<void> fetchDistricts(String divisionId) async {
+    setState(() {
+      isLoadingDistrict =
+          true; // Set isLoading to false when fetching completes (whether successfully or with error)
+    });
     try {
       final List<District> fetchedDistricts =
           await apiService.fetchDistricts(divisionId);
@@ -118,6 +136,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
           print('District Name: ${district.name}');
         }
         print(districts);
+        isLoadingDistrict =
+            false; // Set isLoading to false when fetching completes (whether successfully or with error)
       });
     } catch (e) {
       print('Error fetching districts: $e');
@@ -126,6 +146,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   Future<void> fetchUpazilas(String districtId) async {
+    setState(() {
+      isLoadingUpzila =
+          true; // Set isLoading to false when fetching completes (whether successfully or with error)
+    });
     try {
       final List<Upazila> fetchedUpazilas =
           await apiService.fetchUpazilas(districtId);
@@ -134,6 +158,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
         for (Upazila upazila in fetchedUpazilas) {
           print('Upzila Name: ${upazila.name}');
         }
+        isLoadingUpzila =
+            false; // Set isLoading to false when fetching completes (whether successfully or with error)
       });
     } catch (e) {
       print('Error fetching upazilas: $e');
@@ -142,6 +168,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   Future<void> fetchUnions(String upazilaId) async {
+    setState(() {
+      isLoadingUnion =
+          true; // Set isLoading to false when fetching completes (whether successfully or with error)
+    });
     try {
       final List<Union> fetchedUnions = await apiService.fetchUnions(upazilaId);
       setState(() {
@@ -150,6 +180,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
           print('Union Name: ${union.name}');
           print('Union ID: ${union.id}');
         }
+        isLoadingUnion =
+            false; // Set isLoading to false when fetching completes (whether successfully or with error)
       });
     } catch (e) {
       print('Error fetching unions: $e');
@@ -158,16 +190,31 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   Future<void> fetchNTTNProviders(String unionId) async {
+    setState(() {
+      isLoadingNTTNProvider =
+          true; // Set isLoading to false when fetching completes (whether successfully or with error)
+    });
     try {
       final List<NTTNProvider> fetchedNTTNProviders =
           await apiService.fetchNTTNProviders(unionId);
       print(fetchedNTTNProviders);
       setState(() {
         nttnProviders = fetchedNTTNProviders;
+        if (fetchedNTTNProviders.isNotEmpty) {
+          providerValues = fetchedNTTNProviders.first.provider;
+          _NTTNID = fetchedNTTNProviders.first.id;
+        } else {
+          providerValues = 'zero';
+        }
+
         for (NTTNProvider NTTN in fetchedNTTNProviders) {
           print('NTTN Providers Name: ${NTTN.provider}');
           print('NTTN ID: ${NTTN.id}');
-         /* print('NTTN Phone: ${NTTN.phonenumber}');*/
+          selectedNTTNProvider = providerValues;
+          print(selectedNTTNProvider);
+          /* print('NTTN Phone: ${NTTN.phonenumber}');*/
+          isLoadingNTTNProvider =
+              false; // Set isLoading to false when fetching completes (whether successfully or with error)
         }
       });
     } catch (e) {
@@ -216,14 +263,17 @@ class _ConnectionFormState extends State<ConnectionForm> {
                   children: [
                     Text('Connection Request',
                         style: TextStyle(
-                            fontSize: 30,
+                            fontSize: 25,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'default')),
                     SizedBox(height: 5),
                     Text('Please fill up the form',
-                        style: TextStyle(fontSize: 20, fontFamily: 'default')),
-                    SizedBox(height: 20),
-                    Padding(
+                        style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 18,
+                            fontFamily: 'default')),
+                    SizedBox(height: 40),
+                    /*     Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       child: Row(
@@ -255,7 +305,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
                     ),
                     SizedBox(
                       height: 20,
-                    ),
+                    ),*/
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -290,40 +340,52 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           },
                           decoration: InputDecoration(labelText: 'Division',border: InputBorder.none,),
                         ),*/
+                              Stack(
+                            children: [
                               DropdownFormField(
-                            hintText: 'Select Division',
-                            dropdownItems: divisions
-                                .map((division) => division.name)
-                                .toList(),
-                            initialValue: selectedDivision,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedDistrict = null; // Reset
-                                selectedUpazila = null; // Reset
-                                selectedUnion = null; // Reset
-                                selectedNTTNProvider = null; // Reset
-                                selectedDivision = newValue;
-                                districts.clear();
-                                districts = [];
-                                //It Takes Name String
-                                /*_divisionID = newValue ?? '';
-                              print(_divisionID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                Division selectedDivisionObject =
-                                    divisions.firstWhere(
-                                  (division) => division.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedDivisionObject != null) {
-                                  //It Takes ID Int
-                                  _divisionID = selectedDivisionObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchDistricts(selectedDivisionObject.id);
-                                }
-                              }
-                            },
+                                hintText: 'Select Division',
+                                dropdownItems: divisions
+                                    .map((division) => division.name)
+                                    .toList(),
+                                initialValue: selectedDivision,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedDistrict = null; // Reset
+                                    selectedUpazila = null; // Reset
+                                    selectedUnion = null; // Reset
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedDivision = newValue;
+                                    districts.clear();
+                                    districts = [];
+                                    //It Takes Name String
+                                    /*_divisionID = newValue ?? '';
+                                                                                            print(_divisionID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    Division selectedDivisionObject =
+                                        divisions.firstWhere(
+                                      (division) => division.name == newValue,
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedDivisionObject != null) {
+                                      //It Takes ID Int
+                                      _divisionID = selectedDivisionObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchDistricts(selectedDivisionObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingDivision)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -365,36 +427,48 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           },
                           decoration: InputDecoration(labelText: 'District', border: InputBorder.none,),
                         ),*/
+                              Stack(
+                            children: [
                               DropdownFormField(
-                            hintText: 'Select District',
-                            dropdownItems: districts
-                                .map((district) => district.name)
-                                .toList(),
-                            initialValue: selectedDistrict,
-                            onChanged: (newValue) {
-                              setState(() {
-                                print(selectedDistrict);
-                                selectedUpazila = null; // Reset
-                                selectedUnion = null; // Reset
-                                selectedNTTNProvider = null; // Reset
-                                selectedDistrict = newValue;
-                                /*_districtID = newValue ?? '';
-                              print(_districtID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                District selectedDistrictObject =
-                                    districts.firstWhere(
-                                  (district) => district.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedDistrictObject != null) {
-                                  _districtID = selectedDistrictObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchUpazilas(selectedDistrictObject.id);
-                                }
-                              }
-                            },
+                                hintText: 'Select District',
+                                dropdownItems: districts
+                                    .map((district) => district.name)
+                                    .toList(),
+                                initialValue: selectedDistrict,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    print(selectedDistrict);
+                                    selectedUpazila = null; // Reset
+                                    selectedUnion = null; // Reset
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedDistrict = newValue;
+                                    /*_districtID = newValue ?? '';
+                                                                                            print(_districtID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    District selectedDistrictObject =
+                                        districts.firstWhere(
+                                      (district) => district.name == newValue,
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedDistrictObject != null) {
+                                      _districtID = selectedDistrictObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchUpazilas(selectedDistrictObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingDistrict)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -406,9 +480,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
                       child: Container(
                           width: screenWidth * 0.9,
                           height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(
-                            left: 10, top: 5
-                          ),
+                          padding: EdgeInsets.only(left: 10, top: 5),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -438,33 +510,46 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           },
                           decoration: InputDecoration(labelText: 'Upazila', border: InputBorder.none,),
                         ),*/
+                              Stack(
+                            children: [
                               DropdownFormField(
-                            hintText: 'Select Upazila',
-                            dropdownItems:
-                                upazilas.map((upazila) => upazila.name).toList(),
-                            initialValue: selectedUpazila,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedUnion = null; // Reset
-                                selectedNTTNProvider = null; // Reset
-                                selectedUpazila = newValue;
-                                /* _upazilaID = newValue ?? '';
-                              print(_upazilaID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                Upazila selectedUpazilaObject =
-                                    upazilas.firstWhere(
-                                  (upazila) => upazila.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedUpazilaObject != null) {
-                                  _upazilaID = selectedUpazilaObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchUnions(selectedUpazilaObject.id);
-                                }
-                              }
-                            },
+                                hintText: 'Select Upazila',
+                                dropdownItems: upazilas
+                                    .map((upazila) => upazila.name)
+                                    .toList(),
+                                initialValue: selectedUpazila,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedUnion = null; // Reset
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedUpazila = newValue;
+                                    /* _upazilaID = newValue ?? '';
+                                                                                            print(_upazilaID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    Upazila selectedUpazilaObject =
+                                        upazilas.firstWhere(
+                                      (upazila) => upazila.name == newValue,
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedUpazilaObject != null) {
+                                      _upazilaID = selectedUpazilaObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchUnions(selectedUpazilaObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingUpzila)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -476,9 +561,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
                       child: Container(
                           width: screenWidth * 0.9,
                           height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(
-                            left: 10, top: 5
-                          ),
+                          padding: EdgeInsets.only(left: 10, top: 5),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -508,51 +591,166 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           },
                           decoration: InputDecoration(labelText: 'Union', border: InputBorder.none,),
                         ),*/
+                              Stack(
+                            children: [
                               DropdownFormField(
-                            hintText: 'Select Union',
-                            dropdownItems:
-                                unions.map((union) => union.name).toList(),
-                            initialValue: selectedUnion,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedNTTNProvider = null; // Reset
-                                selectedUnion = newValue;
-                                /*_unionID = newValue ?? '';
-                              print(_unionID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                Union selectedUnionObject = unions.firstWhere(
-                                  (union) => union.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedUnionObject != null) {
-                                  _unionID = selectedUnionObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchNTTNProviders(selectedUnionObject.id);
-                                }
-                              }
-                            },
+                                hintText: 'Select Union',
+                                dropdownItems:
+                                    unions.map((union) => union.name).toList(),
+                                initialValue: selectedUnion,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedUnion = newValue;
+                                    isSelected = true;
+                                    print(isSelected);
+                                    /*_unionID = newValue ?? '';
+                                                                                            print(_unionID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    Union selectedUnionObject =
+                                        unions.firstWhere(
+                                      (union) => union.name == newValue,
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedUnionObject != null) {
+                                      _unionID = selectedUnionObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchNTTNProviders(
+                                          selectedUnionObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingUnion)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
+                    /*   if (isSelected == false) ...[
+                      Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
                           width: screenWidth * 0.9,
                           height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(
+                          child: Stack(
+                            children: [
+                              TextFormField(
+                                style: const TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                                decoration: InputDecoration(
+                                  labelText: '    NTTN Provider',
+                                  labelStyle: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    fontFamily: 'default',
+                                  ),
+                                  //alignLabelWithHint: true,
+                                  //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
+                                  border: const OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
+                                  ),
+                                ),
+                              ),
+                              if (isLoadingNTTNProvider)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],*/
+                    if (isSelected == true) ...[
+                      if (providerValues.isNotEmpty) ...[
+                        if (providerValues == 'zero') ...[
+                          Builder(
+                            builder: (context) {
+                              Future.delayed(Duration.zero, () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'There are no NTTN Providers in this area'),
+                                  ),
+                                );
+                              });
+                              return SizedBox
+                                  .shrink(); // Returning an empty SizedBox as a placeholder
+                            },
+                          ),
+                        ] else if (providerValues != 'zero') ...[
+                          Material(
+                            elevation: 5,
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: screenWidth * 0.9,
+                              height: screenHeight * 0.075,
+                              /*padding: EdgeInsets.only(
                             left: 10, top: 5
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.grey),
-                          ),
-                          child: /*DropdownButtonFormField<String>(
+                          ),*/
+                              child: Stack(
+                                children: [
+                                  TextFormField(
+                                    initialValue: providerValues,
+                                    readOnly: true,
+                                    style: const TextStyle(
+                                      color: Color.fromRGBO(143, 150, 158, 1),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
+                                    ),
+                                    decoration: InputDecoration(
+                                      labelText: '    NTTN Provider',
+                                      labelStyle: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        fontFamily: 'default',
+                                      ),
+                                      alignLabelWithHint: true,
+                                      //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
+                                      border: const OutlineInputBorder(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10)),
+                                      ),
+                                    ),
+                                  ),
+                                  /*if (isLoadingNTTNProvider)
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color:
+                                          const Color.fromRGBO(25, 192, 122, 1),
+                                    ),
+                                  ),*/
+                                ],
+                              ), /*DropdownButtonFormField<String>(
                           value: selectedNTTNProvider,
                           items: selectedUnion != null
                               ? nttnProviderOptions[selectedUnion]!.map((String provider) {
@@ -576,7 +774,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
                           },
                           decoration: InputDecoration(labelText: 'NTTN Provider', border: InputBorder.none,),
                         ),*/
-                              DropdownFormField(
+
+                              /*    DropdownFormField(
                             hintText: 'Select NTTN Provider',
                             dropdownItems: nttnProviders
                                 .map((nttnProvider) => nttnProvider.provider)
@@ -586,13 +785,14 @@ class _ConnectionFormState extends State<ConnectionForm> {
                               setState(() {
                                 selectedNTTNProvider = newValue;
                                 print(selectedNTTNProvider);
-                                /*  _NTTNID = newValue ?? '';
-                              print(_NTTNID);*/
+                                */ /*  _NTTNID = newValue ?? '';
+                              print(_NTTNID);*/ /*
                                 selectedLinkCapacity = null; // Reset
                               });
                               if (newValue == null) {
                                 print('I am null');
                               }
+                              print('NTTN Provider I Need ${providerValues}');
                               if (newValue != null) {
                                 print(newValue);
                                 NTTNProvider selectedNTTNProviderObject =
@@ -607,13 +807,62 @@ class _ConnectionFormState extends State<ConnectionForm> {
                                   setState(() {
                                     _NTTNID = selectedNTTNProviderObject.id;
                                   });
-                                 /* _NTTNPhoneNumber = selectedNTTNProviderObject
-                                      .phonenumber; // Update _NTTNID*/
+                                 */ /* _NTTNPhoneNumber = selectedNTTNProviderObject
+                                      .phonenumber; // Update _NTTNID*/ /*
                                 }
                               }
                             },
-                          )),
-                    ),
+                          )*/
+                            ),
+                          ),
+                        ]
+                      ]
+                      /*      else ...[
+                        Material(
+                          elevation: 5,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: screenWidth * 0.9,
+                            height: screenHeight * 0.075,
+                            child: Stack(
+                              children: [
+                                TextFormField(
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: '    NTTN Provider',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                    //alignLabelWithHint: true,
+                                    //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
+                                    border: const OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                                if (isLoadingNTTNProvider)
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],*/
+                    ],
                     SizedBox(
                       height: 10,
                     ),
@@ -671,6 +920,47 @@ class _ConnectionFormState extends State<ConnectionForm> {
                               },
                             )),
                       ),
+                    if (_linkCapacityID == 'Others') ...[
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: screenWidth * 0.9,
+                        height: screenWidth * 0.2,
+                        child: TextFormField(
+                          controller: _linkcapcitycontroller,
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter your required link capacity';
+                            }
+                            return null;
+                          },
+                          style: const TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: 'Enter your required Link Capacity',
+                            labelStyle: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            alignLabelWithHint: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 80),
+                            border: const OutlineInputBorder(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10))),
+                          ),
+                        ),
+                      ),
+                    ],
                     SizedBox(
                       height: 25,
                     ),
@@ -703,8 +993,8 @@ class _ConnectionFormState extends State<ConnectionForm> {
                             fontFamily: 'default',
                           ),
                           alignLabelWithHint: true,
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 145),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 145),
                           border: const OutlineInputBorder(
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(10))),
@@ -758,24 +1048,30 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   void _connectionRequestForm() {
-    print('Type: $_requestType');
+/*    print('Type: $_requestType');*/
     print('Division: $_divisionID');
     print('District: $_districtID');
     print('Upazila: $_upazilaID');
     print('Union: $_unionID');
     print('NTTN: $_NTTNID');
-    print('Capacity: $_linkCapacityID');
     print('Remark: ${_remark.text}');
+
+    if (_linkCapacityID == 'Others') {
+      _linkCapacityID = _linkcapcitycontroller.text;
+    }
+
+    print('Capacity: $_linkCapacityID');
+
     // Validate and save form data
     if (_validateAndSave()) {
       const snackBar = SnackBar(
-        content: Text(
-            'Processing'),
+        content: Text('Processing'),
       );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print('triggered Validation');
       // Initialize connection request model
       _connectionRequest = ConnectionRequestModel(
-        requestType: _requestType,
+        /*  requestType: _requestType,*/
         divisionId: _divisionID,
         districtId: _districtID,
         upazilaId: _upazilaID,
@@ -792,17 +1088,21 @@ class _ConnectionFormState extends State<ConnectionForm> {
           .then((response) {
         // Handle successful request
         print('Connection request sent successfully!!');
-        if(response == 'Connection Request Already Exist'){
+        if (response == 'Connection Request Already Exist') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true,)),
+            MaterialPageRoute(
+                builder: (context) => ISPDashboard(
+                      shouldRefresh: true,
+                    )),
           );
           const snackBar = SnackBar(
-            content: Text('Request already Sumbitted, please wait for it to be reviewed!'),
+            content: Text(
+                'Request already Sumbitted, please wait for it to be reviewed!'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
-        if(response == 'Please at first request a connection request'){
+        if (response == 'Please at first request a connection request') {
           const snackBar = SnackBar(
             content: Text('Create New Connection First!'),
           );
@@ -811,7 +1111,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
         if (response != null && response == "Connection Request Submitted") {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ISPDashboard(shouldRefresh: true,)),
+            MaterialPageRoute(
+                builder: (context) => ISPDashboard(
+                      shouldRefresh: true,
+                    )),
           );
           const snackBar = SnackBar(
             content: Text('Request Submitted!'),
@@ -826,7 +1129,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
   }
 
   bool _validateAndSave() {
-    final requestTypeIsValid = _requestType.isNotEmpty;
+/*    final requestTypeIsValid = _requestType.isNotEmpty;*/
     final divisionIdIsValid = _divisionID.isNotEmpty;
     final districtIdIsValid = _districtID.isNotEmpty;
     final upazilaIdIsValid = _upazilaID.isNotEmpty;
@@ -835,17 +1138,19 @@ class _ConnectionFormState extends State<ConnectionForm> {
     final linkCapacityIsValid = _linkCapacityID.isNotEmpty;
     final remarkIsValid = _remark.text.isNotEmpty;
 
+    print(linkCapacityIsValid);
+
     // Perform any additional validation logic if needed
 
     // Check if all fields are valid
-    final allFieldsAreValid = requestTypeIsValid &&
+    final allFieldsAreValid = /*requestTypeIsValid &&*/
         divisionIdIsValid &&
-        districtIdIsValid &&
-        upazilaIdIsValid &&
-        unionIdIsValid &&
-        nttNIdIsValid &&
-        linkCapacityIsValid &&
-        remarkIsValid;
+            districtIdIsValid &&
+            upazilaIdIsValid &&
+            unionIdIsValid &&
+            nttNIdIsValid &&
+            linkCapacityIsValid &&
+            remarkIsValid;
 
     return allFieldsAreValid;
   }

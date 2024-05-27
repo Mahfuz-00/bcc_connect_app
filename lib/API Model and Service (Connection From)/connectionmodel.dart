@@ -4,7 +4,7 @@ class ConnectionRequestModel {
   final String upazilaId;
   final String unionId;
   final int nttnProvider;
-  final String requestType;
+/*  final String requestType;*/
   final String linkCapacity;
   final String remark;
 
@@ -14,7 +14,7 @@ class ConnectionRequestModel {
     required this.upazilaId,
     required this.unionId,
     required this.nttnProvider,
-    required this.requestType,
+/*    required this.requestType,*/
     required this.linkCapacity,
     required this.remark,
   });
@@ -26,7 +26,7 @@ class ConnectionRequestModel {
       'upazila': upazilaId,
       'union': unionId,
       'nttn_provider': nttnProvider,
-      'request_type': requestType,
+/*      'request_type': requestType,*/
       'link_capacity': linkCapacity,
       'remark': remark,
     };

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model And Service (BCC_Connections)/apiserviceconnectionbcc.dart';
 import '../API Service (Log Out)/apiServiceLogOut.dart';
+import '../API Service (Notification)/apiServiceNotificationRead.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Login UI/loginUI.dart';
@@ -14,7 +15,8 @@ import '../Profile UI/profileUI.dart';
 import '../Template Models/bccConnectionsPendingdetailtile.dart';
 
 class BCCDashboard extends StatefulWidget {
-  const BCCDashboard({super.key});
+  final bool shouldRefresh;
+  const BCCDashboard({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
   State<BCCDashboard> createState() => _BCCDashboardState();
@@ -37,6 +39,7 @@ class _BCCDashboardState extends State<BCCDashboard>
   int? adslCountActive;
   int? sblCountPending;
   int? sblCountActive;
+  List<String> notifications = [];
 
   Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -92,6 +95,9 @@ class _BCCDashboardState extends State<BCCDashboard>
         return;
       }
 
+      // Extract notifications
+      notifications = List<String>.from(records['notifications'] ?? []);
+
       print(records);
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
@@ -139,15 +145,15 @@ class _BCCDashboardState extends State<BCCDashboard>
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     Future.delayed(Duration(seconds: 5), () {
+    if(widget.shouldRefresh){
       loadUserProfile();
-      // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
         _pageLoading = false;
       });
+    }
     });
-    _tabController = TabController(length: 2, vsync: this);
-    //loadUserProfile();
     if (!_isFetched) {
       fetchConnections();
       // _isFetched = true; // Set _isFetched to true after the first call
@@ -199,12 +205,45 @@ class _BCCDashboardState extends State<BCCDashboard>
                     ),
                   ),
                   actions: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_rounded,
-                        color: Colors.white,
-                      ),
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            _showNotificationsOverlay(context);
+                            var notificationApiService =
+                            await NotificationReadApiService.create();
+                            notificationApiService.readNotification();
+                          },
+                        ),
+                        if (notifications.isNotEmpty)
+                          Positioned(
+                            right: 11,
+                            top: 11,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 12,
+                                minHeight: 12,
+                              ),
+                              child: Text(
+                                '${notifications.length}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -498,7 +537,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => BCCDashboard()));
+                                  builder: (context) => BCCDashboard(shouldRefresh: true,)));
                         },
                         child: Container(
                           width: screenWidth / 3,
@@ -824,4 +863,81 @@ class _BCCDashboardState extends State<BCCDashboard>
       ],
     ));
   }
+
+
+  void _showNotificationsOverlay(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: kToolbarHeight + 10.0,
+        right: 10.0,
+        width: 250,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: notifications.isEmpty
+                ? Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_off),
+                  SizedBox(width: 10,),
+                  Text(
+                    'No new notifications',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: EdgeInsets.all(8),
+              shrinkWrap: true,
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text(notifications[index]),
+                      onTap: () {
+                        // Handle notification tap if necessary
+                        overlayEntry.remove();
+                      },
+                    ),
+                    if (index < notifications.length - 1)
+                      Divider()
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay?.insert(overlayEntry);
+
+    // Remove the overlay when tapping outside
+    Future.delayed(Duration(seconds: 5), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
+  }
+
+
 }

@@ -1,6 +1,8 @@
+import 'package:bcc_connect_app/Provider%20Model/userInfoModel.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model and Service (Login)/loginmodels.dart';
@@ -129,7 +131,7 @@ class _LoginState extends State<Login> {
                                         },
                                         style: const TextStyle(
                                           color: Color.fromRGBO(143, 150, 158, 1),
-                                          fontSize: 15,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           fontFamily: 'default',
                                         ),
@@ -167,7 +169,7 @@ class _LoginState extends State<Login> {
                                             style: const TextStyle(
                                               color: Color.fromRGBO(
                                                   143, 150, 158, 1),
-                                              fontSize: 15,
+                                              fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'default',
                                             ),
@@ -261,7 +263,7 @@ class _LoginState extends State<Login> {
                                         else if (userType == 'bcc_staff') {
                                           Navigator.pushReplacement(
                                             context,
-                                            MaterialPageRoute(builder: (context) => BCCDashboard()),
+                                            MaterialPageRoute(builder: (context) => BCCDashboard(shouldRefresh: true,)),
                                           );
                                         }
                                         else if (userType == 'nttn_sbl_staff') {
@@ -277,11 +279,7 @@ class _LoginState extends State<Login> {
                                           );
                                         }
                                         else {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Incorrect Email and Password.'),
-                                            ),
-                                          );
+                                          showTopToast(context, 'User is Invalid.');
                                         }
                                       }
                                     }
@@ -385,12 +383,13 @@ class _LoginState extends State<Login> {
           _fetchUserProfile(response.token);
           return true;
         } else {
+          showTopToast(context, 'Email or password is not valid.');
           // Handle unsuccessful login
-          ScaffoldMessenger.of(context).showSnackBar(
+          /*ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Email or password is not valid.'),
             ),
-          );
+          );*/
           return false;
         }
       } catch (e) {
@@ -405,11 +404,15 @@ class _LoginState extends State<Login> {
         else if (e.toString().contains('The email field is required') || e.toString().contains('The password field is required')) {
           errorMessage = 'Email or password is empty. Please fill in both fields.';
         }
-        ScaffoldMessenger.of(context).showSnackBar(
+
+        showTopToast(context, errorMessage);
+
+        /* ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
+            behavior: SnackBarBehavior.floating,
           ),
-        );
+        );*/
         return false;
       }
     }
@@ -417,10 +420,45 @@ class _LoginState extends State<Login> {
     return false;
   }
 
+
+  void showTopToast(BuildContext context, String message) {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // 10 is for a little margin from the top
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    // Remove the overlay entry after some time (e.g., 3 seconds)
+    Future.delayed(Duration(seconds: 3)).then((_) {
+      overlayEntry.remove();
+    });
+  }
+
+
   late String AuthenToken;
   late final String? UserName;
   late final String? OrganizationName;
   late final String? PhotoURL;
+  late final String? Id;
 
   Future<void> storeTokenLocally(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -434,18 +472,35 @@ class _LoginState extends State<Login> {
       final profile = await apiService.fetchUserProfile(token);
       final userProfile = UserProfile.fromJson(profile);
 
+/*
+      // Save user profile data using Provider
+      final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: true);
+      userProfileProvider.updateUserProfile(
+        userName: userProfile.name,
+        organizationName: userProfile.organization,
+        photoURL: userProfile.photo,
+      );
+
+      print('State Name :$userProfileProvider.userName');
+      print('State Org: $userProfileProvider.organizationName');
+      print('State URL: $userProfileProvider.photoURL');
+*/
+
       // Save user profile data in SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       try {
         await prefs.setString('userName', userProfile.name);
         await prefs.setString('organizationName', userProfile.organization);
         await prefs.setString('photoUrl', userProfile.photo);
+        await prefs.setString('id', userProfile.Id.toString());
         UserName = prefs.getString('userName');
         OrganizationName = prefs.getString('organizationName');
         PhotoURL = prefs.getString('photoUrl');
+        Id = prefs.getString('id');
         print('User Name: $UserName');
         print('Organization Name: $OrganizationName');
         print('Photo URL: $PhotoURL');
+        print('User ID: $Id');
         print('User profile saved successfully');
       } catch (e) {
         print('Error saving user profile: $e');

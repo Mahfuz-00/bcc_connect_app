@@ -47,11 +47,16 @@ class _SearchUserState extends State<SearchUser> {
   String? selectedNTTNProvider;
   bool _isLoading = false;
   bool _isInternetAvailable = false;
+  bool isLoadingDivision = false;
+  bool isLoadingDistrict = false;
+  bool isLoadingUpzila = false;
+  bool isLoadingUnion = false;
+  bool isLoadingNTTNProvider = false;
+
   //late Connections connection;
 
   // Store the response data in a list
   List<Connections> filteredConnections = [];
-
 
   @override
   void initState() {
@@ -59,14 +64,15 @@ class _SearchUserState extends State<SearchUser> {
     fetchDivisions();
   }
 
-
   Future<void> fetchDivisions() async {
     setState(() {
+      isLoadingDivision = true;
       _isLoading = true;
     });
     try {
       await initializeApiService();
-      final List<DivisionSearch> fetchedDivisions = await apiService.fetchDivisions();
+      final List<DivisionSearch> fetchedDivisions =
+          await apiService.fetchDivisions();
       setState(() {
         _isLoading = false;
         divisions = fetchedDivisions;
@@ -74,6 +80,7 @@ class _SearchUserState extends State<SearchUser> {
           print('Division Name: ${division.name}');
           print('Division Name: ${division.id}');
         }
+        isLoadingDivision = false;
       });
     } catch (e) {
       print('Error fetching divisions: $e');
@@ -83,6 +90,7 @@ class _SearchUserState extends State<SearchUser> {
 
   Future<void> fetchDistricts(String divisionId) async {
     setState(() {
+      isLoadingDistrict = true;
       _isLoading = true;
     });
     try {
@@ -94,6 +102,7 @@ class _SearchUserState extends State<SearchUser> {
         for (DistrictSearch district in fetchedDistricts) {
           print('District Name: ${district.name}');
         }
+        isLoadingDistrict = false;
       });
     } catch (e) {
       print('Error fetching districts: $e');
@@ -103,6 +112,7 @@ class _SearchUserState extends State<SearchUser> {
 
   Future<void> fetchUpazilas(String districtId) async {
     setState(() {
+      isLoadingUpzila = true;
       _isLoading = true;
     });
     try {
@@ -114,6 +124,7 @@ class _SearchUserState extends State<SearchUser> {
         for (UpazilaSearch upazila in fetchedUpazilas) {
           print('Upzila Name: ${upazila.name}');
         }
+        isLoadingUpzila = false;
       });
     } catch (e) {
       print('Error fetching upazilas: $e');
@@ -123,16 +134,19 @@ class _SearchUserState extends State<SearchUser> {
 
   Future<void> fetchUnions(String upazilaId) async {
     setState(() {
+      isLoadingUnion = true;
       _isLoading = true;
     });
     try {
-      final List<UnionSearch> fetchedUnions = await apiService.fetchUnions(upazilaId);
+      final List<UnionSearch> fetchedUnions =
+          await apiService.fetchUnions(upazilaId);
       setState(() {
         _isLoading = false;
         unions = fetchedUnions;
         for (UnionSearch union in fetchedUnions) {
           print('Union Name: ${union.name}');
         }
+        isLoadingUnion = false;
       });
     } catch (e) {
       print('Error fetching unions: $e');
@@ -146,23 +160,22 @@ class _SearchUserState extends State<SearchUser> {
     });
     try {
       final List<NTTNProviderResult> fetchedNTTNProviders =
-      await apiService.fetchNTTNProviders(unionId);
+          await apiService.fetchNTTNProviders(unionId);
       setState(() {
         _isLoading = false;
         nttnProviders = fetchedNTTNProviders;
-        int counter =0;
+        int counter = 0;
         for (NTTNProviderResult NTTN in fetchedNTTNProviders) {
           print('NTTN Provider Details$counter: ${NTTN.toString()}');
           counter++;
         }
+        isLoadingNTTNProvider = false;
       });
     } catch (e) {
       print('Error fetching NTTN providers: $e');
       // Handle error
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +221,8 @@ class _SearchUserState extends State<SearchUser> {
                             fontWeight: FontWeight.bold,
                             fontFamily: 'default')),
                     SizedBox(height: 5),
-                    Text('Select an Optimal filter to search ISP Connections(s)',
+                    Text(
+                        'Select an Optimal filter to search ISP Connections(s)',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20,
@@ -230,43 +244,56 @@ class _SearchUserState extends State<SearchUser> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: DropdownFormField(
-                            hintText: 'Division',
-                            dropdownItems: divisions
-                                .map((division) => division.name)
-                                .toList(),
-                            initialValue: selectedDivision,
-                            onChanged: (newValue) {
-                              setState(() {
-                                //It Takes Name String
-                                selectedDistrict = null; // Reset
-                                districts.clear();
-                                print(selectedDistrict);
-                                print(districts);
-                                selectedUpazila = null; // Reset
-                                selectedUnion = null; // Reset
-                                selectedNTTNProvider = null; // Reset
-                                print('Selected District: ${selectedDistrict}');
-                                selectedDivision = newValue;
-                                if(_isLoading){
-                                  CircularProgressIndicator();
-                                }
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                DivisionSearch selectedDivisionObject =
-                                divisions.firstWhere(
+                          child: Stack(
+                            children: [
+                              DropdownFormField(
+                                hintText: 'Division',
+                                dropdownItems: divisions
+                                    .map((division) => division.name)
+                                    .toList(),
+                                initialValue: selectedDivision,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    //It Takes Name String
+                                    selectedDistrict = null; // Reset
+                                    districts.clear();
+                                    print(selectedDistrict);
+                                    print(districts);
+                                    selectedUpazila = null; // Reset
+                                    selectedUnion = null; // Reset
+                                    selectedNTTNProvider = null; // Reset
+                                    print(
+                                        'Selected District: ${selectedDistrict}');
+                                    selectedDivision = newValue;
+                                    if (_isLoading) {
+                                      CircularProgressIndicator();
+                                    }
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    DivisionSearch selectedDivisionObject =
+                                        divisions.firstWhere(
                                       (division) => division.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedDivisionObject != null) {
-                                  //It Takes ID Int
-                                  _divisionID = selectedDivisionObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchDistricts(selectedDivisionObject.id);
-                                }
-                              }
-                            },
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedDivisionObject != null) {
+                                      //It Takes ID Int
+                                      _divisionID = selectedDivisionObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchDistricts(selectedDivisionObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingDivision)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -284,37 +311,49 @@ class _SearchUserState extends State<SearchUser> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: DropdownFormField(
-                            hintText: 'District',
-                            dropdownItems: districts
-                                .map((district) => district.name)
-                                .toList(),
-                            initialValue: selectedDistrict,
-                            onChanged: (newValue) {
-                              setState(() {
-                                print(districts);
-                                print(selectedDistrict);
-                                selectedUpazila = null; // Reset
-                                selectedUnion = null; // Reset
-                                selectedNTTNProvider = null; // Reset
-                                selectedDistrict = newValue;
-                                if(_isLoading){
-                                  CircularProgressIndicator();
-                                }
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                DistrictSearch selectedDistrictObject =
-                                districts.firstWhere(
+                          child: Stack(
+                            children: [
+                              DropdownFormField(
+                                hintText: 'District',
+                                dropdownItems: districts
+                                    .map((district) => district.name)
+                                    .toList(),
+                                initialValue: selectedDistrict,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    print(districts);
+                                    print(selectedDistrict);
+                                    selectedUpazila = null; // Reset
+                                    selectedUnion = null; // Reset
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedDistrict = newValue;
+                                    if (_isLoading) {
+                                      CircularProgressIndicator();
+                                    }
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    DistrictSearch selectedDistrictObject =
+                                        districts.firstWhere(
                                       (district) => district.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedDistrictObject != null) {
-                                  _districtID = selectedDistrictObject.id;
-                                  fetchUpazilas(selectedDistrictObject.id);
-                                }
-                              }
-                            },
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedDistrictObject != null) {
+                                      _districtID = selectedDistrictObject.id;
+                                      fetchUpazilas(selectedDistrictObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingDistrict)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -326,43 +365,54 @@ class _SearchUserState extends State<SearchUser> {
                       child: Container(
                           width: screenWidth * 0.9,
                           height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(
-                            left: 10, top: 5
-                          ),
+                          padding: EdgeInsets.only(left: 10, top: 5),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: DropdownFormField(
-                            hintText: 'Upazila',
-                            dropdownItems:
-                            upazilas.map((upazila) => upazila.name).toList(),
-                            initialValue: selectedUpazila,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedUnion = null; // Reset
-                                selectedUpazila = newValue;
-                                if(_isLoading){
-                                  CircularProgressIndicator();
-                                }
-                                /* _upazilaID = newValue ?? '';
-                          print(_upazilaID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                UpazilaSearch selectedUpazilaObject =
-                                upazilas.firstWhere(
+                          child: Stack(
+                            children: [
+                              DropdownFormField(
+                                hintText: 'Upazila',
+                                dropdownItems: upazilas
+                                    .map((upazila) => upazila.name)
+                                    .toList(),
+                                initialValue: selectedUpazila,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedUnion = null; // Reset
+                                    selectedUpazila = newValue;
+                                    if (_isLoading) {
+                                      CircularProgressIndicator();
+                                    }
+                                    /* _upazilaID = newValue ?? '';
+                              print(_upazilaID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    UpazilaSearch selectedUpazilaObject =
+                                        upazilas.firstWhere(
                                       (upazila) => upazila.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedUpazilaObject != null) {
-                                  _upazilaID = selectedUpazilaObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  fetchUnions(selectedUpazilaObject.id);
-                                }
-                              }
-                            },
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedUpazilaObject != null) {
+                                      _upazilaID = selectedUpazilaObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      fetchUnions(selectedUpazilaObject.id);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingUpzila)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -374,42 +424,53 @@ class _SearchUserState extends State<SearchUser> {
                       child: Container(
                           width: screenWidth * 0.9,
                           height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(
-                            left: 10, top: 5
-                          ),
+                          padding: EdgeInsets.only(left: 10, top: 5),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: DropdownFormField(
-                            hintText: 'Union',
-                            dropdownItems:
-                            unions.map((union) => union.name).toList(),
-                            initialValue: selectedUnion,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedNTTNProvider = null; // Reset
-                                selectedUnion = newValue;
-                                if(_isLoading){
-                                  CircularProgressIndicator();
-                                }
-                                /*_unionID = newValue ?? '';
-                          print(_unionID);*/
-                              });
-                              if (newValue != null) {
-                                // Find the selected division object
-                                UnionSearch selectedUnionObject = unions.firstWhere(
+                          child: Stack(
+                            children: [
+                              DropdownFormField(
+                                hintText: 'Union',
+                                dropdownItems:
+                                    unions.map((union) => union.name).toList(),
+                                initialValue: selectedUnion,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedNTTNProvider = null; // Reset
+                                    selectedUnion = newValue;
+                                    if (_isLoading) {
+                                      CircularProgressIndicator();
+                                    }
+                                    /*_unionID = newValue ?? '';
+                              print(_unionID);*/
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    UnionSearch selectedUnionObject =
+                                        unions.firstWhere(
                                       (union) => union.name == newValue,
-                                  /*orElse: () => null,*/
-                                );
-                                if (selectedUnionObject != null) {
-                                  _unionID = selectedUnionObject.id;
-                                  // Pass the ID of the selected division to fetchDistricts
-                                  /*fetchNTTNProviders(selectedUnionObject.id);*/
-                                }
-                              }
-                            },
+                                      /*orElse: () => null,*/
+                                    );
+                                    if (selectedUnionObject != null) {
+                                      _unionID = selectedUnionObject.id;
+                                      // Pass the ID of the selected division to fetchDistricts
+                                      /*fetchNTTNProviders(selectedUnionObject.id);*/
+                                    }
+                                  }
+                                },
+                              ),
+                              if (isLoadingUnion)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    color:
+                                        const Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ),
+                            ],
                           )),
                     ),
                     SizedBox(
@@ -446,54 +507,76 @@ class _SearchUserState extends State<SearchUser> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        SizedBox(height: 10,),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
                                         Container(
                                           //height: screenHeight*0.25,
                                           child: FutureBuilder<void>(
                                               future: filterNTTNConnections(),
                                               builder: (context, snapshot) {
-                                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
                                                   // Return a loading indicator while waiting for data
                                                   return Container(
-                                                    height: 200, // Adjust height as needed
-                                                    width: screenWidth, // Adjust width as needed
+                                                    height: 200,
+                                                    // Adjust height as needed
+                                                    width: screenWidth,
+                                                    // Adjust width as needed
                                                     decoration: BoxDecoration(
                                                       color: Colors.white,
-                                                      borderRadius: BorderRadius.circular(10),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
                                                     ),
                                                     child: Center(
-                                                      child: CircularProgressIndicator(),
+                                                      child:
+                                                          CircularProgressIndicator(),
                                                     ),
                                                   );
                                                 } else if (snapshot.hasError) {
                                                   // Handle errors
-                                                  return buildNoRequestsWidget(screenWidth, 'Error: ${snapshot.error}');
-                                                } else if (snapshot.connectionState == ConnectionState.done) {
-                                                  if (searchresults.isNotEmpty) {
+                                                  return buildNoRequestsWidget(
+                                                      screenWidth,
+                                                      'Error: ${snapshot.error}');
+                                                } else if (snapshot
+                                                        .connectionState ==
+                                                    ConnectionState.done) {
+                                                  if (searchresults
+                                                      .isNotEmpty) {
                                                     // If data is loaded successfully, display the ListView
                                                     return Container(
                                                       child: ListView.separated(
                                                         shrinkWrap: true,
-                                                        physics: NeverScrollableScrollPhysics(),
+                                                        physics:
+                                                            NeverScrollableScrollPhysics(),
                                                         itemCount: /*pendingConnectionRequests.length > 10
                                         ? 10
-                                        :*/ searchresults.length,
-                                                        itemBuilder: (context, index) {
+                                        :*/
+                                                            searchresults
+                                                                .length,
+                                                        itemBuilder:
+                                                            (context, index) {
                                                           // Display each connection request using ConnectionRequestInfoCard
-                                                          return searchresults[index];
+                                                          return searchresults[
+                                                              index];
                                                         },
-                                                        separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                                        separatorBuilder:
+                                                            (context, index) =>
+                                                                const SizedBox(
+                                                                    height: 10),
                                                       ),
                                                     );
                                                   } else {
                                                     // Handle the case when there are no pending connection requests
-                                                    return buildNoRequestsWidget(screenWidth, 'No Connection Found!');
+                                                    return buildNoRequestsWidget(
+                                                        screenWidth,
+                                                        'No Connection Found!');
                                                   }
                                                 }
                                                 // Return a default widget if none of the conditions above are met
                                                 return SizedBox(); // You can return an empty SizedBox or any other default widget
-                                              }
-                                          ),
+                                              }),
                                         ),
                                       ],
                                     );
@@ -513,8 +596,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 20,
                     ),
-                    if (_providerInfo != null)
-                      _providerInfo!,
+                    if (_providerInfo != null) _providerInfo!,
                   ],
                 ),
               ),
@@ -563,31 +645,31 @@ class _SearchUserState extends State<SearchUser> {
     try {
       // Call the API service method to filter NTTN connections
       print('Request:: $requestData');
-      final Map<String, dynamic> filteredData = await apiService.filterNTTNConnection(requestData);
+      final Map<String, dynamic> filteredData =
+          await apiService.filterNTTNConnection(requestData);
       // Process the filtered data as needed
       print('Filtered NTTN connections: $filteredData');
-
 
       // Check if the 'records' field exists in the response data
       if (filteredData.containsKey('records')) {
         // Extract the list of connections from the 'records' field
         List<dynamic> connections = filteredData['records'];
         print('Connections:: $connections');
-          // Map pending requests to widgets
-          final List<Widget> searchWidgets = connections.map((request) {
-            return SearchConnectionsInfoCard(
-              Name: request['name'],
-              OrganizationName: request['organization'],
-              MobileNo: request['mobile'],
-              ConnectionType: request['connection_type'],
-              Provider: request['provider'],
-              Status: request['status'],
-            );
-          }).toList();
-          setState(() {
-            searchresults = searchWidgets;
-            //filteredConnections.add(connection);
-          });
+        // Map pending requests to widgets
+        final List<Widget> searchWidgets = connections.map((request) {
+          return SearchConnectionsInfoCard(
+            Name: request['name'],
+            OrganizationName: request['organization'],
+            MobileNo: request['mobile'],
+            ConnectionType: request['connection_type'],
+            Provider: request['provider'],
+            Status: request['status'],
+          );
+        }).toList();
+        setState(() {
+          searchresults = searchWidgets;
+          //filteredConnections.add(connection);
+        });
 
         //print('Fetched Connection:: $filteredConnections');
       }
@@ -596,5 +678,4 @@ class _SearchUserState extends State<SearchUser> {
       print('Error filtering NTTN connections: $e');
     }
   }
-
 }

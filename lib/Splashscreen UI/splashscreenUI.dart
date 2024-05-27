@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: const Padding(
                 padding: EdgeInsets.all(30),
                 child: Text(
-                  'BCC Connect',
+                  'BCC Connect Network',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 25,

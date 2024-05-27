@@ -40,7 +40,7 @@ class APIServiceConnection {
       }
 
       final http.Response response = await http.post(
-        Uri.parse('$URL/isp/connection'),
+        Uri.parse('$URL/isp/new-connection'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token' // Use token here

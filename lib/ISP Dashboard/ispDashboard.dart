@@ -1,9 +1,12 @@
+import 'package:bcc_connect_app/Provider%20Model/userInfoModel.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model and Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
 import '../API Service (Log Out)/apiServiceLogOut.dart';
+import '../API Service (Notification)/apiServiceNotificationRead.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Request and Review List (Full)/ispRequestList.dart';
@@ -12,6 +15,7 @@ import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import '../Template Models/ispRequestdetailstile.dart';
+import '../Upgrade UI/upgradeUI.dart';
 import 'templateerrorcontainer.dart';
 
 class ISPDashboard extends StatefulWidget {
@@ -38,6 +42,8 @@ class _ISPDashboardState extends State<ISPDashboard> {
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
+  late UserProfileProvider userProfileInfo;
+  List<String> notifications = [];
 
   Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -80,8 +86,11 @@ class _ISPDashboardState extends State<ISPDashboard> {
         _isLoading = true;
       });
 
+      // Extract notifications
+      notifications = List<String>.from(records['notifications'] ?? []);
+
       // Simulate fetching data for 5 seconds
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 1));
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       for (var index = 0; index < pendingRequestsData.length; index++) {
@@ -154,7 +163,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
           ),
           onPressed: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ISPRequestList()));
+                MaterialPageRoute(builder: (context) => ISPRequestList(shouldRefresh: true)));
           },
           child: Text('See All Request',
               style: TextStyle(
@@ -185,7 +194,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
           ),
           onPressed: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ISPReviewedList()));
+                MaterialPageRoute(builder: (context) => ISPReviewedList(shouldRefresh: true)));
           },
           child: Text('See All Reviewed Request',
               style: TextStyle(
@@ -202,6 +211,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
   @override
   void initState() {
     super.initState();
+    userProfileInfo = Provider.of<UserProfileProvider>(context, listen: false);
     print('initState called');
     Future.delayed(Duration(seconds: 5), () {
       if (widget.shouldRefresh && !_isFetched) {
@@ -263,12 +273,45 @@ class _ISPDashboardState extends State<ISPDashboard> {
                     ),
                   ),
                   actions: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_rounded,
-                        color: Colors.white,
-                      ),
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            _showNotificationsOverlay(context);
+                            var notificationApiService =
+                                await NotificationReadApiService.create();
+                            notificationApiService.readNotification();
+                          },
+                        ),
+                        if (notifications.isNotEmpty)
+                          Positioned(
+                            right: 11,
+                            top: 11,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 12,
+                                minHeight: 12,
+                              ),
+                              child: Text(
+                                '${notifications.length}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -298,13 +341,13 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
                                   fit: BoxFit.cover,
-                                  image: NetworkImage(photoUrl),
+                                  image: NetworkImage(photoUrl /*userProfileInfo.photoURL*/),
                                 ),
                               ),
                             ),
                             Text(
-                              /*  'Welcome',*/
-                              userName,
+                              userName
+                            /*userProfileInfo.userName*/,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -314,7 +357,8 @@ class _ISPDashboardState extends State<ISPDashboard> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              organizationName,
+                              organizationName
+                            /*userProfileInfo.organizationName*/,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
@@ -339,7 +383,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      ISPDashboard())); // Close the drawer
+                                      ISPDashboard(shouldRefresh: true))); // Close the drawer
                         },
                       ),
                       Divider(),
@@ -373,7 +417,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ISPRequestList()));
+                                  builder: (context) => ISPRequestList(shouldRefresh: true)));
                         },
                       ),
                       Divider(),
@@ -390,7 +434,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ISPReviewedList()));
+                                  builder: (context) => ISPReviewedList(shouldRefresh: true)));
                         },
                       ),
                       Divider(),
@@ -559,6 +603,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                                         index) =>
                                                     const SizedBox(height: 10),
                                               ),
+                                              SizedBox(height: 10,),
                                               if (shouldShowSeeAllButton(
                                                   pendingConnectionRequests))
                                                 buildSeeAllButtonRequestList(
@@ -650,6 +695,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                                         index) =>
                                                     const SizedBox(height: 10),
                                               ),
+                                              SizedBox(height: 10,),
                                               if (shouldShowSeeAllButton(
                                                   acceptedConnectionRequests))
                                                 buildSeeAllButtonReviewedList(
@@ -715,7 +761,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ISPDashboard()));
+                                  builder: (context) => ISPDashboard(shouldRefresh: true)));
                         },
                         child: Container(
                           width: screenWidth / 3,
@@ -792,7 +838,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) {
-                              return Information();
+                              return UpgradeUI(shouldRefresh: true);
                             },
                           ));
                         },
@@ -810,21 +856,25 @@ class _ISPDashboardState extends State<ISPDashboard> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(
-                                Icons.info,
+                                Icons.upgrade,
                                 size: 30,
                                 color: Colors.white,
                               ),
                               SizedBox(
                                 height: 5,
                               ),
-                              Text(
-                                'Information',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'default',
-                                ),
+                              Wrap(
+                                children: [
+                                  Text(
+                                    'Upgrade',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -837,4 +887,79 @@ class _ISPDashboardState extends State<ISPDashboard> {
             ),
           );
   }
+
+  void _showNotificationsOverlay(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: kToolbarHeight + 10.0,
+        right: 10.0,
+        width: 250,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: notifications.isEmpty
+                ? Container(
+              height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.notifications_off),
+                      SizedBox(width: 10,),
+                      Text(
+                                        'No new notifications',
+                                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                )
+                : ListView.builder(
+              padding: EdgeInsets.all(8),
+              shrinkWrap: true,
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text(notifications[index]),
+                      onTap: () {
+                        // Handle notification tap if necessary
+                        overlayEntry.remove();
+                      },
+                    ),
+                    if (index < notifications.length - 1)
+                    Divider()
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay?.insert(overlayEntry);
+
+    // Remove the overlay when tapping outside
+    Future.delayed(Duration(seconds: 5), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
+  }
+
 }

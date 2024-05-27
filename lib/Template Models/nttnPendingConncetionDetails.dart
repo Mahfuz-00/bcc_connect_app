@@ -172,10 +172,10 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                               NTTNDashboard(shouldRefresh: true)),
                         );
                         const snackBar = SnackBar(
-                          content: Text('Request Rejected!'),
+                          content: Text('Request Declined!'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      });
+                      });// Validation complete, hide circular progress indicator
                     },
                     child: Text('Decline',
                         style: TextStyle(

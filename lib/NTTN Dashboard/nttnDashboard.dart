@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API Model and Service(NTTN_Connection)/apiserviceconnectionnttn.dart';
 import '../API Service (Log Out)/apiServiceLogOut.dart';
+import '../API Service (Notification)/apiServiceNotificationRead.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../ISP Dashboard/templateerrorcontainer.dart';
 import '../Information/information.dart';
@@ -39,6 +40,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
+  List<String> notifications = [];
 
   Future<void> fetchConnectionApplications() async {
     if (_isFetched) return;
@@ -72,6 +74,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         print('No records available');
         return;
       }
+
+      // Extract notifications
+      notifications = List<String>.from(records['notifications'] ?? []);
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
@@ -304,12 +309,45 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                     ),
                   ),
                   actions: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_rounded,
-                        color: Colors.white,
-                      ),
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            _showNotificationsOverlay(context);
+                            var notificationApiService =
+                            await NotificationReadApiService.create();
+                            notificationApiService.readNotification();
+                          },
+                        ),
+                        if (notifications.isNotEmpty)
+                          Positioned(
+                            right: 11,
+                            top: 11,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 12,
+                                minHeight: 12,
+                              ),
+                              child: Text(
+                                '${notifications.length}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -494,7 +532,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                           children: [
                             Center(
                               child: Text(
-                                'Welcome, $userName',
+                                'Connection Status',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black,
@@ -658,6 +696,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                                         index) =>
                                                     const SizedBox(height: 10),
                                               ),
+                                              SizedBox(height: 10,),
                                               if (shouldShowSeeAllButton(
                                                   pendingConnectionRequests))
                                                 buildSeeAllButtonPendingList(
@@ -748,6 +787,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                                     const SizedBox(height: 10),
                                               ),
                                             ),
+                                            SizedBox(height: 10,),
                                             if (shouldShowSeeAllButton(
                                                 acceptedConnectionRequests))
                                               buildSeeAllButtonActiveList(
@@ -903,4 +943,79 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             ),
           );
   }
+
+  void _showNotificationsOverlay(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: kToolbarHeight + 10.0,
+        right: 10.0,
+        width: 250,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: notifications.isEmpty
+                ? Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_off),
+                  SizedBox(width: 10,),
+                  Text(
+                    'No new notifications',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: EdgeInsets.all(8),
+              shrinkWrap: true,
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text(notifications[index]),
+                      onTap: () {
+                        // Handle notification tap if necessary
+                        overlayEntry.remove();
+                      },
+                    ),
+                    if (index < notifications.length - 1)
+                      Divider()
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay?.insert(overlayEntry);
+
+    // Remove the overlay when tapping outside
+    Future.delayed(Duration(seconds: 5), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
+  }
+
 }

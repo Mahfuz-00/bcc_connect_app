@@ -1,7 +1,8 @@
 // Import necessary packages
-import 'package:bcc_connect_app/API%20Service%20(Forgot%20Password)/apiServiceForgotPassword.dart';
+import '../API Service (Forgot Password)/apiServiceForgotPassword.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
 import 'otpverficationUI.dart';
@@ -32,17 +33,22 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword.create();
-    apiService.sendForgotPasswordOTP(email);
+/*    apiService.sendForgotPasswordOTP(email);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => OPTVerfication()),
-    );
-/*    apiService.sendForgotPasswordOTP(email).then((response) {
-      if(response != null){
+    );*/
+    apiService.sendForgotPasswordOTP(email).then((response) {
+      if (response == 'Forget password otp send successfully') {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OPTVerfication()),
         );
+      } else if (response == 'validation error') {
+        const snackBar = SnackBar(
+          content: Text('Invalid Email'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }).catchError((error) {
       // Handle registration error
@@ -51,7 +57,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         content: Text('Invalid Email'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    });*/
+    });
     // Navigate to OTP verification screen
   }
 
@@ -73,10 +79,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     child: Container(
                       padding: EdgeInsets.only(left: 8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Color.fromRGBO(25, 192, 122, 1), width: 2),
+                        border: Border.all(
+                            color: Color.fromRGBO(25, 192, 122, 1), width: 2),
                         // Border properties
-                        borderRadius:
-                            BorderRadius.circular(10), // Optional: Rounded border
+                        borderRadius: BorderRadius.circular(
+                            10), // Optional: Rounded border
                       ),
                       child: IconButton(
                         onPressed: () {
@@ -157,9 +164,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             ),
                             SizedBox(height: 50),
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 String email = _emailController.text;
                                 _sendCode(email);
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setString('email', email);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:

@@ -169,7 +169,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -201,7 +201,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -233,7 +233,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -271,7 +271,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -310,7 +310,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -342,7 +342,7 @@ class _SignupState extends State<Signup> {
                                   obscureText: _isObscuredPassword,
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -385,7 +385,7 @@ class _SignupState extends State<Signup> {
                                   obscureText: _isObscuredConfirmPassword,
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -439,7 +439,7 @@ class _SignupState extends State<Signup> {
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   ),
@@ -498,8 +498,14 @@ class _SignupState extends State<Signup> {
                                                   size: 60, color: Colors.grey),
                                         ),
                                         SizedBox(width: 8),
+                                        VerticalDivider(thickness: 5,),
                                         Text('Upload',
-                                            style: TextStyle(color: Colors.blue)),
+                                          style: TextStyle(
+                                            color: Color.fromRGBO(25, 192, 122, 1),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            fontFamily: 'default',
+                                          ),),
                                         // Customize upload text style
                                       ],
                                     ),
