@@ -197,7 +197,7 @@ class _SearchUserState extends State<SearchUser> {
             },
           ),
           title: const Text(
-            'Search',
+            'Advance Search',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -205,6 +205,7 @@ class _SearchUserState extends State<SearchUser> {
               fontFamily: 'default',
             ),
           ),
+          centerTitle: true,
         ),
         body: SafeArea(
           child: SingleChildScrollView(

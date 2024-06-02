@@ -145,6 +145,7 @@ class _ProfileUIState extends State<ProfileUI> {
                 fontWeight: FontWeight.bold,
                 fontFamily: 'default',
               ),),
+            centerTitle: true,
           ),
           body: _pageLoading
               ? Center(child: CircularProgressIndicator()) // Show indicator

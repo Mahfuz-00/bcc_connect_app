@@ -405,6 +405,23 @@ class _ISPDashboardState extends State<ISPDashboard> {
                       ),
                       Divider(),
                       ListTile(
+                        title: Text('Upgrade Connection',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UpgradeUI(shouldRefresh: true)));
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
                         title: Text('Request List',
                             style: TextStyle(
                               color: Colors.black87,

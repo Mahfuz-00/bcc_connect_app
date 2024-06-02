@@ -44,7 +44,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
             icon: Icon(Icons.arrow_back_ios_new_outlined, color: Colors.white,)
         ),
         title: const Text(
-          'Connection Details',
+          'Active Connection Details',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -52,6 +52,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
             fontFamily: 'default',
           ),
         ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -63,7 +64,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 10.0),
                 child: const Center(
                   child: Text(
-                    'Welcome, NTTN Admin Name',
+                    'Connection Details',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.black,

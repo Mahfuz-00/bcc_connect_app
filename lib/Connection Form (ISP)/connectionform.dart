@@ -251,6 +251,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
               fontFamily: 'default',
             ),
           ),
+          centerTitle: true,
         ),
         body: SafeArea(
           child: SingleChildScrollView(

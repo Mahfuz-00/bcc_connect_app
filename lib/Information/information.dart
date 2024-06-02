@@ -38,6 +38,7 @@ class _InformationState extends State<Information> with SingleTickerProviderStat
               fontFamily: 'default',
             ),
           ),
+          centerTitle: true,
         ),
         body: SingleChildScrollView(
           child: SafeArea(
