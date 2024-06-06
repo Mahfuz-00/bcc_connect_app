@@ -297,7 +297,9 @@ class _SignupState extends State<Signup> {
                                   controller: _phoneController,
                                   keyboardType: TextInputType.phone,
                                   inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    // Only allow digits
+                                    LengthLimitingTextInputFormatter(11),
                                   ],
                                   validator: (input) {
                                     if (input == null || input.isEmpty) {
