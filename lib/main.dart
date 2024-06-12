@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'Provider Model/userInfoModel.dart';
-import 'Splashscreen UI/splashscreenUI.dart';
+import 'Bloc/user_bloc.dart';
 import 'package:rename_app/rename_app.dart';
+
+import 'UI/Splashscreen UI/splashscreenUI.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,9 +21,8 @@ class MyApp extends StatelessWidget {
       statusBarColor: Color.fromRGBO(25, 192, 122, 1), // Change the status bar color here
     ));
 
-    return ChangeNotifierProvider(
-
-     create: (context) => UserProfileProvider() ,
+    return BlocProvider(
+      create: (_) => UserDataBloc(), // Initialize UserDataBloc
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'BCC Connect Network',
