@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../NTTN Dashboard/nttnDashboard.dart';
 
 class ActiveConnectionDetailsPage extends StatelessWidget {
   final String Name;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../Data/API Service (Upgrade Connection)/apiServiceUpgradeConnection.dart';
+import '../../Data/Data Sources/API Service (Upgrade Connection)/apiServiceUpgradeConnection.dart';
 
 class UpgradeConnectionInfoCard extends StatefulWidget {
   final String UserID;

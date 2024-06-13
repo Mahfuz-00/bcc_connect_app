@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../Data/API Service (Accept or Decline)/apiServiceAcceptOrDecline.dart';
-import '../NTTN Dashboard/nttnDashboard.dart';
+import '../../Data/Data Sources/API Service (Accept or Decline)/apiServiceAcceptOrDecline.dart';
+import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 
 class PendingConnectionDetailsPage extends StatelessWidget {
   final String Name;
