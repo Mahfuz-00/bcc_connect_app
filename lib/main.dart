@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rename_app/rename_app.dart';
 
-import 'UI/Bloc/user_bloc.dart';
+import 'UI/Bloc/auth_cubit.dart';
 import 'UI/Pages/Splashscreen UI/splashscreenUI.dart';
 
 void main() {
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     ));
 
     return BlocProvider(
-      create: (_) => UserDataBloc(), // Initialize UserDataBloc
+      create: (context) => AuthCubit(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'BCC Connect Network',

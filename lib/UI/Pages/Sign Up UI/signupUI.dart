@@ -599,6 +599,7 @@ class _SignupState extends State<Signup> {
         content: Text(
             'Processing'),
       );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       final registerRequest = RegisterRequestmodel(
         fullName: _fullNameController.text,
         organization: _organizationController.text,
@@ -623,6 +624,21 @@ class _SignupState extends State<Signup> {
           );
           const snackBar = SnackBar(
             content: Text('Registration Submitted!'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        } else if (response != null && response == "The email has already been taken."){
+          const snackBar = SnackBar(
+            content: Text('The Email is Taken!, Please Try entering a different Email'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        } else if (response != null && response == "The phone has already been taken."){
+          const snackBar = SnackBar(
+            content: Text('The Phone Number is Taken!, Please Try a different Number'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        } else{
+          const snackBar = SnackBar(
+            content: Text('Registration Failed!'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }

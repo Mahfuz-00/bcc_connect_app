@@ -36,6 +36,7 @@ class APIService {
 
       // Send the request and await the response
       var response = await request.send();
+      print(response.statusCode);
 
       // Check the status code of the response
       if (response.statusCode == 200) {
@@ -46,8 +47,28 @@ class APIService {
         return jsonResponse['message'];
       } else {
         // Handle registration failure
-        print('Failed to register user: ${await response.stream.bytesToString()}');
-        return 'Failed to register user. Please try again.';
+        //print('Failed to register user: ${await response.stream.bytesToString()}');
+        var responseBody = await response.stream.bytesToString();
+        print(responseBody);
+        var jsonResponse = jsonDecode(responseBody);
+        print('Failed to register user: $jsonResponse');
+
+        if (jsonResponse.containsKey('errors')) {
+          var errors = jsonResponse['errors'];
+          print(errors);
+          var emailError = errors.containsKey('email') ? errors['email'][0] : '';
+          var phoneError = errors.containsKey('phone') ? errors['phone'][0] : '';
+
+          var errorMessage = '';
+          if (emailError.isNotEmpty) errorMessage = emailError;
+          if (phoneError.isNotEmpty) errorMessage = phoneError;
+
+          print(errorMessage);
+          return errorMessage;}
+        else {
+          print('Failed to register user: $responseBody');
+          return 'Failed to register user. Please try again.';
+        }
       }
     } catch (e) {
       // Handle any exceptions

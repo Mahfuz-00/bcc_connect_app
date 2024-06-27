@@ -9,7 +9,6 @@ import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
-import '../../Bloc/user_bloc.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Request and Review List (Full)/ispRequestList.dart';
@@ -247,32 +246,6 @@ class _ISPDashboardState extends State<ISPDashboard> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
-    final userDataBloc = BlocProvider.of<UserDataBloc>(context);
-
-    // Access the data stored in the bloc's state
-    final state = userDataBloc.state;
-    if (state is UserNameLoaded) {
-      UserName = state.name;
-      print('User Name: $UserName');
-    }
-    if (state is UserOrganizationNameLoaded) {
-      OrganizationName = state.organizationName;
-      print('Organization Name: $OrganizationName');
-    }
-    if (state is UserPhotoLoaded) {
-      Photo = state.photo;
-      Photo = 'https://bcc.touchandsolve.com' + Photo;
-      print('Photo: $Photo');
-    }
-    if (state is UserIdLoaded) {
-      ID = state.id;
-      print('Loaded ID: $ID');
-    }
-    if (state is UserToken) {
-      Token = state.token;
-      print('Token: $Token');
-    }
 
     return _pageLoading
         ? Scaffold(

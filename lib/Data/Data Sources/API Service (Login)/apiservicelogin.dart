@@ -21,6 +21,7 @@ class APIService {
       if (response.statusCode == 200) {
         // Successful login, parse the response JSON
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        print("Error:: ${jsonResponse}");
         return LoginResponseModel.fromJson(jsonResponse);
         /*Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse['token'];*/
