@@ -14,6 +14,7 @@ class _PasswordChangeState extends State<PasswordChange> {
   bool _isObscuredCurrentPassword = true;
   bool _isObscuredPassword = true;
   bool _isObscuredConfirmPassword = true;
+  bool _isButtonClicked = false;
 
   IconData _getIconCurrentPassword() {
     return _isObscuredCurrentPassword ? Icons.visibility_off : Icons.visibility;
@@ -56,10 +57,7 @@ class _PasswordChangeState extends State<PasswordChange> {
             color: Colors.white,
           ),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileUI(shouldRefresh: true,)),
-            );
+            Navigator.pop(context);
           },
         ),
       ),
@@ -98,7 +96,18 @@ class _PasswordChangeState extends State<PasswordChange> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'default',
-                    )),
+                    ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_getIconCurrentPassword()),
+                    onPressed: () {
+                      setState(() {
+                        _isObscuredCurrentPassword = !_isObscuredCurrentPassword;
+                        _currentPasswordController.text =
+                            _currentPasswordController.text;
+                      });
+                    },
+                  ),
+                ),
               ),
               SizedBox(height: 20),
               Text(
@@ -129,7 +138,18 @@ class _PasswordChangeState extends State<PasswordChange> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'default',
-                    )),
+                    ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_getIconPassword()),
+                    onPressed: () {
+                      setState(() {
+                        _isObscuredPassword = !_isObscuredPassword;
+                        _passwordController.text =
+                            _passwordController.text;
+                      });
+                    },
+                  ),
+                ),
               ),
               SizedBox(height: 20),
               Text(
@@ -160,7 +180,18 @@ class _PasswordChangeState extends State<PasswordChange> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'default',
-                    )),
+                    ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_getIconConfirmPassword()),
+                    onPressed: () {
+                      setState(() {
+                        _isObscuredConfirmPassword = !_isObscuredConfirmPassword;
+                        _confirmPasswordController.text =
+                            _confirmPasswordController.text;
+                      });
+                    },
+                  ),
+                ),
               ),
               SizedBox(height: 40),
               Center(
@@ -185,7 +216,9 @@ class _PasswordChangeState extends State<PasswordChange> {
                     onPressed: () {
                       _updatePassword();
                     },
-                    child: Text(
+                    child: _isButtonClicked
+                        ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                        : Text(
                       'Update',
                       style: TextStyle(
                         color: Colors.white,
@@ -205,10 +238,26 @@ class _PasswordChangeState extends State<PasswordChange> {
   }
 
   bool checkConfirmPassword() {
-    return _passwordController.text == _confirmPasswordController.text;
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _isButtonClicked =
+        false; // Validation complete, hide circular progress indicator
+      });
+      const snackBar = SnackBar(
+        content: Text('New Password and Confirm Password are not Matched!'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return false;  // Return false if passwords do not match
+    } else {
+      return true;  // Return true if passwords match
+    }
   }
 
   void _updatePassword() async {
+    setState(() {
+      _isButtonClicked =
+      true; // Validation complete, hide circular progress indicator
+    });
    if(checkConfirmPassword()){
      String currentPassword = _currentPasswordController.text;
      String newPassword = _passwordController.text;
@@ -222,14 +271,22 @@ class _PasswordChangeState extends State<PasswordChange> {
          newPassword: newPassword,
          passwordConfirmation: confirmPassword,
        ).then((response) {
+         setState(() {
+           _isButtonClicked =
+           false; // Validation complete, hide circular progress indicator
+         });
          print("Submitted");
-         if (response != null && response == "User Registration Successfully") {
-           Navigator.pushReplacement(
-             context,
-             MaterialPageRoute(builder: (context) => ProfileUI()),
-           );
+         print(response);
+         if (response != null && response == "Password Update Successfully") {
+           Navigator.pop(context);
            const snackBar = SnackBar(
-             content: Text('Registration Submitted!'),
+             content: Text('Password Changed!'),
+           );
+           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+         }
+         if (response != null && response == "The current password do not match.") {
+           const snackBar = SnackBar(
+             content: Text('Current Password is not Matched!'),
            );
            ScaffoldMessenger.of(context).showSnackBar(snackBar);
          }
@@ -237,7 +294,7 @@ class _PasswordChangeState extends State<PasswordChange> {
          // Handle registration error
          print(error);
          const snackBar = SnackBar(
-           content: Text('Registration failed!'),
+           content: Text('Password Change failed!'),
          );
          ScaffoldMessenger.of(context).showSnackBar(snackBar);
        });

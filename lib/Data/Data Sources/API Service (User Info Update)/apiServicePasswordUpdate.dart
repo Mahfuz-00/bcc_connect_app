@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class APIServicePasswordUpdate {
-  static const String baseURL = 'https://bcc.touchandsolve.com/api/';
+  String baseURL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   APIServicePasswordUpdate._();
@@ -27,7 +27,7 @@ class APIServicePasswordUpdate {
     print(prefs.getString('token'));
   }
 
-  Future<Map<String, dynamic>> updatePassword({
+  Future<String> updatePassword({
     required String currentPassword,
     required String newPassword,
     required String passwordConfirmation,
@@ -41,34 +41,49 @@ class APIServicePasswordUpdate {
         throw Exception('Authentication token is empty.');
       }
 
-      print(currentPassword);
-      print(newPassword);
-      print(passwordConfirmation);
+      print('Current $currentPassword');
+      print('New $newPassword');
+      print('Confirm $passwordConfirmation');
+
+      final requestBody = jsonEncode({
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'password_confirmation': passwordConfirmation,
+      });
+
+      print('Request Body: $requestBody'); 
+      print('Auth: $authToken');
 
 
       final response = await http.post(
         Uri.parse('$baseURL/update/password'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $authToken'
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
         },
-        body: jsonEncode(<String, String>{
-          'current_password': currentPassword,
-          'new_password': newPassword,
-          'password_confirmation': passwordConfirmation,
-        }),
+        body: requestBody,
       );
 
       if (response.statusCode == 200) {
+        print('password');
         // Request successful, parse response data if needed
         final responseData = jsonDecode(response.body);
         print(response.body);
-        return responseData;
+        final responseMessage = responseData['message'];
+
+        print(responseMessage);
+        return responseMessage;
       } else {
         print(response.statusCode);
         print(response.body);
-        throw Exception(
-            'Failed to update password: ${response.reasonPhrase}');
+        final responseData = jsonDecode(response.body);
+        final responseError = responseData['errors'];
+        print(responseError);
+        final List<dynamic> responseMessageList = responseError['current_password'];
+        final String responseMessage = responseMessageList.join(', ');
+        print(responseMessage);
+        print(response.request);
+        return responseMessage.toString();
       }
     } catch (e) {
       throw Exception('Failed to update Password: $e');

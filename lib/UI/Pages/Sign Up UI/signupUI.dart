@@ -627,22 +627,34 @@ class _SignupState extends State<Signup> {
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else if (response != null && response == "The email has already been taken."){
+          setState(() {
+            _isLoading = false;
+          });
           const snackBar = SnackBar(
             content: Text('The Email is Taken!, Please Try entering a different Email'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else if (response != null && response == "The phone has already been taken."){
+          setState(() {
+            _isLoading = false;
+          });
           const snackBar = SnackBar(
             content: Text('The Phone Number is Taken!, Please Try a different Number'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else{
+          setState(() {
+            _isLoading = false;
+          });
           const snackBar = SnackBar(
             content: Text('Registration Failed!'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
       }).catchError((error) {
+        setState(() {
+          _isLoading = false;
+        });
         // Handle registration error
         print(error);
         const snackBar = SnackBar(

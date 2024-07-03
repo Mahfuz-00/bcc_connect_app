@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,15 +14,16 @@ import '../../../Data/Data Sources/API Service (Profile)/apiserviceprofile.dart'
 import '../../../Data/Data Sources/API Service (User Info Update)/apiServiceImageUpdate.dart';
 import '../../../Data/Data Sources/API Service (User Info Update)/apiServiceUserInfoUpdate.dart';
 import '../../../Data/Models/profileModelFull.dart';
+import '../../../Data/Models/profilemodel.dart';
 import '../../../Data/Models/userInfoUpdateModel.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../ISP Dashboard/ispDashboard.dart';
-
+import 'passwordChange.dart';
 
 class ProfileUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const ProfileUI({Key? key, this.shouldRefresh = false})
-      : super(key: key);
+  const ProfileUI({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
   State<ProfileUI> createState() => _ProfileUIState();
@@ -73,7 +76,27 @@ class _ProfileUIState extends State<ProfileUI> {
     print(userProfile!.name);
     print(userProfile!.id);
 
-    try {
+    setState(() {
+      // Map UserProfileFull to UserProfile or use directly if they match
+      userProfileCubit = UserProfile(
+        Id: userProfile!.id,
+        name: userProfile!.name,
+        organization: userProfile!.organization,
+        photo: userProfile!.photo,
+        // Add other fields as needed
+      );
+    });
+
+    // Update the UserProfileCubit state using context.read
+    context.read<AuthCubit>().updateProfile(UserProfile(
+            Id: userProfile!.id,
+            name: userProfile!.name,
+            organization: userProfile!.organization,
+            photo: userProfile!.photo)
+        // Add other fields as needed
+        );
+
+/*    try {
       await prefs.setString('userName', userProfile!.name);
       await prefs.setString('organizationName', userProfile!.organization);
       await prefs.setString('photoUrl', userProfile!.photo);
@@ -86,16 +109,17 @@ class _ProfileUIState extends State<ProfileUI> {
       print('User profile saved successfully');
     } catch (e) {
       print('Error saving user profile: $e');
-    }
-
+    }*/
   }
+
+  late UserProfile userProfileCubit;
 
   @override
   void initState() {
     super.initState();
     print('initState called');
     _fetchUserProfile();
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh && !isloaded) {
         isloaded = true;
         // Initialize controllers after user profile data is fetched
@@ -133,18 +157,23 @@ class _ProfileUIState extends State<ProfileUI> {
           appBar: AppBar(
             backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.white,),
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+              ),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
-            title: Text('Profile Overview',
+            title: Text(
+              'Profile Overview',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'default',
-              ),),
+              ),
+            ),
             centerTitle: true,
           ),
           body: _pageLoading
@@ -271,12 +300,14 @@ class _ProfileUIState extends State<ProfileUI> {
                                       _buildDataCouple(Icons.mail, 'Email',
                                           userProfile!.email),
                                       Divider(),
-                                /*      GestureDetector(
+                                      GestureDetector(
                                         onTap: () {
-                                          Navigator.pushReplacement(
+                                          Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                              builder: (context) => PasswordChange(),));
+                                                builder: (context) =>
+                                                    PasswordChange(),
+                                              ));
                                         },
                                         child: Container(
                                           padding: EdgeInsets.all(10),
@@ -313,7 +344,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                             ],
                                           ),
                                         ),
-                                      )*/
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -379,29 +410,29 @@ class _ProfileUIState extends State<ProfileUI> {
                     ),
                   ),
                 ),
-          floatingActionButton:  _pageLoading
+          floatingActionButton: _pageLoading
               ? null // Show indicator
-              :FloatingActionButton(
-            onPressed: () {
-              _showEditDialog();
-            },
-            child: Icon(
-              Icons.edit,
-              color: Colors.white,
-              size: 30,
-            ),
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            // Change the background color as needed
-            elevation: 8,
-            // Increase the elevation to make it appear larger
-            highlightElevation: 12,
-            // Increase the highlight elevation for the pressed state
+              : FloatingActionButton(
+                  onPressed: () {
+                    _showEditDialog();
+                  },
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                  // Change the background color as needed
+                  elevation: 8,
+                  // Increase the elevation to make it appear larger
+                  highlightElevation: 12,
+                  // Increase the highlight elevation for the pressed state
 
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  30), // Adjust the border radius as needed
-            ),
-          ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        30), // Adjust the border radius as needed
+                  ),
+                ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ),
       ),
@@ -478,7 +509,7 @@ class _ProfileUIState extends State<ProfileUI> {
                         fontSize: 20,
                         height: 1.6,
                         letterSpacing: 1.3,
-                       // fontWeight: FontWeight.bold,
+                        // fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                       ),
                     ),
@@ -604,16 +635,19 @@ class _ProfileUIState extends State<ProfileUI> {
                       final result =
                           await apiService.updateUserProfile(userProfileUpdate);
                       Navigator.of(context).pop();
+                      const snackBar = SnackBar(
+                        content: Text('Profile Updated'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileUI(
-                                  shouldRefresh:
-                                  true)));
+                              builder: (context) =>
+                                  ProfileUI(shouldRefresh: true)));
                       // Handle the result as needed, e.g., show a toast message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(result)),
-                      );// Close the dialog
+                      ); // Close the dialog
                     }
                   },
                   child: Text('Update',
@@ -747,15 +781,34 @@ class _ProfileUIState extends State<ProfileUI> {
 
   Future<void> _updateProfilePicture(File imageFile) async {
     try {
+      Navigator.pop(context);
+      const snackBar = SnackBar(
+        content: Text(
+            'Profile Picture Updating ....'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       final apiService = await APIProfilePictureUpdate.create();
       print(imageFile.path);
       print(imageFile);
       final response = await apiService.updateProfilePicture(image: imageFile);
       print('Profile picture update status: ${response.status}');
       print('Message: ${response.message}');
+      const snackBar2 = SnackBar(
+        content: Text(
+            'Profile Picture Update Successfully'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  ProfileUI(
+                      shouldRefresh:
+                      true)));
     } catch (e) {
       print('Error updating profile picture: $e');
     }
   }
+
 
 }

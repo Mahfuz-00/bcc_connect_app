@@ -51,7 +51,6 @@ class _LoginState extends State<Login> {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
     _checkLoginRequest();
-    // Use Cubit to emit the user profile and token
     authCubit = context.read<AuthCubit>();
   }
 

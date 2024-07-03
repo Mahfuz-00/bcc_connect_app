@@ -1,12 +1,14 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttn.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/nttnPendingConncetionDetails.dart';
@@ -164,7 +166,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     }
   }
 
-  Future<void> loadUserProfile() async {
+/*  Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('userName') ?? '';
@@ -176,7 +178,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       print('Photo URL: $photoUrl');
       print('User profile got it!!!!');
     });
-  }
+  }*/
 
   // Function to check if more than 10 items are available in the list
   bool shouldShowSeeAllButton(List list) {
@@ -253,11 +255,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadUserProfile();
+   // loadUserProfile();
     if (widget.shouldRefresh) {
-      loadUserProfile();
+     // loadUserProfile();
       // Refresh logic here, e.g., fetch data again
-      Future.delayed(Duration(seconds: 5), () {
+      Future.delayed(Duration(seconds: 2), () {
         // After 5 seconds, set isLoading to false to stop showing the loading indicator
         setState(() {
           _pageLoading = false;
@@ -283,108 +285,114 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
               child: CircularProgressIndicator(),
             ),
           )
-        : InternetChecker(
-            child: PopScope(
-              canPop: false,
-              child: Scaffold(
-                key: _scaffoldKey,
-                appBar: AppBar(
-                  backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                  titleSpacing: 5,
-                  leading: IconButton(
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      _scaffoldKey.currentState!.openDrawer();
-                    },
-                  ),
-                  title: const Text(
-                    'NTTN Dashboard',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      fontFamily: 'default',
-                    ),
-                  ),
-                  actions: [
-                    Stack(
-                      children: [
-                        IconButton(
+        : BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              if (state is AuthAuthenticated) {
+                final userProfile = state.userProfile;
+                return InternetChecker(
+                  child: PopScope(
+                    canPop: false,
+                    child: Scaffold(
+                      key: _scaffoldKey,
+                      appBar: AppBar(
+                        backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                        titleSpacing: 5,
+                        leading: IconButton(
                           icon: const Icon(
-                            Icons.notifications,
+                            Icons.menu,
                             color: Colors.white,
                           ),
-                          onPressed: () async {
-                            _showNotificationsOverlay(context);
-                            var notificationApiService =
-                            await NotificationReadApiService.create();
-                            notificationApiService.readNotification();
+                          onPressed: () {
+                            _scaffoldKey.currentState!.openDrawer();
                           },
                         ),
-                        if (notifications.isNotEmpty)
-                          Positioned(
-                            right: 11,
-                            top: 11,
-                            child: Container(
-                              padding: EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 12,
-                                minHeight: 12,
-                              ),
-                              child: Text(
-                                '${notifications.length}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                        title: const Text(
+                          'NTTN Dashboard',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            fontFamily: 'default',
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-                drawer: Drawer(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: <Widget>[
-                      DrawerHeader(
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(25, 192, 122, 1),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 60, // Adjust width as needed
-                              height: 60, // Adjust height as needed
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: NetworkImage(photoUrl),
+                        actions: [
+                          Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.notifications,
+                                  color: Colors.white,
                                 ),
+                                onPressed: () async {
+                                  _showNotificationsOverlay(context);
+                                  var notificationApiService =
+                                      await NotificationReadApiService.create();
+                                  notificationApiService.readNotification();
+                                },
                               ),
-                            ),
-                            Text(
-                              userName,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
+                              if (notifications.isNotEmpty)
+                                Positioned(
+                                  right: 11,
+                                  top: 11,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 12,
+                                      minHeight: 12,
+                                    ),
+                                    child: Text(
+                                      '${notifications.length}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      drawer: Drawer(
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: <Widget>[
+                            DrawerHeader(
+                              decoration: BoxDecoration(
+                                color: const Color.fromRGBO(25, 192, 122, 1),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                         /*   Text(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 60, // Adjust width as needed
+                                    height: 60, // Adjust height as needed
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(
+                                            'https://bcc.touchandsolve.com${userProfile.photo}'
+                                          /*photoUrl */),
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    userProfile.name,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  /*   Text(
                               organizationName,
                               style: TextStyle(
                                 color: Colors.white,
@@ -393,269 +401,286 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 fontFamily: 'default',
                               ),
                             ),*/
-                          ],
-                        ),
-                      ),
-                      ListTile(
-                        title: Text('Home',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      NTTNDashboard())); // Close the drawer
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Pending Application',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      NTTNPendingConnectionList()));
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Connections',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      NTTNActiveConnectionList()));
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Information',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) {
-                              return Information();
-                            },
-                          ));
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Profile',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      ProfileUI())); // Close the drawer
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Logout',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
-                        onTap: () async {
-                          // Clear user data from SharedPreferences
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.remove('userName');
-                          await prefs.remove('organizationName');
-                          await prefs.remove('photoUrl');
-                          // Create an instance of LogOutApiService
-                          var logoutApiService =
-                              await LogOutApiService.create();
-
-                          // Wait for authToken to be initialized
-                          logoutApiService.authToken;
-
-                          // Call the signOut method on the instance
-                          if (await logoutApiService.signOut()) {
-                            Navigator.pop(context);
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        Login())); // Close the drawer
-                          }
-                        },
-                      ),
-                      Divider(),
-                    ],
-                  ),
-                ),
-                body: SingleChildScrollView(
-                  child: SafeArea(
-                    child: Container(
-                      color: Colors.grey[100],
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Text(
-                                'Connection Status',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
-                                ),
+                                ],
                               ),
                             ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Container(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Material(
-                                  elevation: 3,
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    width: screenWidth * 0.45,
-                                    height: screenHeight * 0.2,
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(10)),
-                                      color: Colors.deepPurple,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(CountActive.toString(),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 50,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'default',
-                                            )),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Text('Total Active Connection',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'default',
-                                            ))
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Material(
-                                  elevation: 3,
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    width: screenWidth * 0.45,
-                                    height: screenHeight * 0.2,
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(10)),
-                                      color: Colors.greenAccent,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(CountPending.toString(),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 50,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'default',
-                                            )),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Text('New Pending Connection',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'default',
-                                            ))
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Container(
-                              child: const Text('Pending Application',
-                                  textAlign: TextAlign.left,
+                            ListTile(
+                              title: Text('Home',
                                   style: TextStyle(
-                                    color: Colors.black,
+                                    color: Colors.black87,
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'default',
                                   )),
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            NTTNDashboard())); // Close the drawer
+                              },
                             ),
                             Divider(),
-                            const SizedBox(height: 5),
-                            RequestsWidget(
-                                loading: _isLoading,
-                                fetch: _isFetched,
-                                errorText: 'There is no new connection request at this moment.',
-                                listWidget: pendingConnectionRequests,
-                                fetchData: fetchConnectionApplications(),
-                                numberOfWidgets: 10,
-                                showSeeAllButton: shouldShowSeeAllButton(
-                                    pendingConnectionRequests),
-                                seeAllButtonText: 'See All Request',
-                                nextPage: NTTNPendingConnectionList()),
-                           /* Container(
+                            ListTile(
+                              title: Text('Pending Application',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            NTTNPendingConnectionList()));
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              title: Text('Connections',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            NTTNActiveConnectionList()));
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              title: Text('Information',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) {
+                                    return Information();
+                                  },
+                                ));
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              title: Text('Profile',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ProfileUI())); // Close the drawer
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              title: Text('Logout',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () async {
+                                Navigator.pop(context);
+                                const snackBar = SnackBar(
+                                  content: Text(
+                                      'Logging out'),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                             /*   // Clear user data from SharedPreferences
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('userName');
+                                await prefs.remove('organizationName');
+                                await prefs.remove('photoUrl');*/
+                                // Create an instance of LogOutApiService
+                                var logoutApiService =
+                                    await LogOutApiService.create();
+
+                                // Wait for authToken to be initialized
+                                logoutApiService.authToken;
+
+                                // Call the signOut method on the instance
+                                if (await logoutApiService.signOut()) {
+                                  const snackBar = SnackBar(
+                                    content: Text(
+                                        'Logged out'),
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  // Call logout method in AuthCubit/AuthBloc
+                                  context.read<AuthCubit>().logout();
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Login())); // Close the drawer
+                                }
+                              },
+                            ),
+                            Divider(),
+                          ],
+                        ),
+                      ),
+                      body: SingleChildScrollView(
+                        child: SafeArea(
+                          child: Container(
+                            color: Colors.grey[100],
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      'Connection Status',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  Container(
+                                      child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Material(
+                                        elevation: 3,
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Container(
+                                          width: screenWidth * 0.45,
+                                          height: screenHeight * 0.2,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(10)),
+                                            color: Colors.deepPurple,
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(CountActive.toString(),
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 50,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'default',
+                                                  )),
+                                              SizedBox(
+                                                height: 15,
+                                              ),
+                                              Text('Total Active Connection',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'default',
+                                                  ))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Material(
+                                        elevation: 3,
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Container(
+                                          width: screenWidth * 0.45,
+                                          height: screenHeight * 0.2,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(10)),
+                                            color: Colors.greenAccent,
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(CountPending.toString(),
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 50,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'default',
+                                                  )),
+                                              SizedBox(
+                                                height: 15,
+                                              ),
+                                              Text('New Pending Connection',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'default',
+                                                  ))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Container(
+                                    child: const Text('Pending Application',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        )),
+                                  ),
+                                  Divider(),
+                                  const SizedBox(height: 5),
+                                  RequestsWidget(
+                                      loading: _isLoading,
+                                      fetch: _isFetched,
+                                      errorText:
+                                          'There is no new connection request at this moment.',
+                                      listWidget: pendingConnectionRequests,
+                                      fetchData: fetchConnectionApplications(),
+                                      numberOfWidgets: 10,
+                                      showSeeAllButton: shouldShowSeeAllButton(
+                                          pendingConnectionRequests),
+                                      seeAllButtonText: 'See All Request',
+                                      nextPage: NTTNPendingConnectionList()),
+                                  /* Container(
                               //height: screenHeight*0.25,
                               child: FutureBuilder<void>(
                                   future: fetchConnectionApplications(),
@@ -727,32 +752,33 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     return SizedBox(); // You can return an empty SizedBox or any other default widget
                                   }),
                             ),*/
-                            Divider(),
-                            const SizedBox(height: 5),
-                            Container(
-                              child: const Text('Active Connections',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  )),
-                            ),
-                            Divider(),
-                            const SizedBox(height: 5),
-                            RequestsWidget(
-                                loading: _isLoading,
-                                fetch: _isFetched,
-                                errorText: 'No Active connection.',
-                                listWidget: acceptedConnectionRequests,
-                                fetchData: fetchConnectionApplications(),
-                                numberOfWidgets: 10,
-                                showSeeAllButton: shouldShowSeeAllButton(
-                                    acceptedConnectionRequests),
-                                seeAllButtonText: 'See All Reviewed Request',
-                                nextPage: NTTNActiveConnectionList()),
-                      /*      Container(
+                                  Divider(),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    child: const Text('Active Connections',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        )),
+                                  ),
+                                  Divider(),
+                                  const SizedBox(height: 5),
+                                  RequestsWidget(
+                                      loading: _isLoading,
+                                      fetch: _isFetched,
+                                      errorText: 'No Active connection.',
+                                      listWidget: acceptedConnectionRequests,
+                                      fetchData: fetchConnectionApplications(),
+                                      numberOfWidgets: 10,
+                                      showSeeAllButton: shouldShowSeeAllButton(
+                                          acceptedConnectionRequests),
+                                      seeAllButtonText:
+                                          'See All Reviewed Request',
+                                      nextPage: NTTNActiveConnectionList()),
+                                  /*      Container(
                               //height: screenHeight*0.25,
                               child: FutureBuilder<void>(
                                   future: fetchConnectionApplications(),
@@ -822,148 +848,153 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     return SizedBox();
                                   }),
                             ),*/
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      bottomNavigationBar: Container(
+                        height: screenHeight * 0.08,
+                        color: const Color.fromRGBO(25, 192, 122, 1),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                Future.delayed(Duration(seconds: 0), () {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => NTTNDashboard(
+                                              shouldRefresh: true)));
+                                });
+                              },
+                              child: Container(
+                                width: screenWidth / 3,
+                                padding: EdgeInsets.all(7.5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.home,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      height: 2.5,
+                                    ),
+                                    Text(
+                                      'Home',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) {
+                                    return SearchUser();
+                                  },
+                                ));
+                              },
+                              behavior: HitTestBehavior.translucent,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                  left: BorderSide(
+                                    color: Colors.black,
+                                    width: 1.0,
+                                  ),
+                                )),
+                                width: screenWidth / 3,
+                                padding: EdgeInsets.all(7.5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.search,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      height: 2.5,
+                                    ),
+                                    Text(
+                                      'Search',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) {
+                                    return Information();
+                                  },
+                                ));
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                  left: BorderSide(
+                                    color: Colors.black,
+                                    width: 1.0,
+                                  ),
+                                )),
+                                width: screenWidth / 3,
+                                padding: EdgeInsets.all(7.5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.info,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      height: 2.5,
+                                    ),
+                                    Text(
+                                      'Information',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                ),
-                bottomNavigationBar: Container(
-                  height: screenHeight * 0.08,
-                  color: const Color.fromRGBO(25, 192, 122, 1),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          Future.delayed(Duration(seconds: 0), () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        NTTNDashboard(shouldRefresh: true)));
-                          });
-                        },
-                        child: Container(
-                          width: screenWidth / 3,
-                          padding: EdgeInsets.all(7.5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.home,
-                                size: 30,
-                                color: Colors.white,
-                              ),
-                              SizedBox(
-                                height: 2.5,
-                              ),
-                              Text(
-                                'Home',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) {
-                              return SearchUser();
-                            },
-                          ));
-                        },
-                        behavior: HitTestBehavior.translucent,
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(
-                            left: BorderSide(
-                              color: Colors.black,
-                              width: 1.0,
-                            ),
-                          )),
-                          width: screenWidth / 3,
-                          padding: EdgeInsets.all(7.5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.search,
-                                size: 30,
-                                color: Colors.white,
-                              ),
-                              SizedBox(
-                                height: 2.5,
-                              ),
-                              Text(
-                                'Search',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) {
-                              return Information();
-                            },
-                          ));
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(
-                            left: BorderSide(
-                              color: Colors.black,
-                              width: 1.0,
-                            ),
-                          )),
-                          width: screenWidth / 3,
-                          padding: EdgeInsets.all(7.5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.info,
-                                size: 30,
-                                color: Colors.white,
-                              ),
-                              SizedBox(
-                                height: 2.5,
-                              ),
-                              Text(
-                                'Information',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                );
+              } else {
+                return Text('');
+              }
+            },
           );
   }
 
@@ -992,40 +1023,41 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             ),
             child: notifications.isEmpty
                 ? Container(
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_off),
-                  SizedBox(width: 10,),
-                  Text(
-                    'No new notifications',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
-              padding: EdgeInsets.all(8),
-              shrinkWrap: true,
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text(notifications[index]),
-                      onTap: () {
-                        // Handle notification tap if necessary
-                        overlayEntry.remove();
-                      },
+                    height: 50,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.notifications_off),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'No new notifications',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
                     ),
-                    if (index < notifications.length - 1)
-                      Divider()
-                  ],
-                );
-              },
-            ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    shrinkWrap: true,
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: Icon(Icons.info_outline),
+                            title: Text(notifications[index]),
+                            onTap: () {
+                              // Handle notification tap if necessary
+                              overlayEntry.remove();
+                            },
+                          ),
+                          if (index < notifications.length - 1) Divider()
+                        ],
+                      );
+                    },
+                  ),
           ),
         ),
       ),
@@ -1040,5 +1072,4 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       }
     });
   }
-
 }
