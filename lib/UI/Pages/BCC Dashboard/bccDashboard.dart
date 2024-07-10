@@ -695,7 +695,9 @@ class _BCCDashboardState extends State<BCCDashboard>
                   ),
                 );
               } else {
-                return Text('');
+                return Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
               }
             },
           );

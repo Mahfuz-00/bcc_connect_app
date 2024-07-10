@@ -978,7 +978,9 @@ class _ISPDashboardState extends State<ISPDashboard> {
       );
     }
     else {
-      return Text('');
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
   },
 );

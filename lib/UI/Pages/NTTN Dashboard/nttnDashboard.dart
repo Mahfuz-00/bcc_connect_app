@@ -255,9 +255,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-   // loadUserProfile();
+    // loadUserProfile();
     if (widget.shouldRefresh) {
-     // loadUserProfile();
+      // loadUserProfile();
       // Refresh logic here, e.g., fetch data again
       Future.delayed(Duration(seconds: 2), () {
         // After 5 seconds, set isLoading to false to stop showing the loading indicator
@@ -377,8 +377,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
                                         image: NetworkImage(
-                                            'https://bcc.touchandsolve.com${userProfile.photo}'
-                                          /*photoUrl */),
+                                            'https://bcc.touchandsolve.com${userProfile.photo}' /*photoUrl */),
                                       ),
                                     ),
                                   ),
@@ -503,11 +502,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                               onTap: () async {
                                 Navigator.pop(context);
                                 const snackBar = SnackBar(
-                                  content: Text(
-                                      'Logging out'),
+                                  content: Text('Logging out'),
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                             /*   // Clear user data from SharedPreferences
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                                /*   // Clear user data from SharedPreferences
                                 final prefs =
                                     await SharedPreferences.getInstance();
                                 await prefs.remove('userName');
@@ -523,10 +522,10 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 // Call the signOut method on the instance
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
-                                    content: Text(
-                                        'Logged out'),
+                                    content: Text('Logged out'),
                                   );
-                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
                                   // Call logout method in AuthCubit/AuthBloc
                                   context.read<AuthCubit>().logout();
                                   Navigator.pushReplacement(
@@ -992,7 +991,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                   ),
                 );
               } else {
-                return Text('');
+                return Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
               }
             },
           );
