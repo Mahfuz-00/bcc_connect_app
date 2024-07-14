@@ -1,10 +1,12 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
 import '../Connection Form (ISP)/connectionform.dart';
@@ -288,19 +290,39 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                         fontFamily: 'default',
                       )),
                   onTap: () async {
+                    Navigator.pop(context);
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Logging out'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    /*   // Clear user data from SharedPreferences
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('userName');
+                                await prefs.remove('organizationName');
+                                await prefs.remove('photoUrl');*/
                     // Create an instance of LogOutApiService
-                    var logoutApiService = await LogOutApiService.create();
+                    var logoutApiService =
+                    await LogOutApiService.create();
 
                     // Wait for authToken to be initialized
                     logoutApiService.authToken;
 
                     // Call the signOut method on the instance
                     if (await logoutApiService.signOut()) {
-                      Navigator.pop(context);
-                      Navigator.push(
+                      const snackBar = SnackBar(
+                        content: Text(
+                            'Logged out'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      // Call logout method in AuthCubit/AuthBloc
+                      context.read<AuthCubit>().logout();
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Login())); // Close the drawer
+                              builder: (context) =>
+                                  Login())); // Close the drawer
                     }
                   },
                 ),

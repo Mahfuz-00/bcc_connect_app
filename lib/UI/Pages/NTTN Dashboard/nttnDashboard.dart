@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -376,8 +377,8 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            'https://bcc.touchandsolve.com${userProfile.photo}' /*photoUrl */),
+                                        image: CachedNetworkImageProvider(
+                                            'https://bcc.touchandsolve.com${userProfile.photo}'),
                                       ),
                                     ),
                                   ),

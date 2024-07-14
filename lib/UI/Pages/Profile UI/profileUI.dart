@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -198,9 +199,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            'https://bcc.touchandsolve.com' +
-                                                userProfile!.photo),
+                                        image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile!.photo}'),
                                       ),
                                     ),
                                   ),

@@ -258,9 +258,6 @@ class _SearchUserState extends State<SearchUser> {
                                   setState(() {
                                     //It Takes Name String
                                     selectedDistrict = null; // Reset
-                                    districts.clear();
-                                    print(selectedDistrict);
-                                    print(districts);
                                     selectedUpazila = null; // Reset
                                     selectedUnion = null; // Reset
                                     selectedNTTNProvider = null; // Reset
@@ -323,8 +320,6 @@ class _SearchUserState extends State<SearchUser> {
                                 initialValue: selectedDistrict,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    print(districts);
-                                    print(selectedDistrict);
                                     selectedUpazila = null; // Reset
                                     selectedUnion = null; // Reset
                                     selectedNTTNProvider = null; // Reset
@@ -383,7 +378,8 @@ class _SearchUserState extends State<SearchUser> {
                                 initialValue: selectedUpazila,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    selectedUnion = null; // Reset
+                                    selectedUnion = null;
+                                    selectedNTTNProvider = null;
                                     selectedUpazila = newValue;
                                     if (_isLoading) {
                                       CircularProgressIndicator();

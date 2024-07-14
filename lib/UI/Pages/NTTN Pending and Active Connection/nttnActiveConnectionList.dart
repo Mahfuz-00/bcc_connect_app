@@ -1,12 +1,14 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttn.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/templateerrorcontainer.dart';
@@ -301,21 +303,35 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         fontFamily: 'default',
                       )),
                   onTap: () async {
-                    // Clear user data from SharedPreferences
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('userName');
-                    await prefs.remove('organizationName');
-                    await prefs.remove('photoUrl');
+                    Navigator.pop(context);
+                    const snackBar = SnackBar(
+                      content: Text(
+                          'Logging out'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    /*   // Clear user data from SharedPreferences
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('userName');
+                                await prefs.remove('organizationName');
+                                await prefs.remove('photoUrl');*/
                     // Create an instance of LogOutApiService
-                    var logoutApiService = await LogOutApiService.create();
+                    var logoutApiService =
+                    await LogOutApiService.create();
 
                     // Wait for authToken to be initialized
                     logoutApiService.authToken;
 
                     // Call the signOut method on the instance
                     if (await logoutApiService.signOut()) {
-                      Navigator.pop(context);
-                      Navigator.push(
+                      const snackBar = SnackBar(
+                        content: Text(
+                            'Logged out'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      // Call logout method in AuthCubit/AuthBloc
+                      context.read<AuthCubit>().logout();
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                               builder: (context) =>

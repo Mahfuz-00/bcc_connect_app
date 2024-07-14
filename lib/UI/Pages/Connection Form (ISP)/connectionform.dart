@@ -353,8 +353,6 @@ class _ConnectionFormState extends State<ConnectionForm> {
                                     selectedUnion = null; // Reset
                                     selectedNTTNProvider = null; // Reset
                                     selectedDivision = newValue;
-                                    districts.clear();
-                                    districts = [];
                                     //It Takes Name String
                                     /*_divisionID = newValue ?? '';
                                                                                             print(_divisionID);*/

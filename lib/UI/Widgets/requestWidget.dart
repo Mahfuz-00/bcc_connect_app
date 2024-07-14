@@ -70,7 +70,7 @@ class RequestsWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     if (showSeeAllButton)
-                      buildSeeAllButtonReviewedList(context),
+                      buildSeeAllButton(context),
                   ],
                 ),
               );
@@ -82,16 +82,16 @@ class RequestsWidget extends StatelessWidget {
     );
   }
 
-  Widget buildSeeAllButtonReviewedList(BuildContext context) {
+  Widget buildSeeAllButton(BuildContext context) {
     return Center(
       child: Material(
         elevation: 5,
         borderRadius: BorderRadius.circular(10),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(13, 70, 127, 1),
+            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
             fixedSize: Size(
-              MediaQuery.of(context).size.width * 0.9,
+              MediaQuery.of(context).size.width * 0.7,
               MediaQuery.of(context).size.height * 0.08,
             ),
             shape: RoundedRectangleBorder(

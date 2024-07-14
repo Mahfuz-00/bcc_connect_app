@@ -1,11 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Fetch Connections)/apiServiceFetchconnectionlist.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/templateerrorcontainer.dart';
 import '../../Widgets/upgradeConnectionDetails.dart';
 import '../Connection Form (ISP)/connectionform.dart';
@@ -250,34 +253,38 @@ class _ISPDashboardState extends State<UpgradeUI> {
         child: CircularProgressIndicator(),
       ),
     )
-        : InternetChecker(
-      child: PopScope(
-        canPop: false,
-        child: Scaffold(
-          backgroundColor: Colors.grey[100],
-          key: _scaffoldKey,
-          appBar: AppBar(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            titleSpacing: 5,
-            leading: IconButton(
-              icon: const Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                _scaffoldKey.currentState!.openDrawer();
-              },
-            ),
-            title: const Text(
-              'Connection List',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'default',
-              ),
-            ),
-            /*actions: [
+        : BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        if (state is AuthAuthenticated) {
+          final userProfile = state.userProfile;
+          return InternetChecker(
+            child: PopScope(
+              canPop: false,
+              child: Scaffold(
+                backgroundColor: Colors.grey[100],
+                key: _scaffoldKey,
+                appBar: AppBar(
+                  backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                  titleSpacing: 5,
+                  leading: IconButton(
+                    icon: const Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      _scaffoldKey.currentState!.openDrawer();
+                    },
+                  ),
+                  title: const Text(
+                    'Connection List',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      fontFamily: 'default',
+                    ),
+                  ),
+                  /*actions: [
               Stack(
                 children: [
                   IconButton(
@@ -319,19 +326,19 @@ class _ISPDashboardState extends State<UpgradeUI> {
                 ],
               ),
             ],*/
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(25, 192, 122, 1),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /*Container(
+                ),
+                drawer: Drawer(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      DrawerHeader(
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(25, 192, 122, 1),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /*Container(
                         height: 60,
                         width: 60,
                         child: CircleAvatar(
@@ -339,223 +346,223 @@ class _ISPDashboardState extends State<UpgradeUI> {
                           radius: 30,
                         ),
                       ),*/
-                      Container(
-                        width: 60, // Adjust width as needed
-                        height: 60, // Adjust height as needed
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: NetworkImage(photoUrl /*userProfileInfo.photoURL*/),
-                          ),
+                            Container(
+                              width: 60, // Adjust width as needed
+                              height: 60, // Adjust height as needed
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile.photo}'),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              userProfile.name
+                              /*userProfileInfo.userName*/,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              userProfile.organization
+                              /*userProfileInfo.organizationName*/,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        userName
-                        /*userProfileInfo.userName*/,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        organizationName
-                        /*userProfileInfo.organizationName*/,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ListTile(
-                  title: Text('Home',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ISPDashboard(shouldRefresh: true))); // Close the drawer
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('New Connection Request',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ConnectionForm()));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Request List',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ISPRequestList(shouldRefresh: true)));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Reviewed List',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ISPReviewedList(shouldRefresh: true)));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Information',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return Information();
-                      },
-                    ));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Profile',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfileUI(
-                                shouldRefresh:
-                                true))); // Close the drawer
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Logout',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () async {
-                    // Clear user data from SharedPreferences
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('userName');
-                    await prefs.remove('organizationName');
-                    await prefs.remove('photoUrl');
-                    // Create an instance of LogOutApiService
-                    var logoutApiService =
-                    await LogOutApiService.create();
-
-                    // Wait for authToken to be initialized
-                    logoutApiService.authToken;
-
-                    // Call the signOut method on the instance
-                    if (await logoutApiService.signOut()) {
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  Login())); // Close the drawer
-                    }
-                  },
-                ),
-                Divider(),
-              ],
-            ),
-          ),
-          body: SingleChildScrollView(
-            child: SafeArea(
-              child: Container(
-                color: Colors.grey[100],
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 30),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          'Your Existing Connection List',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        child: const Text('Connection List',
-                            //key: requestTextKey,
-                            textAlign: TextAlign.left,
+                      ListTile(
+                        title: Text('Home',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black87,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'default',
                             )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ISPDashboard(shouldRefresh: true))); // Close the drawer
+                        },
                       ),
                       Divider(),
-                      const SizedBox(height: 5),
-         /*             Container(
+                      ListTile(
+                        title: Text('New Connection Request',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ConnectionForm()));
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Request List',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ISPRequestList(shouldRefresh: true)));
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Reviewed List',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ISPReviewedList(shouldRefresh: true)));
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Information',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) {
+                              return Information();
+                            },
+                          ));
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Profile',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProfileUI(
+                                      shouldRefresh:
+                                      true))); // Close the drawer
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Logout',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                        onTap: () async {
+                          // Clear user data from SharedPreferences
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('userName');
+                          await prefs.remove('organizationName');
+                          await prefs.remove('photoUrl');
+                          // Create an instance of LogOutApiService
+                          var logoutApiService =
+                          await LogOutApiService.create();
+
+                          // Wait for authToken to be initialized
+                          logoutApiService.authToken;
+
+                          // Call the signOut method on the instance
+                          if (await logoutApiService.signOut()) {
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        Login())); // Close the drawer
+                          }
+                        },
+                      ),
+                      Divider(),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  child: SafeArea(
+                    child: Container(
+                      color: Colors.grey[100],
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 30),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Text(
+                                'Your Existing Connection List',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 25,
+                            ),
+                            Container(
+                              child: const Text('Connection List',
+                                  //key: requestTextKey,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                            ),
+                            Divider(),
+                            const SizedBox(height: 5),
+                            /*             Container(
                         //height: screenHeight*0.25,
                         child: FutureBuilder<void>(
                             future: _isLoading
@@ -642,80 +649,80 @@ class _ISPDashboardState extends State<UpgradeUI> {
                       ),
                       Divider(),
                       const SizedBox(height: 5),*/
-                      Container(
-                        //height: screenHeight*0.25,
-                        child: FutureBuilder<void>(
-                            future: _isLoading
-                                ? null
-                                : fetchConnectionRequests(),
-                            builder: (context, snapshot) {
-                              if (!_isFetched) {
-                                // Return a loading indicator while waiting for data
-                                return Container(
-                                  height: 200, // Adjust height as needed
-                                  width:
-                                  screenWidth, // Adjust width as needed
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                    BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
-                                // Handle errors
-                                return buildNoRequestsWidget(screenWidth,
-                                    'Error: ${snapshot.error}');
-                              } else if (_isFetched) {
-                                if (acceptedConnectionRequests.isEmpty) {
-                                  // Handle the case when there are no pending connection requests
-                                  return buildNoRequestsWidget(
-                                      screenWidth,
-                                      'You don\'t have any Connection, please create a new connection.');
-                                } else if (acceptedConnectionRequests
-                                    .isNotEmpty) {
-                                  // If data is loaded successfully, display the ListView
-                                  return Container(
-                                    child: Column(
-                                      children: [
-                                        ListView.separated(
-                                          shrinkWrap: true,
-                                          physics:
-                                          NeverScrollableScrollPhysics(),
-                                          itemCount:
-                                          acceptedConnectionRequests
-                                              .length >
-                                              10
-                                              ? 10
-                                              : acceptedConnectionRequests
-                                              .length,
-                                          itemBuilder: (context, index) {
-                                            // Display each connection request using ConnectionRequestInfoCard
-                                            return acceptedConnectionRequests[
-                                            index];
-                                          },
-                                          separatorBuilder: (context,
-                                              index) =>
-                                          const SizedBox(height: 10),
+                            Container(
+                              //height: screenHeight*0.25,
+                              child: FutureBuilder<void>(
+                                  future: _isLoading
+                                      ? null
+                                      : fetchConnectionRequests(),
+                                  builder: (context, snapshot) {
+                                    if (!_isFetched) {
+                                      // Return a loading indicator while waiting for data
+                                      return Container(
+                                        height: 200, // Adjust height as needed
+                                        width:
+                                        screenWidth, // Adjust width as needed
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                          BorderRadius.circular(10),
                                         ),
-                                        SizedBox(height: 10,),
-                                    /*    if (shouldShowSeeAllButton(
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      // Handle errors
+                                      return buildNoRequestsWidget(screenWidth,
+                                          'Error: ${snapshot.error}');
+                                    } else if (_isFetched) {
+                                      if (acceptedConnectionRequests.isEmpty) {
+                                        // Handle the case when there are no pending connection requests
+                                        return buildNoRequestsWidget(
+                                            screenWidth,
+                                            'You don\'t have any Connection, please create a new connection.');
+                                      } else if (acceptedConnectionRequests
+                                          .isNotEmpty) {
+                                        // If data is loaded successfully, display the ListView
+                                        return Container(
+                                          child: Column(
+                                            children: [
+                                              ListView.separated(
+                                                shrinkWrap: true,
+                                                physics:
+                                                NeverScrollableScrollPhysics(),
+                                                itemCount:
+                                                acceptedConnectionRequests
+                                                    .length >
+                                                    10
+                                                    ? 10
+                                                    : acceptedConnectionRequests
+                                                    .length,
+                                                itemBuilder: (context, index) {
+                                                  // Display each connection request using ConnectionRequestInfoCard
+                                                  return acceptedConnectionRequests[
+                                                  index];
+                                                },
+                                                separatorBuilder: (context,
+                                                    index) =>
+                                                const SizedBox(height: 10),
+                                              ),
+                                              SizedBox(height: 10,),
+                                              /*    if (shouldShowSeeAllButton(
                                             acceptedConnectionRequests))
                                           buildSeeAllButtonReviewedList(
                                               context),*/
-                                      ],
-                                    ),
-                                  );
-                                }
-                              }
-                              return SizedBox();
-                            }),
-                      ),
-                      Divider(),
-                      const SizedBox(height: 30),
-                /*      Center(
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }
+                                    return SizedBox();
+                                  }),
+                            ),
+                            Divider(),
+                            const SizedBox(height: 30),
+                            /*      Center(
                         child: Material(
                           elevation: 5,
                           borderRadius: BorderRadius.circular(10),
@@ -748,144 +755,151 @@ class _ISPDashboardState extends State<UpgradeUI> {
                           ),
                         ),
                       )*/
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                bottomNavigationBar: Container(
+                  height: screenHeight * 0.08,
+                  color: const Color.fromRGBO(25, 192, 122, 1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ISPDashboard(shouldRefresh: true)));
+                        },
+                        child: Container(
+                          width: screenWidth / 3,
+                          padding: EdgeInsets.all(5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.home,
+                                size: 30,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                'Home',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ConnectionForm()));
+                        },
+                        behavior: HitTestBehavior.translucent,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                ),
+                              )),
+                          width: screenWidth / 3,
+                          padding: EdgeInsets.all(5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.add_circle_outlined,
+                                size: 30,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                'New Connection',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) {
+                              return UpgradeUI(shouldRefresh: true);
+                            },
+                          ));
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                ),
+                              )),
+                          width: screenWidth / 3,
+                          padding: EdgeInsets.all(5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.refresh,
+                                size: 30,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                'Refresh',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-          bottomNavigationBar: Container(
-            height: screenHeight * 0.08,
-            color: const Color.fromRGBO(25, 192, 122, 1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ISPDashboard(shouldRefresh: true)));
-                  },
-                  child: Container(
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.home,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Home',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ConnectionForm()));
-                  },
-                  behavior: HitTestBehavior.translucent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        )),
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.add_circle_outlined,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'New Connection',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return UpgradeUI(shouldRefresh: true);
-                      },
-                    ));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        )),
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.refresh,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Refresh',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+          );
+        } else {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 
