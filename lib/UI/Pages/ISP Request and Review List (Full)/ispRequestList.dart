@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
+import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectionfulldetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
+import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
@@ -35,11 +37,14 @@ class _ISPRequestListState extends State<ISPRequestList> {
   bool _pageLoading = true;
   int _itemsToLoad = 3;
   ScrollController _scrollController = ScrollController();
+  late Pagination pendingPagination;
+  bool canFetchMorePending = false;
+  late String url = '';
 
   Future<void> fetchConnectionRequests() async {
     if (_isFetched) return;
     try {
-      final apiService = await APIService.create();
+      final apiService = await APIServiceISPConnection.create();
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -58,6 +63,19 @@ class _ISPRequestListState extends State<ISPRequestList> {
         return;
       }
 
+      final Map<String, dynamic> pagination = records['pagination'] ?? {};
+      print(pagination);
+
+      pendingPagination = Pagination.fromJson(pagination['pending']);
+      if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+        url = pendingPagination.nextPage as String;
+        print(pendingPagination.nextPage);
+        canFetchMorePending = pendingPagination.canFetchNext;
+      } else{
+        url = '';
+        canFetchMorePending = false;
+      }
+
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       final int initialLoadCount = pendingRequestsData.length > _itemsToLoad
           ? _itemsToLoad
@@ -71,7 +89,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
       // Map pending requests to widgets
       final List<Widget> pendingWidgets =
-          pendingRequestsData.take(initialLoadCount).map((request) {
+          pendingRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
           NTTNProvider: request['provider'],
@@ -97,64 +115,99 @@ class _ISPRequestListState extends State<ISPRequestList> {
     setState(() {
       _isLoading = true;
     });
+    print(url);
 
     try {
-      final apiService = await APIService.create();
-      final Map<String, dynamic> dashboardData =
-          await apiService.fetchDashboardData();
+      if (url != '' && url.isNotEmpty) {
+        final apiService = await APIServiceISPConnectionFull.create();
+        final Map<String, dynamic> dashboardData =
+            await apiService.fetchFullData(url);
 
-      if (dashboardData == null || dashboardData.isEmpty) {
-        print(
-            'No data available or error occurred while fetching dashboard data');
-        return;
-      }
+        if (dashboardData == null || dashboardData.isEmpty) {
+          print(
+              'No data available or error occurred while fetching dashboard data');
+          return;
+        }
 
-      final Map<String, dynamic> records = dashboardData['records'];
-      if (records == null || records.isEmpty) {
-        print('No records available');
-        return;
-      }
+        final Map<String, dynamic> records = dashboardData['records'];
+        if (records == null || records.isEmpty) {
+          print('No records available');
+          return;
+        }
 
-      final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
-      final int currentCount = pendingConnectionRequests.length;
-      final int additionalLoadCount =
-          pendingRequestsData.length > currentCount + _itemsToLoad
-              ? _itemsToLoad
-              : pendingRequestsData.length - currentCount;
-      for (var index = 0; index < pendingRequestsData.length; index++) {
-        print(
-            'Pending Request at index $index: ${pendingRequestsData[index]}\n');
-      }
+        final Map<String, dynamic> pagination = records['pagination'] ?? {};
+        print(pagination);
 
-      print('Current count: $currentCount');
-      print('Additional load count: $additionalLoadCount');
+        pendingPagination = Pagination.fromJson(pagination['pending']);
 
-      if (additionalLoadCount == 0) {
-        // If no additional requests are loaded
+        if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+          url = pendingPagination.nextPage as String;
+          print(pendingPagination.nextPage);
+          canFetchMorePending = pendingPagination.canFetchNext;
+        } else{
+          url = '';
+          canFetchMorePending = false;
+        }
+
+        final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
+        final int currentCount = pendingConnectionRequests.length;
+        /*final int additionalLoadCount =
+            pendingRequestsData.length > currentCount + _itemsToLoad
+                ? _itemsToLoad
+                : pendingRequestsData.length - currentCount;
+        for (var index = 0; index < pendingRequestsData.length; index++) {
+          print(
+              'Pending Request at index $index: ${pendingRequestsData[index]}\n');
+        }*/
+
+        if (pendingRequestsData.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('All requests loaded')),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        print('Current count: $currentCount');
+       // print('Additional load count: $additionalLoadCount');
+
+      /*  if (additionalLoadCount == 0) {
+          // If no additional requests are loaded
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('All requests loaded')),
+          );
+        }*/
+
+        final List<Widget> pendingWidgets = pendingRequestsData
+            //.skip(currentCount)
+            //.take(additionalLoadCount)
+            .map((request) {
+          return ConnectionRequestInfoCard(
+            ConnectionType: request['connection_type'],
+            NTTNProvider: request['provider'],
+            ApplicationID: request['application_id'].toString(),
+            MobileNo: request['phone'],
+            Location: request['location'],
+            Time: request['created_at'],
+            Status: request['status'],
+          );
+        }).toList();
+
+        setState(() {
+          pendingConnectionRequests.addAll(pendingWidgets);
+          _isLoading = false;
+        });
+      } else{
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All requests loaded')),
         );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
       }
-
-      final List<Widget> pendingWidgets = pendingRequestsData
-          .skip(currentCount)
-          .take(additionalLoadCount)
-          .map((request) {
-        return ConnectionRequestInfoCard(
-          ConnectionType: request['connection_type'],
-          NTTNProvider: request['provider'],
-          ApplicationID: request['application_id'].toString(),
-          MobileNo: request['phone'],
-          Location: request['location'],
-          Time: request['created_at'],
-          Status: request['status'],
-        );
-      }).toList();
-
-      setState(() {
-        pendingConnectionRequests.addAll(pendingWidgets);
-        _isLoading = false;
-      });
     } catch (e) {
       print('Error fetching more connection requests: $e');
       setState(() {
@@ -169,22 +222,22 @@ class _ISPRequestListState extends State<ISPRequestList> {
     _scrollController.addListener(() {
       print("Scroll Position: ${_scrollController.position.pixels}");
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_isLoading) {
         print('Invoking Scrolling!!');
         fetchMoreConnectionRequests();
       }
     });
     print('initState called');
+    if (!_isFetched) {
+      fetchConnectionRequests();
+      //_isFetched = true; // Set _isFetched to true after the first call
+    }
     Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh) {
         // Refresh logic here, e.g., fetch data again
         print('Page Loading Done!!');
         // connectionRequests = [];
-        if (!_isFetched) {
-          fetchConnectionRequests();
-          //_isFetched = true; // Set _isFetched to true after the first call
-        }
       }
       // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
@@ -296,7 +349,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    ISPDashboard())); // Close the drawer
+                                    ISPDashboard(shouldRefresh: true,))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -329,7 +382,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPReviewedList()));
+                                builder: (context) => ISPReviewedList(shouldRefresh: true,)));
                       },
                     ),
                     Divider(),
@@ -364,7 +417,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    ProfileUI())); // Close the drawer
+                                    ProfileUI(shouldRefresh: true,))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -379,8 +432,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                       onTap: () async {
                         Navigator.pop(context);
                         const snackBar = SnackBar(
-                          content: Text(
-                              'Logging out'),
+                          content: Text('Logging out'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         /*   // Clear user data from SharedPreferences
@@ -390,8 +442,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                                 await prefs.remove('organizationName');
                                 await prefs.remove('photoUrl');*/
                         // Create an instance of LogOutApiService
-                        var logoutApiService =
-                        await LogOutApiService.create();
+                        var logoutApiService = await LogOutApiService.create();
 
                         // Wait for authToken to be initialized
                         logoutApiService.authToken;
@@ -399,8 +450,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
-                            content: Text(
-                                'Logged out'),
+                            content: Text('Logged out'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           // Call logout method in AuthCubit/AuthBloc
@@ -419,70 +469,94 @@ class _ISPRequestListState extends State<ISPRequestList> {
               ),
               body: _pageLoading
                   ? Center(
-                child: CircularProgressIndicator(),
-              )
+                      child: CircularProgressIndicator(),
+                    )
                   : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: SafeArea(
-                        child: Container(
-                          color: Colors.grey[100],
-                          padding: const EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: const Text(
-                                  'All Request List',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
+                      headerSliverBuilder: (context, innerBoxIsScrolled) {
+                        return [
+                          SliverToBoxAdapter(
+                            child: SafeArea(
+                              child: Container(
+                                color: Colors.grey[100],
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 10, top: 20, bottom: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        'Welcome, ${userProfile.name}',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 10,),
+                                    Center(
+                                      child: Text(
+                                            'All Requests List',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
+                                    ),
+                                    Divider(),
+                                  ],
                                 ),
                               ),
-                              Divider(),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ];
-                },
-                body: pendingConnectionRequests.isNotEmpty
-                    ? NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (!scrollInfo.metrics.outOfRange &&
-                        scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-                        !_isLoading) {
-                      fetchMoreConnectionRequests();
-                    }
-                    return true;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: ListView.separated(
-                      addAutomaticKeepAlives: false,
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemCount: pendingConnectionRequests.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == pendingConnectionRequests.length) {
-                          return Center(
-                            child: _isLoading ? CircularProgressIndicator() : SizedBox.shrink(),
-                          );
-                        }
-                        return pendingConnectionRequests[index];
+                        ];
                       },
-                      separatorBuilder: (context, index) => const SizedBox(height: 10),
+                      body: pendingConnectionRequests.isNotEmpty
+                          ? NotificationListener<ScrollNotification>(
+                              onNotification: (scrollInfo) {
+                                if (!scrollInfo.metrics.outOfRange &&
+                                    scrollInfo.metrics.pixels ==
+                                        scrollInfo.metrics.maxScrollExtent &&
+                                    !_isLoading &&
+                                    canFetchMorePending) {
+                                  fetchMoreConnectionRequests();
+                                }
+                                return true;
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: ListView.separated(
+                                  addAutomaticKeepAlives: false,
+                                  shrinkWrap: true,
+                                  controller: _scrollController,
+                                  itemCount:
+                                      pendingConnectionRequests.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (index ==
+                                        pendingConnectionRequests.length) {
+                                      return Center(
+                                        child: _isLoading
+                                            ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
+                                            child: CircularProgressIndicator())
+                                            : SizedBox.shrink(),
+                                      );
+                                    }
+                                    return pendingConnectionRequests[index];
+                                  },
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 10),
+                                ),
+                              ),
+                            )
+                          : buildNoRequestsWidget(screenWidth,
+                              'You currently don\'t have any new requests pending.'),
                     ),
-                  ),
-                )
-                    : buildNoRequestsWidget(screenWidth, 'You currently don\'t have any new requests pending.'),
-              ),
               bottomNavigationBar: Container(
                 height: screenHeight * 0.08,
                 color: const Color.fromRGBO(25, 192, 122, 1),

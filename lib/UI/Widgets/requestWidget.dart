@@ -7,7 +7,6 @@ class RequestsWidget extends StatelessWidget {
   final String errorText;
   final Future<void> fetchData;
   final List<Widget> listWidget;
-  final int numberOfWidgets;
   final bool showSeeAllButton;
   final String seeAllButtonText;
   final Widget nextPage;
@@ -19,7 +18,6 @@ class RequestsWidget extends StatelessWidget {
     required this.errorText,
     required this.listWidget,
     required this.fetchData,
-    required this.numberOfWidgets,
     required this.showSeeAllButton,
     required this.seeAllButtonText,
     required this.nextPage,
@@ -61,7 +59,7 @@ class RequestsWidget extends StatelessWidget {
                     ListView.separated(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: listWidget.length > numberOfWidgets ? numberOfWidgets : listWidget.length,
+                      itemCount: listWidget.length,
                       itemBuilder: (context, index) {
                         // Display each connection request using the listWidget
                         return listWidget[index];

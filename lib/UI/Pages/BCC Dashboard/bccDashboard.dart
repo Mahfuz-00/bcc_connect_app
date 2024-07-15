@@ -1,3 +1,4 @@
+import 'package:bcc_connect_app/Data/Data%20Sources/API%20Service%20(BCC_Connections)/apiserviceconnectionfullbcc.dart';
 import 'package:bcc_connect_app/UI/Widgets/requestWidget.dart';
 import 'package:bcc_connect_app/UI/Widgets/requestWidgetShowAll.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -11,8 +12,10 @@ import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (BCC_Connections)/apiserviceconnectionbcc.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
+import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/bccConnectionsPendingdetailtile.dart';
+import '../../Widgets/templateerrorcontainer.dart';
 import '../Information/information.dart';
 import '../Search UI/searchUI.dart';
 import '../Login UI/loginUI.dart';
@@ -45,6 +48,11 @@ class _BCCDashboardState extends State<BCCDashboard>
   int? sblCountPending;
   int? sblCountActive;
   List<String> notifications = [];
+  ScrollController _scrollController = ScrollController();
+  ScrollController _tabScrollController = ScrollController();
+  late Pagination pendingPagination;
+  bool canFetchMorePending = false;
+  late String url = '';
 
 /*  Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,6 +108,20 @@ class _BCCDashboardState extends State<BCCDashboard>
         return;
       }
 
+      final Map<String, dynamic> pagination = records['pagination'] ?? {};
+      print(pagination);
+
+      pendingPagination = Pagination.fromJson(pagination);
+      print('Pagination: $pendingPagination');
+      if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+        url = pendingPagination.nextPage as String;
+        print(pendingPagination.nextPage);
+        canFetchMorePending = pendingPagination.canFetchNext;
+      } else{
+        url = '';
+        canFetchMorePending = false;
+      }
+
       // Extract notifications
       notifications = List<String>.from(records['notifications'] ?? []);
 
@@ -147,12 +169,126 @@ class _BCCDashboardState extends State<BCCDashboard>
     }
   }
 
+  Future<void> fetchMoreConnectionRequests() async {
+    setState(() {
+      _isLoading = true;
+    });
+    print(url);
+
+    try {
+      if (url != '' && url.isNotEmpty) {
+        final apiService = await BCCFullConnectionAPIService.create();
+        final Map<String, dynamic> dashboardData =
+        await apiService.fetchFullDashboardItems(url);
+
+        if (dashboardData == null || dashboardData.isEmpty) {
+          print(
+              'No data available or error occurred while fetching dashboard data');
+          return;
+        }
+
+        final Map<String, dynamic> records = dashboardData['records'];
+        if (records == null || records.isEmpty) {
+          print('No records available');
+          return;
+        }
+
+        final Map<String, dynamic> pagination = records['pagination'] ?? {};
+        print(pagination);
+
+        pendingPagination = Pagination.fromJson(pagination);
+
+        if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+          url = pendingPagination.nextPage as String;
+          print(pendingPagination.nextPage);
+          canFetchMorePending = pendingPagination.canFetchNext;
+        } else{
+          url = '';
+          canFetchMorePending = false;
+        }
+
+        final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
+        final int currentCount = pendingConnectionRequests.length;
+        /*final int additionalLoadCount =
+            pendingRequestsData.length > currentCount + _itemsToLoad
+                ? _itemsToLoad
+                : pendingRequestsData.length - currentCount;
+        for (var index = 0; index < pendingRequestsData.length; index++) {
+          print(
+              'Pending Request at index $index: ${pendingRequestsData[index]}\n');
+        }*/
+
+        if (pendingRequestsData.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('All requests loaded')),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        print('Current count: $currentCount');
+        // print('Additional load count: $additionalLoadCount');
+
+        /*  if (additionalLoadCount == 0) {
+          // If no additional requests are loaded
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('All requests loaded')),
+          );
+        }*/
+
+        // Map pending requests to widgets
+        final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
+          return BCCConnectionsInfoCard(
+            Name: request['name'],
+            OrganizationName: request['organization'],
+            MobileNo: request['mobile'],
+            ConnectionType: request['connection_type'],
+            Provider: request['provider'],
+            ApplicationID: request['application_id'],
+            Status: request['status'],
+          );
+        }).toList();
+
+        setState(() {
+          pendingConnectionRequests.addAll(pendingWidgets);
+          _isLoading = false;
+        });
+      } else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('All requests loaded')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+    } catch (e) {
+      print('Error fetching more connection requests: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      print("Scroll Position: ${_scrollController.position.pixels}");
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent &&
+          !_isLoading) {
+        print('Invoking Scrolling!!');
+        fetchMoreConnectionRequests();
+      }
+    });
     _tabController = TabController(length: 2, vsync: this);
     //loadUserProfile();
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 5), () {
       //loadUserProfile();
       if (widget.shouldRefresh) {
         setState(() {
@@ -279,6 +415,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 20,),
                                   Text(
                                     userProfile.name,
                                     style: TextStyle(
@@ -314,7 +451,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            BCCDashboard())); // Close the drawer
+                                            BCCDashboard(shouldRefresh: true,))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -349,7 +486,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            ProfileUI())); // Close the drawer
+                                            ProfileUI(shouldRefresh: true,))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -403,160 +540,125 @@ class _BCCDashboardState extends State<BCCDashboard>
                         ),
                       ),
                       body: SingleChildScrollView(
-                          child: SafeArea(
-                        child: Container(
-                          color: Colors.grey[100],
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Center(
-                                  child: Text(
-                                    'Connection Status',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'default',
+                        controller: _scrollController,
+                        child: Column(
+                          children: [
+                            SafeArea(
+                              child: Container(
+                                color: Colors.grey[100],
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        'Welcome, ${userProfile.name}',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                Container(
-                                  child: TabBar(
-                                    padding: EdgeInsets.zero,
-                                    controller: _tabController,
-                                    tabs: [
-                                      Tab(
-                                        child: Text(
-                                          'SecureNet Bangladesh Limited',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'default',
+                                    const SizedBox(height: 10),
+                                    Center(
+                                      child: Text(
+                                        'Connection Status',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    TabBar(
+                                      controller: _tabController,
+                                      tabs: [
+                                        Tab(
+                                          child: Text(
+                                            'SecureNet Bangladesh Limited',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'default',
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Tab(
-                                        child: Text(
-                                          'Advanced Digital Solution Limited',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'default',
+                                        Tab(
+                                          child: Text(
+                                            'Advanced Digital Solution Limited',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'default',
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  height: screenHeight * 0.25,
-                                  width: screenWidth,
-                                  child: TabBarView(
-                                    controller: _tabController,
-                                    children: [
-                                      // Widget for SecureNet Bangladesh Limited Tab
-                                      buildContentForSecureNetBangladeshLimited(
-                                          sblCountActive, sblCountPending),
-                                      // Widget for Advanced Digital Solution Limited Tab
-                                      buildContentForAdvancedDigitalSolutionLimited(
-                                          adslCountActive, adslCountPending),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  'Pending Authentication',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                RequestsWidgetShowAll(
-                                  loading: _isLoading,
-                                  fetch: _isFetched,
-                                  errorText:
-                                      'There is no new connection request at this moment.',
-                                  listWidget: pendingConnectionRequests,
-                                  fetchData: fetchConnections(),
-                                ),
-                                /*   Container(
-                            //height: screenHeight*0.25,
-                            child: FutureBuilder<void>(
-                                future: fetchConnections(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    // Return a loading indicator while waiting for data
-                                    return Container(
-                                      height: 200,
-                                      // Adjust height as needed
-                                      width: screenWidth,
-                                      // Adjust width as needed
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    // Handle errors
-                                    return buildNoRequestsWidget(screenWidth,
-                                        'Error: ${snapshot.error}');
-                                  } else if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    if (pendingConnectionRequests.isNotEmpty) {
-                                      // If data is loaded successfully, display the ListView
-                                      return Container(
-                                        child: ListView.separated(
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount: */ /*pendingConnectionRequests.length > 10
-                                          ? 10
-                                          :*/ /*
-                                              pendingConnectionRequests.length,
-                                          itemBuilder: (context, index) {
-                                            // Display each connection request using ConnectionRequestInfoCard
-                                            return pendingConnectionRequests[
-                                                index];
-                                          },
-                                          separatorBuilder: (context, index) =>
-                                              const SizedBox(height: 10),
-                                        ),
-                                      );
-                                    } else {
-                                      // Handle the case when there are no pending connection requests
-                                      return buildNoRequestsWidget(screenWidth,
-                                          'There is no new connection request at this moment.');
-                                    }
-                                  }
-                                  // Return a default widget if none of the conditions above are met
-                                  return SizedBox(); // You can return an empty SizedBox or any other default widget
-                                }),
-                          ),*/
-                              ],
+                              ),
                             ),
-                          ),
+                            Container(
+                              height: screenHeight * 0.25,
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  buildContentForSecureNetBangladeshLimited(sblCountActive, sblCountPending),
+                                  buildContentForAdvancedDigitalSolutionLimited(adslCountActive, adslCountPending),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: Text(
+                                'Pending Authentication',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                              ),
+                            ),
+                            Divider(),
+                            pendingConnectionRequests.isNotEmpty
+                                ? Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: ListView.separated(
+                                                                physics: NeverScrollableScrollPhysics(), // Prevent scrolling inside ListView
+                                                                shrinkWrap: true, // Allow ListView to take only necessary height
+                                                                itemCount: pendingConnectionRequests.length + 1,
+                                                                itemBuilder: (context, index) {
+                                  if (index == pendingConnectionRequests.length) {
+                                    return Center(
+                                      child: _isLoading
+                                          ? Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 20),
+                                        child: CircularProgressIndicator(),
+                                      )
+                                          : SizedBox.shrink(),
+                                    );
+                                  }
+                                  return pendingConnectionRequests[index];
+                                                                },
+                                                                separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                                              ),
+                                )
+                                : buildNoRequestsWidget(screenWidth, 'There is no new connection request at this moment.'),
+                          ],
                         ),
-                      )),
+                      ),
                       bottomNavigationBar: Container(
                         height: screenHeight * 0.08,
                         color: const Color.fromRGBO(25, 192, 122, 1),

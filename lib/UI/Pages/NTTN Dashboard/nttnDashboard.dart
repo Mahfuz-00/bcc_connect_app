@@ -9,6 +9,7 @@ import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttn.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
+import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
@@ -44,6 +45,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   late String organizationName = '';
   late String photoUrl = '';
   List<String> notifications = [];
+  late Pagination pendingPagination;
+  late Pagination acceptedPagination;
+
+  bool canFetchMorePending = false;
+  bool canFetchMoreAccepted = false;
 
   Future<void> fetchConnectionApplications() async {
     if (_isFetched) return;
@@ -77,6 +83,19 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         print('No records available');
         return;
       }
+
+      final Map<String, dynamic> pagination = records['pagination'] ?? {};
+      print(pagination);
+
+      pendingPagination = Pagination.fromJson(pagination['pending']);
+      acceptedPagination = Pagination.fromJson(pagination['accepted']);
+      print(pendingPagination.nextPage);
+      print(acceptedPagination.nextPage);
+
+      //recentPagination = Pagination.fromJson(pagination['recent']);
+
+      canFetchMorePending = pendingPagination.canFetchNext;
+      canFetchMoreAccepted = acceptedPagination.canFetchNext;
 
       // Extract notifications
       notifications = List<String>.from(records['notifications'] ?? []);
@@ -181,7 +200,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     });
   }*/
 
-  // Function to check if more than 10 items are available in the list
+/*  // Function to check if more than 10 items are available in the list
   bool shouldShowSeeAllButton(List list) {
     return list.length > 10;
   }
@@ -250,7 +269,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         ),
       ),
     );
-  }
+  }*/
 
   @override
   void initState() {
@@ -382,6 +401,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 20,),
                                   Text(
                                     userProfile.name,
                                     style: TextStyle(
@@ -417,7 +437,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNDashboard())); // Close the drawer
+                                            NTTNDashboard(shouldRefresh: true,))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -435,7 +455,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNPendingConnectionList()));
+                                            NTTNPendingConnectionList(shouldRefresh: true,)));
                               },
                             ),
                             Divider(),
@@ -453,7 +473,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNActiveConnectionList()));
+                                            NTTNActiveConnectionList(shouldRefresh: true,)));
                               },
                             ),
                             Divider(),
@@ -488,7 +508,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            ProfileUI())); // Close the drawer
+                                            ProfileUI(shouldRefresh: true,))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -554,7 +574,22 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 children: [
                                   Center(
                                     child: Text(
-                                      'Connection Status',
+                                      'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Center(
+                                    child: Text(
+                                          'Connection Status',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.black,
@@ -675,11 +710,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                           'There is no new connection request at this moment.',
                                       listWidget: pendingConnectionRequests,
                                       fetchData: fetchConnectionApplications(),
-                                      numberOfWidgets: 10,
-                                      showSeeAllButton: shouldShowSeeAllButton(
-                                          pendingConnectionRequests),
+                                      showSeeAllButton: canFetchMorePending,
                                       seeAllButtonText: 'See All Request',
-                                      nextPage: NTTNPendingConnectionList()),
+                                      nextPage: NTTNPendingConnectionList(shouldRefresh: true,)),
                                   /* Container(
                               //height: screenHeight*0.25,
                               child: FutureBuilder<void>(
@@ -772,12 +805,10 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       errorText: 'No Active connection.',
                                       listWidget: acceptedConnectionRequests,
                                       fetchData: fetchConnectionApplications(),
-                                      numberOfWidgets: 10,
-                                      showSeeAllButton: shouldShowSeeAllButton(
-                                          acceptedConnectionRequests),
+                                      showSeeAllButton: canFetchMoreAccepted,
                                       seeAllButtonText:
                                           'See All Reviewed Request',
-                                      nextPage: NTTNActiveConnectionList()),
+                                      nextPage: NTTNActiveConnectionList(shouldRefresh: true,)),
                                   /*      Container(
                               //height: screenHeight*0.25,
                               child: FutureBuilder<void>(

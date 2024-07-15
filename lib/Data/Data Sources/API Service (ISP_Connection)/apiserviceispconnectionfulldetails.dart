@@ -3,14 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class APIServiceISPConnection {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+class APIServiceISPConnectionFull {
   late final String authToken;
 
-  APIServiceISPConnection._();
+  APIServiceISPConnectionFull._();
 
-  static Future<APIServiceISPConnection> create() async {
-    var apiService = APIServiceISPConnection._();
+  static Future<APIServiceISPConnectionFull> create() async {
+    var apiService = APIServiceISPConnectionFull._();
     await apiService._loadAuthToken();
     print('triggered API');
     return apiService;
@@ -28,7 +27,7 @@ class APIServiceISPConnection {
     print(prefs.getString('token'));
   }
 
-  Future<Map<String, dynamic>> fetchDashboardData() async {
+  Future<Map<String, dynamic>> fetchFullData(String url) async {
     final String token = await authToken;
     try {
       if (token.isEmpty) {
@@ -36,7 +35,7 @@ class APIServiceISPConnection {
       }
 
       final response = await http.get(
-        Uri.parse('$URL/dashboard'),
+        Uri.parse(url),
         headers: {'Authorization': 'Bearer $token'}, // Pass the actual token, not the future
       );
 

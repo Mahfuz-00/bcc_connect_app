@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
+import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectionfulldetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
+import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
@@ -38,6 +41,10 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
+  ScrollController _scrollController = ScrollController();
+  late Pagination acceptedPagination;
+  bool canFetchMoreAccepted = false;
+  late String url = '';
 
   Future<void> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -52,7 +59,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
   Future<void> fetchConnectionRequests() async {
     if (_isFetched) return;
     try {
-      final apiService = await APIService.create();
+      final apiService = await APIServiceISPConnection.create();
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -69,6 +76,19 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
         // No records available
         print('No records available');
         return;
+      }
+
+      final Map<String, dynamic> pagination = records['pagination'] ?? {};
+      print(pagination);
+
+      acceptedPagination = Pagination.fromJson(pagination['accepted']);
+      if(acceptedPagination.nextPage != 'None' && acceptedPagination.nextPage!.isNotEmpty){
+        url = acceptedPagination.nextPage as String;
+        print(acceptedPagination.nextPage);
+        canFetchMoreAccepted = acceptedPagination.canFetchNext;
+      } else{
+        url = '';
+        canFetchMoreAccepted = false;
       }
 
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
@@ -101,20 +121,106 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
     }
   }
 
+  Future<void> fetchMoreConnectionRequests() async {
+    setState(() {
+      _isLoading = true;
+    });
+    print(url);
+
+    try {
+      if (url != '' && url.isNotEmpty) {
+        final apiService = await APIServiceISPConnectionFull.create();
+        final Map<String, dynamic> dashboardData =
+        await apiService.fetchFullData(url);
+
+        if (dashboardData == null || dashboardData.isEmpty) {
+          print(
+              'No data available or error occurred while fetching dashboard data');
+          return;
+        }
+
+        final Map<String, dynamic> records = dashboardData['records'];
+        if (records == null || records.isEmpty) {
+          print('No records available');
+          return;
+        }
+
+        final Map<String, dynamic> pagination = records['pagination'] ?? {};
+        print(pagination);
+
+        acceptedPagination = Pagination.fromJson(pagination['accepted']);
+        if(acceptedPagination.nextPage != 'None' && acceptedPagination.nextPage!.isNotEmpty){
+          url = acceptedPagination.nextPage as String;
+          print(acceptedPagination.nextPage);
+          canFetchMoreAccepted = acceptedPagination.canFetchNext;
+        } else{
+          url = '';
+          canFetchMoreAccepted = false;
+        }
+
+        final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
+        for (var index = 0; index < acceptedRequestsData.length; index++) {
+          print(
+              'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
+        }
+
+
+        // Map accepted requests to widgets
+        final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
+          return ConnectionRequestInfoCard(
+            ConnectionType: request['connection_type'],
+            NTTNProvider: request['provider'],
+            ApplicationID: request['application_id'].toString(),
+            MobileNo: request['phone'],
+            Location: request['location'],
+            Time: request['created_at'],
+            Status: request['status'],
+          );
+        }).toList();
+
+        setState(() {
+          acceptedConnectionRequests.addAll(acceptedWidgets);
+          _isLoading = false;
+        });
+      } else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('All requests loaded')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+    } catch (e) {
+      print('Error fetching more connection requests: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      print("Scroll Position: ${_scrollController.position.pixels}");
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent &&
+          !_isLoading) {
+        print('Invoking Scrolling!!');
+        fetchMoreConnectionRequests();
+      }
+    });
     print('initState called');
-    Future.delayed(Duration(seconds: 5), () {
+    if (!_isFetched) {
+      fetchConnectionRequests();
+    }
+    Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh && !_isFetched) {
         loadUserProfile();
         // Refresh logic here, e.g., fetch data again
         print('Page Loading Done!!');
         // connectionRequests = [];
-        if (!_isFetched) {
-          fetchConnectionRequests();
-          //_isFetched = true; // Set _isFetched to true after the first call
-        }
       }
       // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
@@ -129,472 +235,438 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return InternetChecker(
-      child: PopScope(
-        canPop: false,
-        child: Scaffold(
-          backgroundColor: Colors.grey[100],
-          key: _scaffoldKey,
-          appBar: AppBar(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            titleSpacing: 5,
-            leading: IconButton(
-              icon: const Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                _scaffoldKey.currentState!.openDrawer();
-              },
-            ),
-            title: const Text(
-              'Reviewed List',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'default',
-              ),
-            ),
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(25, 192, 122, 1),
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        if (state is AuthAuthenticated) {
+          final userProfile = state.userProfile;
+          return InternetChecker(
+            child: Scaffold(
+              backgroundColor: Colors.grey[100],
+              key: _scaffoldKey,
+              appBar: AppBar(
+                backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                titleSpacing: 5,
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Colors.white,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 60, // Adjust width as needed
-                        height: 60, // Adjust height as needed
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: NetworkImage(photoUrl),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Welcome', /*userName,*/
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        '',/*organizationName,*/
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                      ),
-                    ],
+                  onPressed: () {
+                    _scaffoldKey.currentState!.openDrawer();
+                  },
+                ),
+                title: const Text(
+                  'Reviewed List',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontFamily: 'default',
                   ),
                 ),
-                ListTile(
-                  title: Text('Home',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ISPDashboard())); // Close the drawer
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('New Connection Request',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ConnectionForm()));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Request List',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ISPRequestList()));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Information',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return Information();
-                      },
-                    ));
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Profile',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfileUI())); // Close the drawer
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Logout',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      )),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    const snackBar = SnackBar(
-                      content: Text(
-                          'Logging out'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    /*   // Clear user data from SharedPreferences
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('userName');
-                                await prefs.remove('organizationName');
-                                await prefs.remove('photoUrl');*/
-                    // Create an instance of LogOutApiService
-                    var logoutApiService =
-                    await LogOutApiService.create();
-
-                    // Wait for authToken to be initialized
-                    logoutApiService.authToken;
-
-                    // Call the signOut method on the instance
-                    if (await logoutApiService.signOut()) {
-                      const snackBar = SnackBar(
-                        content: Text(
-                            'Logged out'),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      // Call logout method in AuthCubit/AuthBloc
-                      context.read<AuthCubit>().logout();
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  Login())); // Close the drawer
-                    }
-                  },
-                ),
-                Divider(),
-              ],
-            ),
-          ),
-          body: _pageLoading
-              ? Center(
-            // Show circular loading indicator while waiting
-            child: CircularProgressIndicator(),
-          )
-              : SingleChildScrollView(
-            child: SafeArea(
-              child: Container(
-                color: Colors.grey[100],
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          'Welcome ', /*$userName*/
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
+              ),
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(25, 192, 122, 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 60, // Adjust width as needed
+                            height: 60, // Adjust height as needed
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: CachedNetworkImageProvider(
+                                    'https://bcc.touchandsolve.com${userProfile.photo}'),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        child: const Text('Reviewed List',
-                            textAlign: TextAlign.left,
+                          SizedBox(height: 10),
+                          Text(
+                            userProfile.name,
+                            /*userName,*/
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'default',
-                            )),
-                      ),
-                      Divider(),
-                      const SizedBox(height: 5),
-                      Container(
-                        //height: screenHeight*0.25,
-                        child: FutureBuilder<void>(
-                            future: _isLoading ? null : fetchConnectionRequests(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                // Return a loading indicator while waiting for data
-                                return Container(
-                                  height: 200, // Adjust height as needed
-                                  width:
-                                  screenWidth, // Adjust width as needed
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
-                                // Handle errors
-                                return buildNoRequestsWidget(
-                                    screenWidth, 'Error: ${snapshot.error}');
-                              } else if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (acceptedConnectionRequests.isEmpty) {
-                                  // Handle the case when there are no pending connection requests
-                                  return buildNoRequestsWidget(screenWidth,
-                                      'No connection requests reviewed yet');
-                                } else {
-                                  // If data is loaded successfully, display the ListView
-                                  return Container(
-                                    child: ListView.separated(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: /* acceptedConnectionRequests.length > 10
-                                        ? 10
-                                        :*/
-                                      acceptedConnectionRequests.length,
-                                      itemBuilder: (context, index) {
-                                        // Display each connection request using ConnectionRequestInfoCard
-                                        return acceptedConnectionRequests[
-                                        index];
-                                      },
-                                      separatorBuilder: (context, index) =>
-                                      const SizedBox(height: 10),
-                                    ),
-                                  );
-                                }
-                              }
-                              return SizedBox();
-                            }),
-                      ),
-                      Divider(),
-                      const SizedBox(height: 30),
-                      Center(
-                        child: Material(
-                          elevation: 5,
-                          borderRadius: BorderRadius.circular(10),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                              const Color.fromRGBO(25, 192, 122, 1),
-                              fixedSize: Size(
-                                  MediaQuery.of(context).size.width * 0.8,
-                                  MediaQuery.of(context).size.height * 0.1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          ISPDashboard()));
-                            },
-                            child: const Text('Return to Home',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
-                                )),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            userProfile.organization,
+                            /*organizationName,*/
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      title: Text('Home',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ISPDashboard(shouldRefresh: true,))); // Close the drawer
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('New Connection Request',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => ConnectionForm()));
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Request List',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => ISPRequestList(shouldRefresh: true,)));
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Information',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) {
+                            return Information();
+                          },
+                        ));
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Profile',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileUI(shouldRefresh: true,))); // Close the drawer
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Logout',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        const snackBar = SnackBar(
+                          content: Text(
+                              'Logging out'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        /*   // Clear user data from SharedPreferences
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.remove('userName');
+                              await prefs.remove('organizationName');
+                              await prefs.remove('photoUrl');*/
+                        // Create an instance of LogOutApiService
+                        var logoutApiService =
+                        await LogOutApiService.create();
+
+                        // Wait for authToken to be initialized
+                        logoutApiService.authToken;
+
+                        // Call the signOut method on the instance
+                        if (await logoutApiService.signOut()) {
+                          const snackBar = SnackBar(
+                            content: Text(
+                                'Logged out'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          // Call logout method in AuthCubit/AuthBloc
+                          context.read<AuthCubit>().logout();
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Login())); // Close the drawer
+                        }
+                      },
+                    ),
+                    Divider(),
+                  ],
+                ),
+              ),
+              body: _pageLoading
+                  ? Center(
+                // Show circular loading indicator while waiting
+                child: CircularProgressIndicator(),
+              )
+                  : NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: SafeArea(
+                        child: Container(
+                          color: Colors.grey[100],
+                          padding: const EdgeInsets.only(
+                              left: 10, right: 10, top: 20, bottom: 5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Text(
+                                  'Welcome, ${userProfile.name}',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10,),
+                              Center(
+                                child: const Text(
+                                  'All Reviewed Requests',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                ),
+                              ),
+                              Divider(),
+                            ],
                           ),
                         ),
-                      )
-                    ],
+                      ),
+                    ),
+                  ];
+                },
+                body: acceptedConnectionRequests.isNotEmpty
+                    ? NotificationListener<ScrollNotification>(
+                  onNotification: (scrollInfo) {
+                    if (!scrollInfo.metrics.outOfRange &&
+                        scrollInfo.metrics.pixels ==
+                            scrollInfo.metrics.maxScrollExtent &&
+                        !_isLoading &&
+                        canFetchMoreAccepted) {
+                      fetchMoreConnectionRequests();
+                    }
+                    return true;
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0),
+                    child: ListView.separated(
+                      addAutomaticKeepAlives: false,
+                      shrinkWrap: true,
+                      controller: _scrollController,
+                      itemCount:
+                      acceptedConnectionRequests.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index ==
+                            acceptedConnectionRequests.length) {
+                          return Center(
+                            child: _isLoading
+                                ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
+                                child: CircularProgressIndicator())
+                                : SizedBox.shrink(),
+                          );
+                        }
+                        return acceptedConnectionRequests[index];
+                      },
+                      separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                    ),
                   ),
+                )
+                    : buildNoRequestsWidget(screenWidth,
+                    'No connection requests reviewed yet.'),
+              ),
+              bottomNavigationBar: Container(
+                height: screenHeight * 0.08,
+                color: const Color.fromRGBO(25, 192, 122, 1),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => ISPDashboard()));
+                      },
+                      child: Container(
+                        width: screenWidth / 3,
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.home,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'Home',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => ConnectionForm()));
+                      },
+                      behavior: HitTestBehavior.translucent,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                color: Colors.black,
+                                width: 1.0,
+                              ),
+                            )),
+                        width: screenWidth / 3,
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.add_circle_outlined,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'New Connection',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) {
+                            return Information();
+                          },
+                        ));
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                color: Colors.black,
+                                width: 1.0,
+                              ),
+                            )),
+                        width: screenWidth / 3,
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.info,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'Information',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-          bottomNavigationBar: Container(
-            height: screenHeight * 0.08,
-            color: const Color.fromRGBO(25, 192, 122, 1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => ISPDashboard()));
-                  },
-                  child: Container(
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.home,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Home',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ConnectionForm()));
-                  },
-                  behavior: HitTestBehavior.translucent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        )),
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.add_circle_outlined,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'New Connection',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return Information();
-                      },
-                    ));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        )),
-                    width: screenWidth / 3,
-                    padding: EdgeInsets.all(5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.info,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Information',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            fontFamily: 'default',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+          );
+        } else {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 }

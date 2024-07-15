@@ -2,15 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-class APIServiceISPConnection {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+class BCCFullConnectionAPIService {
   late final String authToken;
 
-  APIServiceISPConnection._();
+  BCCFullConnectionAPIService._();
 
-  static Future<APIServiceISPConnection> create() async {
-    var apiService = APIServiceISPConnection._();
+  static Future<BCCFullConnectionAPIService> create() async {
+    var apiService = BCCFullConnectionAPIService._();
     await apiService._loadAuthToken();
     print('triggered API');
     return apiService;
@@ -28,27 +26,29 @@ class APIServiceISPConnection {
     print(prefs.getString('token'));
   }
 
-  Future<Map<String, dynamic>> fetchDashboardData() async {
+  Future<Map<String, dynamic>> fetchFullDashboardItems(String url) async {
     final String token = await authToken;
     try {
       if (token.isEmpty) {
         throw Exception('Authentication token is empty.');
       }
-
       final response = await http.get(
-        Uri.parse('$URL/dashboard'),
-        headers: {'Authorization': 'Bearer $token'}, // Pass the actual token, not the future
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        print(data);
-        return data; // Return the JSON body directly
+        final jsonData = json.decode(response.body);
+        print(jsonData);
+        return jsonData;
       } else {
-        throw Exception('Failed to load dashboard data');
+        throw Exception('Failed to load dashboard items');
       }
     } catch (e) {
-      throw Exception('Error fetching dashboard data: $e');
+      throw Exception('Error fetching dashboard items: $e');
     }
   }
 }
