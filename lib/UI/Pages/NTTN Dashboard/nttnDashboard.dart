@@ -279,7 +279,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     if (widget.shouldRefresh) {
       // loadUserProfile();
       // Refresh logic here, e.g., fetch data again
-      Future.delayed(Duration(seconds: 2), () {
+      Future.delayed(Duration(seconds: 5), () {
         // After 5 seconds, set isLoading to false to stop showing the loading indicator
         setState(() {
           _pageLoading = false;

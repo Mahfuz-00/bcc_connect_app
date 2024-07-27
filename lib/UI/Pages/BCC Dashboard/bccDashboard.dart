@@ -16,6 +16,7 @@ import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/bccConnectionsPendingdetailtile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
+import '../../Widgets/templateloadingcontainer.dart';
 import '../Information/information.dart';
 import '../Search UI/searchUI.dart';
 import '../Login UI/loginUI.dart';
@@ -113,11 +114,12 @@ class _BCCDashboardState extends State<BCCDashboard>
 
       pendingPagination = Pagination.fromJson(pagination);
       print('Pagination: $pendingPagination');
-      if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+      if (pendingPagination.nextPage != 'None' &&
+          pendingPagination.nextPage!.isNotEmpty) {
         url = pendingPagination.nextPage as String;
         print(pendingPagination.nextPage);
         canFetchMorePending = pendingPagination.canFetchNext;
-      } else{
+      } else {
         url = '';
         canFetchMorePending = false;
       }
@@ -179,7 +181,7 @@ class _BCCDashboardState extends State<BCCDashboard>
       if (url != '' && url.isNotEmpty) {
         final apiService = await BCCFullConnectionAPIService.create();
         final Map<String, dynamic> dashboardData =
-        await apiService.fetchFullDashboardItems(url);
+            await apiService.fetchFullDashboardItems(url);
 
         if (dashboardData == null || dashboardData.isEmpty) {
           print(
@@ -198,11 +200,12 @@ class _BCCDashboardState extends State<BCCDashboard>
 
         pendingPagination = Pagination.fromJson(pagination);
 
-        if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+        if (pendingPagination.nextPage != 'None' &&
+            pendingPagination.nextPage!.isNotEmpty) {
           url = pendingPagination.nextPage as String;
           print(pendingPagination.nextPage);
           canFetchMorePending = pendingPagination.canFetchNext;
-        } else{
+        } else {
           url = '';
           canFetchMorePending = false;
         }
@@ -255,7 +258,7 @@ class _BCCDashboardState extends State<BCCDashboard>
           pendingConnectionRequests.addAll(pendingWidgets);
           _isLoading = false;
         });
-      } else{
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All requests loaded')),
         );
@@ -272,15 +275,13 @@ class _BCCDashboardState extends State<BCCDashboard>
     }
   }
 
-
-
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
       print("Scroll Position: ${_scrollController.position.pixels}");
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_isLoading) {
         print('Invoking Scrolling!!');
         fetchMoreConnectionRequests();
@@ -411,11 +412,14 @@ class _BCCDashboardState extends State<BCCDashboard>
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile.photo}'),
+                                        image: CachedNetworkImageProvider(
+                                            'https://bcc.touchandsolve.com${userProfile.photo}'),
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 20,),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
                                   Text(
                                     userProfile.name,
                                     style: TextStyle(
@@ -450,8 +454,9 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            BCCDashboard(shouldRefresh: true,))); // Close the drawer
+                                        builder: (context) => BCCDashboard(
+                                              shouldRefresh: true,
+                                            ))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -485,8 +490,9 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            ProfileUI(shouldRefresh: true,))); // Close the drawer
+                                        builder: (context) => ProfileUI(
+                                              shouldRefresh: true,
+                                            ))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -501,10 +507,10 @@ class _BCCDashboardState extends State<BCCDashboard>
                               onTap: () async {
                                 Navigator.pop(context);
                                 const snackBar = SnackBar(
-                                  content: Text(
-                                      'Logging out'),
+                                  content: Text('Logging out'),
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
                                 /*   // Clear user data from SharedPreferences
                                 final prefs =
                                     await SharedPreferences.getInstance();
@@ -513,7 +519,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 await prefs.remove('photoUrl');*/
                                 // Create an instance of LogOutApiService
                                 var logoutApiService =
-                                await LogOutApiService.create();
+                                    await LogOutApiService.create();
 
                                 // Wait for authToken to be initialized
                                 logoutApiService.authToken;
@@ -521,10 +527,10 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 // Call the signOut method on the instance
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
-                                    content: Text(
-                                        'Logged out'),
+                                    content: Text('Logged out'),
                                   );
-                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
                                   // Call logout method in AuthCubit/AuthBloc
                                   context.read<AuthCubit>().logout();
                                   Navigator.pushReplacement(
@@ -546,7 +552,8 @@ class _BCCDashboardState extends State<BCCDashboard>
                             SafeArea(
                               child: Container(
                                 color: Colors.grey[100],
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -612,14 +619,17 @@ class _BCCDashboardState extends State<BCCDashboard>
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [
-                                  buildContentForSecureNetBangladeshLimited(sblCountActive, sblCountPending),
-                                  buildContentForAdvancedDigitalSolutionLimited(adslCountActive, adslCountPending),
+                                  buildContentForSecureNetBangladeshLimited(
+                                      sblCountActive, sblCountPending),
+                                  buildContentForAdvancedDigitalSolutionLimited(
+                                      adslCountActive, adslCountPending),
                                 ],
                               ),
                             ),
                             const SizedBox(height: 5),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
                               child: Text(
                                 'Pending Authentication',
                                 textAlign: TextAlign.center,
@@ -634,28 +644,40 @@ class _BCCDashboardState extends State<BCCDashboard>
                             Divider(),
                             pendingConnectionRequests.isNotEmpty
                                 ? Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: ListView.separated(
-                                                                physics: NeverScrollableScrollPhysics(), // Prevent scrolling inside ListView
-                                                                shrinkWrap: true, // Allow ListView to take only necessary height
-                                                                itemCount: pendingConnectionRequests.length + 1,
-                                                                itemBuilder: (context, index) {
-                                  if (index == pendingConnectionRequests.length) {
-                                    return Center(
-                                      child: _isLoading
-                                          ? Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 20),
-                                        child: CircularProgressIndicator(),
-                                      )
-                                          : SizedBox.shrink(),
-                                    );
-                                  }
-                                  return pendingConnectionRequests[index];
-                                                                },
-                                                                separatorBuilder: (context, index) => const SizedBox(height: 10),
-                                                              ),
-                                )
-                                : buildNoRequestsWidget(screenWidth, 'There is no new connection request at this moment.'),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    child: ListView.separated(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      // Prevent scrolling inside ListView
+                                      shrinkWrap: true,
+                                      // Allow ListView to take only necessary height
+                                      itemCount:
+                                          pendingConnectionRequests.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index ==
+                                            pendingConnectionRequests.length) {
+                                          return Center(
+                                            child: _isLoading
+                                                ? Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 20),
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          );
+                                        }
+                                        return pendingConnectionRequests[index];
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 10),
+                                    ),
+                                  )
+                                : !_isLoading
+                                    ? LoadingContainer(screenWidth: screenWidth)
+                                    : buildNoRequestsWidget(screenWidth,
+                                        'There is no new connection request at this moment.'),
                           ],
                         ),
                       ),

@@ -12,6 +12,7 @@ import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
+import '../../Widgets/templateloadingcontainer.dart';
 import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import '../Information/information.dart';
@@ -22,7 +23,8 @@ import 'ispRequestList.dart';
 class ISPReviewedList extends StatefulWidget {
   final bool shouldRefresh;
 
-  const ISPReviewedList({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const ISPReviewedList({Key? key, this.shouldRefresh = false})
+      : super(key: key);
 
   @override
   State<ISPReviewedList> createState() => _ISPReviewedListState();
@@ -52,7 +54,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
       userName = prefs.getString('userName') ?? '';
       organizationName = prefs.getString('organizationName') ?? '';
       photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com'+ photoUrl;
+      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
     });
   }
 
@@ -63,7 +65,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
-      await apiService.fetchDashboardData();
+          await apiService.fetchDashboardData();
       if (dashboardData == null || dashboardData.isEmpty) {
         // No data available or an error occurred
         print(
@@ -82,11 +84,12 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
       print(pagination);
 
       acceptedPagination = Pagination.fromJson(pagination['accepted']);
-      if(acceptedPagination.nextPage != 'None' && acceptedPagination.nextPage!.isNotEmpty){
+      if (acceptedPagination.nextPage != 'None' &&
+          acceptedPagination.nextPage!.isNotEmpty) {
         url = acceptedPagination.nextPage as String;
         print(acceptedPagination.nextPage);
         canFetchMoreAccepted = acceptedPagination.canFetchNext;
-      } else{
+      } else {
         url = '';
         canFetchMoreAccepted = false;
       }
@@ -96,7 +99,6 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
         print(
             'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
       }
-
 
       // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
@@ -131,7 +133,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
       if (url != '' && url.isNotEmpty) {
         final apiService = await APIServiceISPConnectionFull.create();
         final Map<String, dynamic> dashboardData =
-        await apiService.fetchFullData(url);
+            await apiService.fetchFullData(url);
 
         if (dashboardData == null || dashboardData.isEmpty) {
           print(
@@ -149,11 +151,12 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
         print(pagination);
 
         acceptedPagination = Pagination.fromJson(pagination['accepted']);
-        if(acceptedPagination.nextPage != 'None' && acceptedPagination.nextPage!.isNotEmpty){
+        if (acceptedPagination.nextPage != 'None' &&
+            acceptedPagination.nextPage!.isNotEmpty) {
           url = acceptedPagination.nextPage as String;
           print(acceptedPagination.nextPage);
           canFetchMoreAccepted = acceptedPagination.canFetchNext;
-        } else{
+        } else {
           url = '';
           canFetchMoreAccepted = false;
         }
@@ -164,9 +167,9 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
               'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
         }
 
-
         // Map accepted requests to widgets
-        final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
+        final List<Widget> acceptedWidgets =
+            acceptedRequestsData.map((request) {
           return ConnectionRequestInfoCard(
             ConnectionType: request['connection_type'],
             NTTNProvider: request['provider'],
@@ -182,7 +185,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
           acceptedConnectionRequests.addAll(acceptedWidgets);
           _isLoading = false;
         });
-      } else{
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All requests loaded')),
         );
@@ -205,7 +208,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
     _scrollController.addListener(() {
       print("Scroll Position: ${_scrollController.position.pixels}");
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_isLoading) {
         print('Invoking Scrolling!!');
         fetchMoreConnectionRequests();
@@ -325,8 +328,9 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ISPDashboard(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => ISPDashboard(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -339,8 +343,10 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                             fontFamily: 'default',
                           )),
                       onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => ConnectionForm()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ConnectionForm()));
                       },
                     ),
                     Divider(),
@@ -354,8 +360,12 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                           )),
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => ISPRequestList(shouldRefresh: true,)));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ISPRequestList(
+                                      shouldRefresh: true,
+                                    )));
                       },
                     ),
                     Divider(),
@@ -389,7 +399,9 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ProfileUI(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => ProfileUI(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -404,8 +416,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                       onTap: () async {
                         Navigator.pop(context);
                         const snackBar = SnackBar(
-                          content: Text(
-                              'Logging out'),
+                          content: Text('Logging out'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         /*   // Clear user data from SharedPreferences
@@ -415,8 +426,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                               await prefs.remove('organizationName');
                               await prefs.remove('photoUrl');*/
                         // Create an instance of LogOutApiService
-                        var logoutApiService =
-                        await LogOutApiService.create();
+                        var logoutApiService = await LogOutApiService.create();
 
                         // Wait for authToken to be initialized
                         logoutApiService.authToken;
@@ -424,8 +434,7 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                         // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
-                            content: Text(
-                                'Logged out'),
+                            content: Text('Logged out'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           // Call logout method in AuthCubit/AuthBloc
@@ -444,95 +453,105 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
               ),
               body: _pageLoading
                   ? Center(
-                // Show circular loading indicator while waiting
-                child: CircularProgressIndicator(),
-              )
-                  : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: SafeArea(
-                        child: Container(
-                          color: Colors.grey[100],
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, top: 20, bottom: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Text(
-                                  'Welcome, ${userProfile.name}',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                      // Show circular loading indicator while waiting
+                      child: CircularProgressIndicator(),
+                    )
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SafeArea(
+                            child: Container(
+                              color: Colors.grey[100],
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(height: 10,),
-                              Center(
-                                child: const Text(
-                                  'All Reviewed Requests',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                                  const SizedBox(height: 10),
+                                  Center(
+                                    child: const Text(
+                                      'All Reviewed Requests',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  Divider(),
+                                ],
                               ),
-                              Divider(),
-                            ],
+                            ),
                           ),
-                        ),
+                          acceptedConnectionRequests.isNotEmpty
+                              ? NotificationListener<ScrollNotification>(
+                                  onNotification: (scrollInfo) {
+                                    if (!scrollInfo.metrics.outOfRange &&
+                                        scrollInfo.metrics.pixels ==
+                                            scrollInfo
+                                                .metrics.maxScrollExtent &&
+                                        !_isLoading &&
+                                        canFetchMoreAccepted) {
+                                      fetchMoreConnectionRequests();
+                                    }
+                                    return true;
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: ListView.separated(
+                                      addAutomaticKeepAlives: false,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      // Prevent internal scrolling
+                                      itemCount:
+                                          acceptedConnectionRequests.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index ==
+                                            acceptedConnectionRequests.length) {
+                                          return Center(
+                                            child: _isLoading
+                                                ? Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 20),
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          );
+                                        }
+                                        return acceptedConnectionRequests[
+                                            index];
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 10),
+                                    ),
+                                  ),
+                                )
+                              : !_isLoading
+                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  : buildNoRequestsWidget(screenWidth,
+                                      'No connection requests reviewed yet.'),
+                        ],
                       ),
                     ),
-                  ];
-                },
-                body: acceptedConnectionRequests.isNotEmpty
-                    ? NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (!scrollInfo.metrics.outOfRange &&
-                        scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent &&
-                        !_isLoading &&
-                        canFetchMoreAccepted) {
-                      fetchMoreConnectionRequests();
-                    }
-                    return true;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0),
-                    child: ListView.separated(
-                      addAutomaticKeepAlives: false,
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemCount:
-                      acceptedConnectionRequests.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index ==
-                            acceptedConnectionRequests.length) {
-                          return Center(
-                            child: _isLoading
-                                ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
-                                child: CircularProgressIndicator())
-                                : SizedBox.shrink(),
-                          );
-                        }
-                        return acceptedConnectionRequests[index];
-                      },
-                      separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
-                    ),
-                  ),
-                )
-                    : buildNoRequestsWidget(screenWidth,
-                    'No connection requests reviewed yet.'),
-              ),
               bottomNavigationBar: Container(
                 height: screenHeight * 0.08,
                 color: const Color.fromRGBO(25, 192, 122, 1),
@@ -542,8 +561,12 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                     GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTap: () {
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => ISPDashboard()));
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ISPDashboard(
+                                      shouldRefresh: true,
+                                    )));
                       },
                       child: Container(
                         width: screenWidth / 3,
@@ -575,18 +598,20 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => ConnectionForm()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ConnectionForm()));
                       },
                       behavior: HitTestBehavior.translucent,
                       child: Container(
                         decoration: BoxDecoration(
                             border: Border(
-                              left: BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            )),
+                          left: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        )),
                         width: screenWidth / 3,
                         padding: EdgeInsets.all(5),
                         child: Column(
@@ -625,11 +650,11 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                       child: Container(
                         decoration: BoxDecoration(
                             border: Border(
-                              left: BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            )),
+                          left: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        )),
                         width: screenWidth / 3,
                         padding: EdgeInsets.all(5),
                         child: Column(

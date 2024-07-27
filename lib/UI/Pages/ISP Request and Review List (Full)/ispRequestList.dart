@@ -12,6 +12,7 @@ import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
+import '../../Widgets/templateloadingcontainer.dart';
 import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import '../Information/information.dart';
@@ -34,6 +35,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
   List<Widget> pendingConnectionRequests = [];
   bool _isFetched = false;
   bool _isLoading = false;
+  bool _isInitialLoading = false;
   bool _pageLoading = true;
   int _itemsToLoad = 3;
   ScrollController _scrollController = ScrollController();
@@ -67,11 +69,12 @@ class _ISPRequestListState extends State<ISPRequestList> {
       print(pagination);
 
       pendingPagination = Pagination.fromJson(pagination['pending']);
-      if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+      if (pendingPagination.nextPage != 'None' &&
+          pendingPagination.nextPage!.isNotEmpty) {
         url = pendingPagination.nextPage as String;
         print(pendingPagination.nextPage);
         canFetchMorePending = pendingPagination.canFetchNext;
-      } else{
+      } else {
         url = '';
         canFetchMorePending = false;
       }
@@ -88,8 +91,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
       print('Current count: $initialLoadCount');
 
       // Map pending requests to widgets
-      final List<Widget> pendingWidgets =
-          pendingRequestsData.map((request) {
+      final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
           NTTNProvider: request['provider'],
@@ -140,11 +142,12 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
         pendingPagination = Pagination.fromJson(pagination['pending']);
 
-        if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+        if (pendingPagination.nextPage != 'None' &&
+            pendingPagination.nextPage!.isNotEmpty) {
           url = pendingPagination.nextPage as String;
           print(pendingPagination.nextPage);
           canFetchMorePending = pendingPagination.canFetchNext;
-        } else{
+        } else {
           url = '';
           canFetchMorePending = false;
         }
@@ -171,9 +174,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
         }
 
         print('Current count: $currentCount');
-       // print('Additional load count: $additionalLoadCount');
+        // print('Additional load count: $additionalLoadCount');
 
-      /*  if (additionalLoadCount == 0) {
+        /*  if (additionalLoadCount == 0) {
           // If no additional requests are loaded
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('All requests loaded')),
@@ -199,7 +202,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
           pendingConnectionRequests.addAll(pendingWidgets);
           _isLoading = false;
         });
-      } else{
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All requests loaded')),
         );
@@ -348,8 +351,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ISPDashboard(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => ISPDashboard(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -382,7 +386,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPReviewedList(shouldRefresh: true,)));
+                                builder: (context) => ISPReviewedList(
+                                      shouldRefresh: true,
+                                    )));
                       },
                     ),
                     Divider(),
@@ -416,8 +422,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfileUI(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => ProfileUI(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -471,91 +478,100 @@ class _ISPRequestListState extends State<ISPRequestList> {
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  : NestedScrollView(
-                      headerSliverBuilder: (context, innerBoxIsScrolled) {
-                        return [
-                          SliverToBoxAdapter(
-                            child: SafeArea(
-                              child: Container(
-                                color: Colors.grey[100],
-                                padding: const EdgeInsets.only(
-                                    left: 10, right: 10, top: 20, bottom: 5),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        'Welcome, ${userProfile.name}',
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'default',
-                                        ),
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SafeArea(
+                            child: Container(
+                              color: Colors.grey[100],
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
                                       ),
                                     ),
-                                    SizedBox(height: 10,),
-                                    Center(
-                                      child: Text(
-                                            'All Requests List',
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'default',
-                                        ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Center(
+                                    child: Text(
+                                      'All Requests List',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
                                       ),
                                     ),
-                                    Divider(),
-                                  ],
-                                ),
+                                  ),
+                                  Divider(),
+                                ],
                               ),
                             ),
                           ),
-                        ];
-                      },
-                      body: pendingConnectionRequests.isNotEmpty
-                          ? NotificationListener<ScrollNotification>(
-                              onNotification: (scrollInfo) {
-                                if (!scrollInfo.metrics.outOfRange &&
-                                    scrollInfo.metrics.pixels ==
-                                        scrollInfo.metrics.maxScrollExtent &&
-                                    !_isLoading &&
-                                    canFetchMorePending) {
-                                  fetchMoreConnectionRequests();
-                                }
-                                return true;
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: ListView.separated(
-                                  addAutomaticKeepAlives: false,
-                                  shrinkWrap: true,
-                                  controller: _scrollController,
-                                  itemCount:
-                                      pendingConnectionRequests.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index ==
-                                        pendingConnectionRequests.length) {
-                                      return Center(
-                                        child: _isLoading
-                                            ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
-                                            child: CircularProgressIndicator())
-                                            : SizedBox.shrink(),
-                                      );
+                          pendingConnectionRequests.isNotEmpty
+                              ? NotificationListener<ScrollNotification>(
+                                  onNotification: (scrollInfo) {
+                                    if (!scrollInfo.metrics.outOfRange &&
+                                        scrollInfo.metrics.pixels ==
+                                            scrollInfo
+                                                .metrics.maxScrollExtent &&
+                                        !_isLoading &&
+                                        canFetchMorePending) {
+                                      fetchMoreConnectionRequests();
                                     }
-                                    return pendingConnectionRequests[index];
+                                    return true;
                                   },
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(height: 10),
-                                ),
-                              ),
-                            )
-                          : buildNoRequestsWidget(screenWidth,
-                              'You currently don\'t have any new requests pending.'),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: ListView.separated(
+                                      addAutomaticKeepAlives: false,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      // Prevent internal scrolling
+                                      itemCount:
+                                          pendingConnectionRequests.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index ==
+                                            pendingConnectionRequests.length) {
+                                          return Center(
+                                            child: _isLoading
+                                                ? Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 20),
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          );
+                                        }
+                                        return pendingConnectionRequests[index];
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 10),
+                                    ),
+                                  ),
+                                )
+                              : !_isLoading
+                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  : buildNoRequestsWidget(screenWidth,
+                                      'You currently don\'t have any new requests pending.'),
+                        ],
+                      ),
                     ),
               bottomNavigationBar: Container(
                 height: screenHeight * 0.08,
@@ -569,7 +585,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPDashboard()));
+                                builder: (context) => ISPDashboard(
+                                      shouldRefresh: true,
+                                    )));
                       },
                       child: Container(
                         width: screenWidth / 3,
@@ -698,3 +716,90 @@ class _ISPRequestListState extends State<ISPRequestList> {
     );
   }
 }
+
+/*NestedScrollView(
+                      headerSliverBuilder: (context, innerBoxIsScrolled) {
+                        return [
+                          SliverToBoxAdapter(
+                            child: SafeArea(
+                              child: Container(
+                                color: Colors.grey[100],
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 10, top: 20, bottom: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        'Welcome, ${userProfile.name}',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 10,),
+                                    Center(
+                                      child: Text(
+                                            'All Requests List',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        ),
+                                      ),
+                                    ),
+                                    Divider(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ];
+                      },
+                      body: pendingConnectionRequests.isNotEmpty
+                          ? NotificationListener<ScrollNotification>(
+                              onNotification: (scrollInfo) {
+                                if (!scrollInfo.metrics.outOfRange &&
+                                    scrollInfo.metrics.pixels ==
+                                        scrollInfo.metrics.maxScrollExtent &&
+                                    !_isLoading &&
+                                    canFetchMorePending) {
+                                  fetchMoreConnectionRequests();
+                                }
+                                return true;
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: ListView.separated(
+                                  addAutomaticKeepAlives: false,
+                                  shrinkWrap: true,
+                                  controller: _scrollController,
+                                  itemCount:
+                                      pendingConnectionRequests.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (index ==
+                                        pendingConnectionRequests.length) {
+                                      return Center(
+                                        child: _isLoading
+                                            ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
+                                            child: CircularProgressIndicator())
+                                            : SizedBox.shrink(),
+                                      );
+                                    }
+                                    return pendingConnectionRequests[index];
+                                  },
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 10),
+                                ),
+                              ),
+                            )
+                          : buildNoRequestsWidget(screenWidth,
+                              'You currently don\'t have any new requests pending.'),
+                    ),*/

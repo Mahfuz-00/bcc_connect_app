@@ -15,6 +15,7 @@ import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/templateerrorcontainer.dart';
+import '../../Widgets/templateloadingcontainer.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
@@ -483,92 +484,102 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                       // Show circular loading indicator while waiting
                       child: CircularProgressIndicator(),
                     )
-                  : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: SafeArea(
-                        child: Container(
-                          color: Colors.grey[100],
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, top: 20, bottom: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Text(
-                                  'Welcome, ${userProfile.name}',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SafeArea(
+                            child: Container(
+                              color: Colors.grey[100],
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(height: 10,),
-                              Center(
-                                child: const Text(
-                                  'All Active Connections',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                                  const SizedBox(height: 10),
+                                  Center(
+                                    child: const Text(
+                                      'All Active Connections',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  Divider(),
+                                ],
                               ),
-                              Divider(),
-                            ],
+                            ),
                           ),
-                        ),
+                          acceptedConnectionRequests.isNotEmpty
+                              ? NotificationListener<ScrollNotification>(
+                                  onNotification: (scrollInfo) {
+                                    if (!scrollInfo.metrics.outOfRange &&
+                                        scrollInfo.metrics.pixels ==
+                                            scrollInfo
+                                                .metrics.maxScrollExtent &&
+                                        !_isLoading &&
+                                        canFetchMoreAccepted) {
+                                      fetchMoreConnectionRequests();
+                                    }
+                                    return true;
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: ListView.separated(
+                                      addAutomaticKeepAlives: false,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      // Prevent internal scrolling
+                                      itemCount:
+                                          acceptedConnectionRequests.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index ==
+                                            acceptedConnectionRequests.length) {
+                                          return Center(
+                                            child: _isLoading
+                                                ? Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 20),
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          );
+                                        }
+                                        return acceptedConnectionRequests[
+                                            index];
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 10),
+                                    ),
+                                  ),
+                                )
+                              : !_isLoading
+                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  : buildNoRequestsWidget(screenWidth,
+                                      'No connection requests reviewed yet.'),
+                        ],
                       ),
                     ),
-                  ];
-                },
-                body: acceptedConnectionRequests.isNotEmpty
-                    ? NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (!scrollInfo.metrics.outOfRange &&
-                        scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent &&
-                        !_isLoading &&
-                        canFetchMoreAccepted) {
-                      fetchMoreConnectionRequests();
-                    }
-                    return true;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0),
-                    child: ListView.separated(
-                      addAutomaticKeepAlives: false,
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemCount:
-                      acceptedConnectionRequests.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index ==
-                            acceptedConnectionRequests.length) {
-                          return Center(
-                            child: _isLoading
-                                ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
-                                child: CircularProgressIndicator())
-                                : SizedBox.shrink(),
-                          );
-                        }
-                        return acceptedConnectionRequests[index];
-                      },
-                      separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
-                    ),
-                  ),
-                )
-                    : buildNoRequestsWidget(screenWidth,
-                    'No connection requests reviewed yet.'),
-              ),
               bottomNavigationBar: Container(
                 height: screenHeight * 0.08,
                 color: const Color.fromRGBO(25, 192, 122, 1),

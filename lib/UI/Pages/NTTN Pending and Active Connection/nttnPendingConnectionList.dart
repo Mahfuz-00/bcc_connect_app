@@ -14,6 +14,7 @@ import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/nttnPendingConncetionDetails.dart';
 import '../../Widgets/templateerrorcontainer.dart';
+import '../../Widgets/templateloadingcontainer.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
@@ -21,14 +22,15 @@ import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 import 'nttnActiveConnectionList.dart';
 
-
 class NTTNPendingConnectionList extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNPendingConnectionList({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const NTTNPendingConnectionList({Key? key, this.shouldRefresh = false})
+      : super(key: key);
 
   @override
-  State<NTTNPendingConnectionList> createState() => _NTTNPendingConnectionListState();
+  State<NTTNPendingConnectionList> createState() =>
+      _NTTNPendingConnectionListState();
 }
 
 class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
@@ -52,7 +54,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
-      await apiService.fetchConnections();
+          await apiService.fetchConnections();
       if (dashboardData == null || dashboardData.isEmpty) {
         // No data available or an error occurred
         print(
@@ -73,11 +75,12 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       print(pagination);
 
       pendingPagination = Pagination.fromJson(pagination['pending']);
-      if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+      if (pendingPagination.nextPage != 'None' &&
+          pendingPagination.nextPage!.isNotEmpty) {
         url = pendingPagination.nextPage as String;
         print(pendingPagination.nextPage);
         canFetchMorePending = pendingPagination.canFetchNext;
-      } else{
+      } else {
         url = '';
         canFetchMorePending = false;
       }
@@ -139,7 +142,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       if (url != '' && url.isNotEmpty) {
         final apiService = await APIServiceISPConnectionFull.create();
         final Map<String, dynamic> dashboardData =
-        await apiService.fetchFullData(url);
+            await apiService.fetchFullData(url);
 
         if (dashboardData == null || dashboardData.isEmpty) {
           print(
@@ -158,11 +161,12 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
         pendingPagination = Pagination.fromJson(pagination['pending']);
 
-        if(pendingPagination.nextPage != 'None' && pendingPagination.nextPage!.isNotEmpty){
+        if (pendingPagination.nextPage != 'None' &&
+            pendingPagination.nextPage!.isNotEmpty) {
           url = pendingPagination.nextPage as String;
           print(pendingPagination.nextPage);
           canFetchMorePending = pendingPagination.canFetchNext;
-        } else{
+        } else {
           url = '';
           canFetchMorePending = false;
         }
@@ -236,7 +240,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
           pendingConnectionRequests.addAll(pendingWidgets);
           _isLoading = false;
         });
-      } else{
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All requests loaded')),
         );
@@ -259,7 +263,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       userName = prefs.getString('userName') ?? '';
       organizationName = prefs.getString('organizationName') ?? '';
       photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com'+ photoUrl;
+      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
       print('User Name: $userName');
       print('Organization Name: $organizationName');
       print('Photo URL: $photoUrl');
@@ -274,7 +278,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
     _scrollController.addListener(() {
       print("Scroll Position: ${_scrollController.position.pixels}");
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_isLoading) {
         print('Invoking Scrolling!!');
         fetchMoreConnectionRequests();
@@ -393,8 +397,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    NTTNDashboard(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => NTTNDashboard(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -408,8 +413,12 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                           )),
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => NTTNActiveConnectionList(shouldRefresh: true,)));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NTTNActiveConnectionList(
+                                      shouldRefresh: true,
+                                    )));
                       },
                     ),
                     Divider(),
@@ -443,8 +452,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfileUI(shouldRefresh: true,))); // Close the drawer
+                                builder: (context) => ProfileUI(
+                                      shouldRefresh: true,
+                                    ))); // Close the drawer
                       },
                     ),
                     Divider(),
@@ -459,8 +469,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                       onTap: () async {
                         Navigator.pop(context);
                         const snackBar = SnackBar(
-                          content: Text(
-                              'Logging out'),
+                          content: Text('Logging out'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         /*   // Clear user data from SharedPreferences
@@ -470,8 +479,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                               await prefs.remove('organizationName');
                               await prefs.remove('photoUrl');*/
                         // Create an instance of LogOutApiService
-                        var logoutApiService =
-                        await LogOutApiService.create();
+                        var logoutApiService = await LogOutApiService.create();
 
                         // Wait for authToken to be initialized
                         logoutApiService.authToken;
@@ -479,8 +487,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
-                            content: Text(
-                                'Logged out'),
+                            content: Text('Logged out'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           // Call logout method in AuthCubit/AuthBloc
@@ -499,95 +506,104 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
               ),
               body: _pageLoading
                   ? Center(
-                // Show circular loading indicator while waiting
-                child: CircularProgressIndicator(),
-              )
-                  : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: SafeArea(
-                        child: Container(
-                          color: Colors.grey[100],
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, top: 20, bottom: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Text(
-                                  'Welcome, ${userProfile.name}',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                      // Show circular loading indicator while waiting
+                      child: CircularProgressIndicator(),
+                    )
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SafeArea(
+                            child: Container(
+                              color: Colors.grey[100],
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(height: 10,),
-                              Center(
-                                child: Text(
-                                  'All Pending Connections',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
+                                  const SizedBox(height: 10),
+                                  Center(
+                                    child: Text(
+                                      'All Pending Applications',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  Divider(),
+                                ],
                               ),
-                              Divider(),
-                            ],
+                            ),
                           ),
-                        ),
+                          pendingConnectionRequests.isNotEmpty
+                              ? NotificationListener<ScrollNotification>(
+                                  onNotification: (scrollInfo) {
+                                    if (!scrollInfo.metrics.outOfRange &&
+                                        scrollInfo.metrics.pixels ==
+                                            scrollInfo
+                                                .metrics.maxScrollExtent &&
+                                        !_isLoading &&
+                                        canFetchMorePending) {
+                                      fetchMoreConnectionRequests();
+                                    }
+                                    return true;
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: ListView.separated(
+                                      addAutomaticKeepAlives: false,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      // Prevent internal scrolling
+                                      itemCount:
+                                          pendingConnectionRequests.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index ==
+                                            pendingConnectionRequests.length) {
+                                          return Center(
+                                            child: _isLoading
+                                                ? Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 20),
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : SizedBox.shrink(),
+                                          );
+                                        }
+                                        return pendingConnectionRequests[index];
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 10),
+                                    ),
+                                  ),
+                                )
+                              : !_isLoading
+                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  : buildNoRequestsWidget(screenWidth,
+                                      'You currently don\'t have any new requests pending.'),
+                        ],
                       ),
                     ),
-                  ];
-                },
-                body: pendingConnectionRequests.isNotEmpty
-                    ? NotificationListener<ScrollNotification>(
-                  onNotification: (scrollInfo) {
-                    if (!scrollInfo.metrics.outOfRange &&
-                        scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent &&
-                        !_isLoading &&
-                        canFetchMorePending) {
-                      fetchMoreConnectionRequests();
-                    }
-                    return true;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0),
-                    child: ListView.separated(
-                      addAutomaticKeepAlives: false,
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemCount:
-                      pendingConnectionRequests.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index ==
-                            pendingConnectionRequests.length) {
-                          return Center(
-                            child: _isLoading
-                                ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
-                                child: CircularProgressIndicator())
-                                : const SizedBox.shrink(),
-                          );
-                        }
-                        return pendingConnectionRequests[index];
-                      },
-                      separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
-                    ),
-                  ),
-                )
-                    : buildNoRequestsWidget(screenWidth,
-                    'You currently don\'t have any new requests pending.'),
-              ),
               bottomNavigationBar: Container(
                 height: screenHeight * 0.08,
                 color: const Color.fromRGBO(25, 192, 122, 1),
@@ -645,11 +661,11 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                       child: Container(
                         decoration: BoxDecoration(
                             border: Border(
-                              left: BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            )),
+                          left: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        )),
                         width: screenWidth / 3,
                         padding: EdgeInsets.all(7.5),
                         child: Column(
@@ -688,11 +704,11 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                       child: Container(
                         decoration: BoxDecoration(
                             border: Border(
-                              left: BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            )),
+                          left: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        )),
                         width: screenWidth / 3,
                         padding: EdgeInsets.all(7.5),
                         child: Column(
@@ -731,6 +747,5 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
         }
       },
     );
-
   }
 }
