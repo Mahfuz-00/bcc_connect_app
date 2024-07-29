@@ -546,7 +546,9 @@ class _ISPReviewedListState extends State<ISPReviewedList> {
                                   ),
                                 )
                               : !_isLoading
-                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  ? Center(
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : buildNoRequestsWidget(screenWidth,
                                       'No connection requests reviewed yet.'),
                         ],

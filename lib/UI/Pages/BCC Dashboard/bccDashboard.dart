@@ -675,7 +675,9 @@ class _BCCDashboardState extends State<BCCDashboard>
                                     ),
                                   )
                                 : !_isLoading
-                                    ? LoadingContainer(screenWidth: screenWidth)
+                                    ? Center(
+                                        child: CircularProgressIndicator(),
+                                      )
                                     : buildNoRequestsWidget(screenWidth,
                                         'There is no new connection request at this moment.'),
                           ],

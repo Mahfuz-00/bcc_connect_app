@@ -574,7 +574,9 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                                   ),
                                 )
                               : !_isLoading
-                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  ? Center(
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : buildNoRequestsWidget(screenWidth,
                                       'No connection requests reviewed yet.'),
                         ],

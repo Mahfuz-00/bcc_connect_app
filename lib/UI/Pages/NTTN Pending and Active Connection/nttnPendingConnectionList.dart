@@ -598,7 +598,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                                   ),
                                 )
                               : !_isLoading
-                                  ? LoadingContainer(screenWidth: screenWidth)
+                                  ? Center(
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : buildNoRequestsWidget(screenWidth,
                                       'You currently don\'t have any new requests pending.'),
                         ],
