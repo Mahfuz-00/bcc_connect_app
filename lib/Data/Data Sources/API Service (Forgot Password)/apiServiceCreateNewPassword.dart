@@ -48,13 +48,13 @@ class APIServiceCreateNewPassword {
   /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<String> NewPassword(
       String email, String password, String confirmPassword) async {
-    if (authToken.isEmpty) {
+/*    if (authToken.isEmpty) {
       print(authToken);
       await _loadAuthToken();
       throw Exception('Authentication token is empty.');
-    }
+    }*/
     print(email);
-    print(authToken);
+  //  print(authToken);
     final Map<String, String> headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
