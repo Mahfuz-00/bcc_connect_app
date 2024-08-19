@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+/// A stateless widget that displays a card with detailed information about a BCC connection.
+/// It includes fields such as Name, Organization Name, Mobile No, Connection Type,
+/// Application ID, Location, Status, Link Capacity, and Remark.
 class BCCConnectionsInfoCard extends StatelessWidget {
-  final String Name;
-  final String OrganizationName;
-  final String MobileNo;
-  final String ConnectionType;
-  final String ApplicationID;
-  final String Location;
-  final String Status;
-  final String LinkCapacity;
-  final String Remark;
-
-
+  final String
+      Name; // The name of the individual associated with the connection.
+  final String
+      OrganizationName; // The organization name linked to the connection.
+  final String MobileNo; // The mobile number associated with the connection.
+  final String ConnectionType; // The type of connection (e.g., New, Upgrade).
+  final String ApplicationID; // The unique ID of the application.
+  final String Location; // The location of the connection.
+  final String
+      Status; // The current status of the connection (e.g., Pending, Accepted).
+  final String
+      LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
+  final String Remark; // Any additional remarks about the connection.
 
   const BCCConnectionsInfoCard({
     Key? key,
@@ -29,17 +34,25 @@ class BCCConnectionsInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context)
+        .size
+        .width; // Fetches the width of the device screen.
+    final screenHeight = MediaQuery.of(context)
+        .size
+        .height; // Fetches the height of the device screen.
     return Material(
       elevation: 5,
+      // Adds shadow to the card to give it a raised effect.
       borderRadius: BorderRadius.circular(10),
+      // Rounds the corners of the card.
       child: Container(
         //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        // Padding inside the card.
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Colors.white, // Background color of the card.
+          borderRadius: const BorderRadius.all(
+              Radius.circular(10)), // Rounds the corners of the card.
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +73,8 @@ class BCCConnectionsInfoCard extends StatelessWidget {
   }
 }
 
+/// A helper function that builds a row to display a label and its corresponding value.
+/// It is used within the `BCCConnectionsInfoCard` to create each piece of information in the card.
 Widget _buildRow(String label, String value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,13 +132,19 @@ Widget _buildRow(String label, String value) {
   );
 }
 
+/// A helper function that formats and displays the date and time in a readable format.
+/// This function is not used in the current implementation but can be used for displaying
+/// date and time information if needed.
 Widget _buildRowTime(String label, String value) {
   //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
 
-  // Option 2: Using separate methods for date and time
+  // Parses the string value into a DateTime object.
   DateTime date = DateTime.parse(value);
+  // Formats the date as "Month Day, Year".
   DateFormat dateFormat = DateFormat.yMMMMd('en_US');
+  // Formats the time in AM/PM format.
   DateFormat timeFormat = DateFormat.jm();
+  // Combines the formatted date and time into a single string.
   String formattedDate = dateFormat.format(date);
   String formattedTime = timeFormat.format(date);
   String formattedDateTime = '$formattedDate, $formattedTime';
@@ -165,6 +186,3 @@ Widget _buildRowTime(String label, String value) {
     ],
   );
 }
-
-
-

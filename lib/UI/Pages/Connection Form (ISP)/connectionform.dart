@@ -34,10 +34,10 @@ class _ConnectionFormState extends State<ConnectionForm> {
 
   final Set<String> linkCapacityOptions = {'5 MB', '10 MB', '15 MB', 'Others'};
 
-  late APIService apiService;
+  late APIServiceRegion apiService;
 
-  Future<APIService> initializeApiService() async {
-    apiService = await APIService.create();
+  Future<APIServiceRegion> initializeApiService() async {
+    apiService = await APIServiceRegion.create();
     return apiService;
   }
 

@@ -5,6 +5,10 @@ import 'package:flutter/animation.dart';
 import '../Login UI/loginUI.dart';
 import '../Sign Up UI/signupUI.dart';
 
+/// The splash screen widget for the application.
+///
+/// This screen is displayed when the app launches and shows a loading animation while checking for internet connectivity.
+/// It includes an animated logo, title text, and buttons to navigate to the login and sign-up screens.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -26,10 +30,11 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     // Ensure Flutter is initialized
     WidgetsFlutterBinding.ensureInitialized();
-    // Perform any asynchronous initialization here
+    // Initialize the animation controller
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1500));
 
+    // Define the animations
     SlideAnimation = Tween(begin: const Offset(0, 3), end: const Offset(0, 0))
         .animate(CurvedAnimation(
             parent: animationController, curve: Curves.easeInOutCirc));
@@ -39,13 +44,15 @@ class _SplashScreenState extends State<SplashScreen>
         .animate(
             CurvedAnimation(parent: animationController, curve: Curves.easeIn));
 
+    // Start the animation after a delay
     Future.delayed(const Duration(seconds: 5), () {
       animationController.forward();
     });
-
+// Check internet connectivity
     _checkInternetConnection();
   }
 
+  /// Checks for internet connectivity and updates the loading state.
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
@@ -65,6 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
     // Return the main app screen
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -83,6 +91,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Display the logo image
             const Image(
               image: AssetImage(
                 'Assets/Images/BCC-Logo.png',
@@ -93,6 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(
               height: 20,
             ),
+            // Display the title text with animation
             SlideTransition(
               position: animatedpadding,
               child: const Padding(
@@ -112,6 +122,7 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(
               height: 50,
             ),
+            // Display buttons with animations
             Stack(
               //fit: StackFit.expand,
               alignment: Alignment.bottomCenter,
@@ -138,12 +149,14 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Login button
                       ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Login(),));
+                                  builder: (context) => Login(),
+                                ));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
@@ -153,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen>
                               //side: BorderSide(color: Colors.black, width: 2),
                             ),
                             //elevation: 3,
-                            fixedSize: Size(screenWidth*0.9, 70),
+                            fixedSize: Size(screenWidth * 0.9, 70),
                           ),
                           child: const Text('Login',
                               textAlign: TextAlign.center,
@@ -166,6 +179,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(
                         height: 20,
                       ),
+                      // Register button
                       ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacement(
@@ -181,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   color: Colors.black, width: 2),
                             ),
                             //elevation: 3,
-                            fixedSize: Size(screenWidth*0.9, 70),
+                            fixedSize: Size(screenWidth * 0.9, 70),
                           ),
                           child: const Text('Register',
                               textAlign: TextAlign.center,

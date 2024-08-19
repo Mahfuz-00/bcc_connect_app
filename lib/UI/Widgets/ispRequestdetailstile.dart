@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+/// A stateless widget that displays detailed information about a connection request
+/// in a structured format, including fields like Connection Type, NTTN Provider,
+/// Application ID, Mobile No, Location, Time, and Status.
 class ConnectionRequestInfoCard extends StatelessWidget {
-  final String ConnectionType;
-  final String NTTNProvider;
-  final String ApplicationID;
-  final String MobileNo;
-  final String Location;
-  final String Time;
-  final String Status;
+  final String ConnectionType; // The type of connection requested.
+  final String
+      NTTNProvider; // The NTTN (Nationwide Telecommunications Transmission Network) provider involved.
+  final String ApplicationID; // The unique identifier for the application.
+  final String MobileNo; // The mobile number associated with the request.
+  final String Location; // The location where the connection is requested.
+  final String Time; // The timestamp of when the request was made.
+  final String Status; // The current status of the connection request.
 
   const ConnectionRequestInfoCard({
     Key? key,
@@ -23,17 +27,25 @@ class ConnectionRequestInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context)
+        .size
+        .width; // Fetches the width of the device screen.
+    final screenHeight = MediaQuery.of(context)
+        .size
+        .height; // Fetches the height of the device screen.
     return Material(
       elevation: 5,
+      // Adds elevation to the card for a subtle shadow effect.
       borderRadius: BorderRadius.circular(10),
+      // Rounds the corners of the card.
       child: Container(
         //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        // Padding inside the container.
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Colors.white, // Background color of the card.
+          borderRadius: const BorderRadius.all(
+              Radius.circular(10)), // Ensures all corners are rounded.
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,6 +64,7 @@ class ConnectionRequestInfoCard extends StatelessWidget {
   }
 }
 
+/// A helper function that builds a row to display a label and its corresponding value.
 Widget _buildRow(String label, String value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,13 +122,17 @@ Widget _buildRow(String label, String value) {
   );
 }
 
+/// A helper function that formats and displays the date and time in a readable format.
 Widget _buildRowTime(String label, String value) {
   //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
 
-  // Option 2: Using separate methods for date and time
+  // Parses the string value into a DateTime object.
   DateTime date = DateTime.parse(value);
+  // Formats the date as "Month Day, Year".
   DateFormat dateFormat = DateFormat.yMMMMd('en_US');
+  // Formats the time in AM/PM format.
   DateFormat timeFormat = DateFormat.jm();
+  // Combines the formatted date and time into a single string.
   String formattedDate = dateFormat.format(date);
   String formattedTime = timeFormat.format(date);
   String formattedDateTime = '$formattedDate, $formattedTime';
@@ -168,6 +185,3 @@ Widget _buildRowTime(String label, String value) {
     ],
   );
 }
-
-
-

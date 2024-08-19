@@ -5,15 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/imageUpdateModel.dart';
 
-
-
+/// Service class for handling profile picture updates.
 class APIProfilePictureUpdate {
   static const String URL =
       'https://bcc.touchandsolve.com/api/user/profile/photo/update';
   late final String authToken;
 
+  // Private constructor for singleton pattern.
   APIProfilePictureUpdate._();
 
+  /// Factory constructor to create an instance of `APIProfilePictureUpdate`.
   static Future<APIProfilePictureUpdate> create() async {
     var apiService = APIProfilePictureUpdate._();
     await apiService._loadAuthToken();
@@ -26,6 +27,9 @@ class APIProfilePictureUpdate {
     print('triggered');
   }*/
 
+  /// Loads the authentication token from shared preferences.
+  ///
+  /// - Returns: A future that completes with the authentication token.
   Future<void> _loadAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     authToken = prefs.getString('token') ?? '';
@@ -33,11 +37,16 @@ class APIProfilePictureUpdate {
     print(prefs.getString('token'));
   }
 
-  Future<ProfilePictureUpdateResponse> updateProfilePicture({required File image}) async {
+  /// Updates the profile picture with the provided image file.
+  ///
+  /// - Parameters:
+  ///   - `image`: The image file to upload.
+  /// - Returns: A `Future` that completes with a `ProfilePictureUpdateResponse` containing the server response.
+  Future<ProfilePictureUpdateResponse> updateProfilePicture(
+      {required File image}) async {
     final String token = await authToken;
     try {
       if (token.isEmpty) {
-        // Wait for authToken to be initialized
         await _loadAuthToken();
         throw Exception('Authentication token is empty.');
       }

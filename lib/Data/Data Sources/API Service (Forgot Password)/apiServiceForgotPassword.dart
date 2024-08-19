@@ -2,12 +2,19 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class APIServiceForgotPassword{
-  final String url = 'https://bcc.touchandsolve.com/api/send/forget/password/otp';
+/// Service class for sending OTP for forgot password requests.
+class APIServiceForgotPassword {
+  final String url =
+      'https://bcc.touchandsolve.com/api/send/forget/password/otp';
   late final String authToken;
 
+  // Private constructor for singleton pattern.
   APIServiceForgotPassword._();
+  APIServiceForgotPassword();
 
+  /// Creates an instance of `APIServiceForgotPassword` and loads the auth token.
+  ///
+  /// - Returns: A future that completes with an instance of `APIServiceForgotPassword`.
   static Future<APIServiceForgotPassword> create() async {
     var apiService = APIServiceForgotPassword._();
     await apiService._loadAuthToken();
@@ -20,6 +27,9 @@ class APIServiceForgotPassword{
     print('triggered');
   }*/
 
+  /// Loads the authentication token from shared preferences.
+  ///
+  /// - Returns: A future that completes with the authentication token.
   Future<void> _loadAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     authToken = prefs.getString('token') ?? '';
@@ -28,58 +38,55 @@ class APIServiceForgotPassword{
     //return token;
   }
 
-
-
+  /// Sends a request to generate an OTP for forgotten password.
+  ///
+  /// - Parameters:
+  ///   - [email]: The email associated with the account.
+  ///
+  /// - Returns: A future that completes with a message indicating success or failure.
+  ///
+  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<String> sendForgotPasswordOTP(String email) async {
-    if (authToken.isEmpty) {
+   /* if (authToken.isEmpty) {
       print(authToken);
-      // Wait for authToken to be initialized
       await _loadAuthToken();
       throw Exception('Authentication token is empty.');
-    }
+    }*/
     print(email);
-    print(authToken);
-    // Define the headers
+   // print(authToken);
     final Map<String, String> headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     };
 
-    // Create the request body
     final Map<String, dynamic> requestBody = {
       'email': email,
     };
 
-    // Encode the request body as JSON
     final String requestBodyJson = jsonEncode(requestBody);
 
     try {
-      // Make the POST request
       final http.Response response = await http.post(
         Uri.parse(url),
         headers: headers,
         body: requestBodyJson,
       );
 
-      // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
-        // Handle the response here, if needed
         print('Forgot password OTP sent successfully.');
         print('Response body: ${response.body}');
         var jsonResponse = jsonDecode(response.body);
         var message = jsonResponse['message'];
         return message;
       } else {
-        // Handle other status codes here
-        print('Failed to send forgot password OTP. Status code: ${response.statusCode}');
+        print(
+            'Failed to send forgot password OTP. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
         var jsonResponse = jsonDecode(response.body);
         var message = jsonResponse['message'];
         return message;
       }
-
     } catch (e) {
-      // Handle any exceptions that occur during the request
       print('Error sending forgot password OTP: $e');
       return 'Error sending forgot password OTP';
     }

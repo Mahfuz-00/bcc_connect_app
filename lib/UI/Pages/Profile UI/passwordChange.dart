@@ -2,6 +2,7 @@ import '../../../Data/Data Sources/API Service (User Info Update)/apiServicePass
 import 'profileUI.dart';
 import 'package:flutter/material.dart';
 
+/// A StatefulWidget that allows users to change their password.
 class PasswordChange extends StatefulWidget {
   @override
   State<PasswordChange> createState() => _PasswordChangeState();
@@ -16,14 +17,17 @@ class _PasswordChangeState extends State<PasswordChange> {
   bool _isObscuredConfirmPassword = true;
   bool _isButtonClicked = false;
 
+  /// Returns the icon for the current password field based on its obscurity state.
   IconData _getIconCurrentPassword() {
     return _isObscuredCurrentPassword ? Icons.visibility_off : Icons.visibility;
   }
 
+  /// Returns the icon for the new password field based on its obscurity state.
   IconData _getIconPassword() {
     return _isObscuredPassword ? Icons.visibility_off : Icons.visibility;
   }
 
+  /// Returns the icon for the confirm password field based on its obscurity state.
   IconData _getIconConfirmPassword() {
     return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
   }
@@ -82,26 +86,26 @@ class _PasswordChangeState extends State<PasswordChange> {
                 keyboardType: TextInputType.text,
                 /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) =>
-                input!.length < 8
+                validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
                 controller: _currentPasswordController,
                 obscureText: _isObscuredCurrentPassword,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter current password',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter current password',
+                  hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(_getIconCurrentPassword()),
                     onPressed: () {
                       setState(() {
-                        _isObscuredCurrentPassword = !_isObscuredCurrentPassword;
+                        _isObscuredCurrentPassword =
+                            !_isObscuredCurrentPassword;
                         _currentPasswordController.text =
                             _currentPasswordController.text;
                       });
@@ -124,28 +128,26 @@ class _PasswordChangeState extends State<PasswordChange> {
                 keyboardType: TextInputType.text,
                 /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) =>
-                input!.length < 8
+                validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
                 controller: _passwordController,
                 obscureText: _isObscuredPassword,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter new password',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter new password',
+                  hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(_getIconPassword()),
                     onPressed: () {
                       setState(() {
                         _isObscuredPassword = !_isObscuredPassword;
-                        _passwordController.text =
-                            _passwordController.text;
+                        _passwordController.text = _passwordController.text;
                       });
                     },
                   ),
@@ -166,26 +168,26 @@ class _PasswordChangeState extends State<PasswordChange> {
                 keyboardType: TextInputType.text,
                 /* onSaved: (input) =>
                 _registerRequest.password = input!,*/
-                validator: (input) =>
-                input!.length < 8
+                validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
                 controller: _confirmPasswordController,
                 obscureText: _isObscuredConfirmPassword,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Confirm new password',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    ),
+                  border: OutlineInputBorder(),
+                  hintText: 'Confirm new password',
+                  hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(_getIconConfirmPassword()),
                     onPressed: () {
                       setState(() {
-                        _isObscuredConfirmPassword = !_isObscuredConfirmPassword;
+                        _isObscuredConfirmPassword =
+                            !_isObscuredConfirmPassword;
                         _confirmPasswordController.text =
                             _confirmPasswordController.text;
                       });
@@ -201,14 +203,8 @@ class _PasswordChangeState extends State<PasswordChange> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                      fixedSize: Size(MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.8,
-                          MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.08),
+                      fixedSize: Size(MediaQuery.of(context).size.width * 0.8,
+                          MediaQuery.of(context).size.height * 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -219,14 +215,14 @@ class _PasswordChangeState extends State<PasswordChange> {
                     child: _isButtonClicked
                         ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
                         : Text(
-                      'Update',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                    ),
+                            'Update',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -237,72 +233,80 @@ class _PasswordChangeState extends State<PasswordChange> {
     );
   }
 
+  /// Checks if the new password and confirm password fields match.
+  /// Displays a SnackBar if they do not match.
+  ///
+  /// Returns `true` if the passwords match, otherwise `false`.
   bool checkConfirmPassword() {
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _isButtonClicked =
-        false; // Validation complete, hide circular progress indicator
+            false; // Validation complete, hide circular progress indicator
       });
       const snackBar = SnackBar(
         content: Text('New Password and Confirm Password are not Matched!'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      return false;  // Return false if passwords do not match
+      return false; // Return false if passwords do not match
     } else {
-      return true;  // Return true if passwords match
+      return true; // Return true if passwords match
     }
   }
 
+  /// Initiates the password update process by calling the API.
+  ///
+  /// Updates the state to show a circular progress indicator while the password is being updated.
+  /// Displays a SnackBar indicating success or failure based on the API response.
   void _updatePassword() async {
     setState(() {
       _isButtonClicked =
-      true; // Validation complete, hide circular progress indicator
+          true; // Validation complete, hide circular progress indicator
     });
-   if(checkConfirmPassword()){
-     String currentPassword = _currentPasswordController.text;
-     String newPassword = _passwordController.text;
-     String confirmPassword = _confirmPasswordController.text;
+    if (checkConfirmPassword()) {
+      String currentPassword = _currentPasswordController.text;
+      String newPassword = _passwordController.text;
+      String confirmPassword = _confirmPasswordController.text;
 
-     try {
-       APIServicePasswordUpdate apiService = await APIServicePasswordUpdate
-           .create();
-       final response = await apiService.updatePassword(
-         currentPassword: currentPassword,
-         newPassword: newPassword,
-         passwordConfirmation: confirmPassword,
-       ).then((response) {
-         setState(() {
-           _isButtonClicked =
-           false; // Validation complete, hide circular progress indicator
-         });
-         print("Submitted");
-         print(response);
-         if (response != null && response == "Password Update Successfully") {
-           Navigator.pop(context);
-           const snackBar = SnackBar(
-             content: Text('Password Changed!'),
-           );
-           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-         }
-         if (response != null && response == "The current password do not match.") {
-           const snackBar = SnackBar(
-             content: Text('Current Password is not Matched!'),
-           );
-           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-         }
-       }).catchError((error) {
-         // Handle registration error
-         print(error);
-         const snackBar = SnackBar(
-           content: Text('Password Change failed!'),
-         );
-         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-       });
-     } catch (e) {
-       print('Error updating password: $e');
-     }
-   }
+      try {
+        APIServicePasswordUpdate apiService =
+            await APIServicePasswordUpdate.create();
+        final response = await apiService
+            .updatePassword(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          passwordConfirmation: confirmPassword,
+        )
+            .then((response) {
+          setState(() {
+            _isButtonClicked =
+                false; // Validation complete, hide circular progress indicator
+          });
+          print("Submitted");
+          print(response);
+          if (response != null && response == "Password Update Successfully") {
+            Navigator.pop(context);
+            const snackBar = SnackBar(
+              content: Text('Password Changed!'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+          if (response != null &&
+              response == "The current password do not match.") {
+            const snackBar = SnackBar(
+              content: Text('Current Password is not Matched!'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        }).catchError((error) {
+          print(error);
+          const snackBar = SnackBar(
+            content: Text('Password Change failed!'),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        });
+      } catch (e) {
+        print('Error updating password: $e');
+      }
+    }
   }
-
-
 }

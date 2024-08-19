@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
+/// A stateless widget that displays detailed information about an active connection.
+/// It includes fields such as Name, Organization Name, Mobile No, Connection Type,
+/// Application ID, Location, Status, Link Capacity, and Remark.
 class ActiveConnectionDetailsPage extends StatelessWidget {
-  final String Name;
-  final String OrganizationName;
-  final String MobileNo;
-  final String ConnectionType;
-  final String ApplicationID;
-  final String Location;
-  final String Status;
-  final String LinkCapacity;
-  final String Remark;
+  final String
+      Name; // The name of the individual associated with the connection.
+  final String
+      OrganizationName; // The organization name linked to the connection.
+  final String MobileNo; // The mobile number associated with the connection.
+  final String ConnectionType; // The type of connection (e.g., New, Upgrade).
+  final String ApplicationID; // The unique ID of the application.
+  final String Location; // The location of the connection.
+  final String
+      Status; // The current status of the connection (e.g., Pending, Accepted).
+  final String
+      LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
+  final String Remark; // Any additional remarks about the connection.
 
   const ActiveConnectionDetailsPage({
     Key? key,
@@ -28,22 +34,30 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context)
+        .size
+        .width; // Fetches the width of the device screen.
+    final screenHeight = MediaQuery.of(context)
+        .size
+        .height; // Fetches the height of the device screen.
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+        // Background color of the app bar.
         leadingWidth: 40,
         titleSpacing: 10,
         leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Navigates back to the previous screen.
             },
-            icon: Icon(Icons.arrow_back_ios_new_outlined, color: Colors.white,)
-        ),
+            icon: Icon(
+              Icons.arrow_back_ios_new_outlined,
+              color: Colors.white,
+            ) // Back arrow icon.
+            ),
         title: const Text(
-          'Active Connection Details',
+          'Active Connection Details', // Title of the app bar.
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -51,11 +65,12 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
             fontFamily: 'default',
           ),
         ),
-        centerTitle: true,
+        centerTitle: true, // Centers the title in the app bar.
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(25.0),
+          // Padding around the entire content.
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -64,6 +79,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
                 child: const Center(
                   child: Text(
                     'Connection Details',
+                    // Title for the connection details section.
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.black,
@@ -75,20 +91,22 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 40,
+                height: 40, // Adds spacing between the title and avatar.
               ),
               Center(
                 child: CircleAvatar(
                   child: Icon(
-                    Icons.person,
+                    Icons.person, // Icon displayed in the center of the avatar.
                     size: 65,
                   ),
-                  radius: 50,
+                  radius: 50, // Sets the size of the avatar.
                 ),
               ),
               SizedBox(height: 20),
+              // Adds spacing between the avatar and the details.
               _buildRow('Name', Name),
               Divider(),
+              // Divider line between rows.
               _buildRow('Organiztion Name', OrganizationName),
               Divider(),
               _buildRow('Mobile No', MobileNo),
@@ -106,17 +124,22 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
               _buildRow('Remark', Remark),
               Divider(),
               SizedBox(height: 40),
+              // Adds spacing before the button.
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                  // Button color.
                   fixedSize: Size(MediaQuery.of(context).size.width * 0.9,
                       MediaQuery.of(context).size.height * 0.1),
+                  // Button size.
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius:
+                        BorderRadius.circular(10), // Button corner radius.
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(
+                      context); // Navigates back to the previous screen when the button is pressed.
                 },
                 child: Text('Back',
                     style: TextStyle(
@@ -133,7 +156,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
     );
   }
 
-
+  /// A helper function that builds a row to display a label and its corresponding value.
   Widget _buildRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,13 +214,17 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
     );
   }
 
+  /// A helper function that formats and displays the date and time in a readable format.
   Widget _buildRowTime(String label, String value) {
     //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
 
-    // Option 2: Using separate methods for date and time
+    // Parses the string value into a DateTime object.
     DateTime date = DateTime.parse(value);
+    // Formats the date as "Month Day, Year".
     DateFormat dateFormat = DateFormat.yMMMMd('en_US');
+    // Formats the time in AM/PM format.
     DateFormat timeFormat = DateFormat.jm();
+    // Combines the formatted date and time into a single string.
     String formattedDate = dateFormat.format(date);
     String formattedTime = timeFormat.format(date);
     String formattedDateTime = '$formattedDate, $formattedTime';
@@ -239,5 +266,4 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
       ],
     );
   }
-
 }

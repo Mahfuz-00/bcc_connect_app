@@ -131,6 +131,10 @@ class _BCCDashboardState extends State<BCCDashboard>
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
+      for (var index = 0; index < pendingRequestsData.length; index++) {
+        print(
+            'Pending Request at index $index: ${pendingRequestsData[index]}\n');
+      }
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
       print('Accepted: $acceptedRequestsData');
 

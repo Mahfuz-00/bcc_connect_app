@@ -10,7 +10,18 @@ import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/searchResultTile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
 
-
+/// `SearchUser` is a StatefulWidget that provides a user interface for searching ISP connections
+/// based on various filters such as Division, District, Upazila, and Union.
+///
+/// The widget interacts with the `APIServiceSearchRegion` to fetch location data and `SearchFilterAPIService`
+/// to filter ISP connections based on selected criteria. The user can select options from dropdowns to filter
+/// the search results, and the results are displayed in a list below the search button.
+///
+/// Key functionalities:
+/// - Fetch and display divisions, districts, upazilas, and unions from the API service.
+/// - Allow the user to select a division, district, upazila, and union from dropdown menus.
+/// - Fetch and display NTTN provider information based on the selected filters.
+/// - Display the search results or an appropriate message if no results are found or an error occurs.
 class SearchUser extends StatefulWidget {
   const SearchUser({super.key});
 
@@ -29,10 +40,10 @@ class _SearchUserState extends State<SearchUser> {
   late String _NTTNPhoneNumber;
   Widget? _providerInfo;
 
-  late APIService apiService;
+  late APIServiceSearchRegion apiService;
 
-  Future<APIService> initializeApiService() async {
-    apiService = await APIService.create();
+  Future<APIServiceSearchRegion> initializeApiService() async {
+    apiService = await APIServiceSearchRegion.create();
     return apiService;
   }
 
@@ -56,7 +67,6 @@ class _SearchUserState extends State<SearchUser> {
 
   //late Connections connection;
 
-  // Store the response data in a list
   List<Connections> filteredConnections = [];
 
   @override
@@ -65,6 +75,7 @@ class _SearchUserState extends State<SearchUser> {
     fetchDivisions();
   }
 
+  /// Fetches the list of divisions from the API and updates the state.
   Future<void> fetchDivisions() async {
     setState(() {
       isLoadingDivision = true;
@@ -89,6 +100,7 @@ class _SearchUserState extends State<SearchUser> {
     }
   }
 
+  /// Fetches the list of districts for the selected division from the API and updates the state.
   Future<void> fetchDistricts(String divisionId) async {
     setState(() {
       isLoadingDistrict = true;
@@ -111,6 +123,7 @@ class _SearchUserState extends State<SearchUser> {
     }
   }
 
+  /// Fetches the list of upazilas for the selected district from the API and updates the state.
   Future<void> fetchUpazilas(String districtId) async {
     setState(() {
       isLoadingUpzila = true;
@@ -133,6 +146,7 @@ class _SearchUserState extends State<SearchUser> {
     }
   }
 
+  /// Fetches the list of unions for the selected upazila from the API and updates the state.
   Future<void> fetchUnions(String upazilaId) async {
     setState(() {
       isLoadingUnion = true;
@@ -155,6 +169,7 @@ class _SearchUserState extends State<SearchUser> {
     }
   }
 
+  /// Fetches the list of NTTN providers for the selected union from the API and updates the state.
   Future<void> fetchNTTNProviders(String unionId) async {
     setState(() {
       _isLoading = true;
@@ -234,6 +249,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 20,
                     ),
+                    // Division Dropdown
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -298,6 +314,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 10,
                     ),
+                    // District Dropdown
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -356,6 +373,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 10,
                     ),
+                    // Upazila Dropdown
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -416,6 +434,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 10,
                     ),
+                    // Union Dropdown
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -474,6 +493,7 @@ class _SearchUserState extends State<SearchUser> {
                     SizedBox(
                       height: 30,
                     ),
+                    // Search Button
                     Center(
                       child: Material(
                         elevation: 5,
@@ -607,33 +627,39 @@ class _SearchUserState extends State<SearchUser> {
 
   List<Widget> searchresults = [];
 
+  /// `filterNTTNConnections` filters NTTN connections based on selected criteria (Division, District, Upazila, and Union)
+  /// and updates the state with the search results.
+  ///
+  /// This method:
+  /// - Creates an instance of `SearchFilterAPIService` to interact with the API.
+  /// - Constructs a request data map with available filter criteria.
+  /// - Sends the request to the API service to filter NTTN connections.
+  /// - Processes the response and extracts connection details.
+  /// - Maps the connection data to a list of `SearchConnectionsInfoCard` widgets.
+  /// - Updates the `searchresults` list with the generated widgets to display the search results.
+  ///
+  /// Errors during the API call are caught and logged for debugging purposes.
   Future<void> filterNTTNConnections() async {
-    // Create an instance of the NTNNConnectionAPIService class
     final apiService = await SearchFilterAPIService.create();
     print(_divisionID);
     print(_districtID);
     print(_upazilaID);
     print(_unionID);
 
-// Define the request data
     final Map<String, dynamic> requestData = {};
 
-// Add division_id if available
     if (_divisionID != null) {
       requestData['division_id'] = _divisionID;
     }
 
-// Add district_id if available
     if (_districtID != null) {
       requestData['district_id'] = _districtID;
     }
 
-// Add upazila_id if available
     if (_upazilaID != null) {
       requestData['upazila_id'] = _upazilaID;
     }
 
-// Add union_id if available
     if (_unionID != null) {
       requestData['union_id'] = _unionID;
     }
@@ -641,16 +667,12 @@ class _SearchUserState extends State<SearchUser> {
     print(requestData);
 
     try {
-      // Call the API service method to filter NTTN connections
       print('Request:: $requestData');
       final Map<String, dynamic> filteredData =
           await apiService.filterNTTNConnection(requestData);
-      // Process the filtered data as needed
       print('Filtered NTTN connections: $filteredData');
 
-      // Check if the 'records' field exists in the response data
       if (filteredData.containsKey('records')) {
-        // Extract the list of connections from the 'records' field
         List<dynamic> connections = filteredData['records'];
         print('Connections:: $connections');
         // Map pending requests to widgets
@@ -672,7 +694,6 @@ class _SearchUserState extends State<SearchUser> {
         //print('Fetched Connection:: $filteredConnections');
       }
     } catch (e) {
-      // Handle any errors that occur during the process
       print('Error filtering NTTN connections: $e');
     }
   }

@@ -102,8 +102,16 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
+      for (var index = 0; index < pendingRequestsData.length; index++) {
+        print(
+            'Pending Request at index $index: ${pendingRequestsData[index]}\n');
+      }
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
       print('Accepted: $acceptedRequestsData');
+      for (var index = 0; index < acceptedRequestsData.length; index++) {
+        print(
+            'Pending Request at index $index: ${acceptedRequestsData[index]}\n');
+      }
 
       // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {

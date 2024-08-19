@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../Data/Data Sources/API Service (Upgrade Connection)/apiServiceUpgradeConnection.dart';
 
+/// A widget that displays detailed information about a connection upgrade request.
+///
+/// This widget is used to show detailed information related to a connection upgrade request
+/// and allows users to submit an upgrade request through a dialog.
+///
+/// [UserID] is the ID of the user requesting the upgrade.
+/// [ConnectionType] is the type of connection being upgraded.
+/// [NTTNProvider] is the name of the NTTN provider.
+/// [ApplicationID] is the unique ID of the application.
+/// [Division] is the division where the connection is located.
+/// [District] is the district where the connection is located.
+/// [Upazila] is the Upazila where the connection is located.
+/// [Union] is the union where the connection is located.
 class UpgradeConnectionInfoCard extends StatefulWidget {
   final String UserID;
   final String ConnectionType;
@@ -26,14 +38,16 @@ class UpgradeConnectionInfoCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UpgradeConnectionInfoCardState createState() => _UpgradeConnectionInfoCardState();
+  _UpgradeConnectionInfoCardState createState() =>
+      _UpgradeConnectionInfoCardState();
 }
 
 class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
   final _formKey = GlobalKey<FormState>();
   String? selectedCapacity;
   bool showCustomCapacityField = false;
-  final TextEditingController customCapacityController = TextEditingController();
+  final TextEditingController customCapacityController =
+      TextEditingController();
   final TextEditingController remarkController = TextEditingController();
 
   @override
@@ -57,7 +71,9 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
             _buildRow('Division', widget.Division),
             _buildRow('Upazila', widget.Upazila),
             _buildRow('Union', widget.Union),
-            SizedBox(height: 15,),
+            SizedBox(
+              height: 15,
+            ),
             Center(
               child: Material(
                 elevation: 5,
@@ -66,14 +82,8 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
                     fixedSize: Size(
-                      MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.5,
-                      MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.075,
+                      MediaQuery.of(context).size.width * 0.5,
+                      MediaQuery.of(context).size.height * 0.075,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -98,6 +108,10 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
     );
   }
 
+  /// Shows a dialog allowing the user to submit an upgrade request.
+  ///
+  /// The dialog contains form fields for entering link capacity and remarks,
+  /// and handles form submission by interacting with the API service.
   void _showUpgradeDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -117,23 +131,23 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
               child: Column(
                 children: [
                   Divider(),
-                    TextFormField(
-                      controller: customCapacityController,
-                      decoration: InputDecoration(
-                          labelText: 'Enter Link Capacity',
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          )),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter link capacity';
-                        }
-                        return null;
-                      },
-                    ),
+                  TextFormField(
+                    controller: customCapacityController,
+                    decoration: InputDecoration(
+                        labelText: 'Enter Link Capacity',
+                        labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'default',
+                        )),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter link capacity';
+                      }
+                      return null;
+                    },
+                  ),
                   TextFormField(
                     controller: remarkController,
                     decoration: InputDecoration(
@@ -166,7 +180,9 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                         fontFamily: 'default',
                       )),
                 ),
-                SizedBox(width: 10,),
+                SizedBox(
+                  width: 10,
+                ),
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
@@ -174,7 +190,6 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                         content: Text('Processing'),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      // Handle the form submission
                       String linkCapacity = customCapacityController.text;
                       String remark = remarkController.text;
 
@@ -182,18 +197,18 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                       print('Remark: $remark');
 
                       try {
-                        UpgradeConnectionAPIService apiService = await UpgradeConnectionAPIService.create();
+                        UpgradeConnectionAPIService apiService =
+                            await UpgradeConnectionAPIService.create();
                         var response = await apiService.updateConnection(
                           id: widget.ApplicationID,
-                          requestType: 'Upgrade', // Assuming 'upgrade' is the request type
+                          requestType: 'Upgrade',
                           linkCapacity: linkCapacity,
                           remark: remark,
                         );
-
-                        // Handle the response here
                         print('Response: $response');
                         const snackBar = SnackBar(
-                          content: Text('Successfully Submitted Upgrade Request'),
+                          content:
+                              Text('Successfully Submitted Upgrade Request'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         Navigator.of(context).pop();
@@ -204,7 +219,6 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         print('Error: $e');
                       }
-
                     }
                   },
                   child: Text('Submit',
@@ -223,6 +237,10 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
     );
   }
 
+  /// Builds a row displaying a label and its corresponding value.
+  ///
+  /// [label] is the text label to display.
+  /// [value] is the value associated with the label.
   Widget _buildRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

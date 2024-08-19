@@ -5,9 +5,15 @@ import '../../Data/Models/profileModelFull.dart';
 
 part 'auth_state.dart';
 
+/// Cubit for managing authentication state.
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
+  /// Logs in a user by saving their profile and token.
+  ///
+  /// - Parameters:
+  ///   - `userProfile`: An instance of `UserProfile` containing user details.
+  ///   - `token`: A string representing the authentication token.
   void login(UserProfile userProfile, String token) {
     emit(AuthAuthenticated(userProfile: userProfile, token: token));
     print('User profile and token saved in Cubit:');
@@ -15,6 +21,10 @@ class AuthCubit extends Cubit<AuthState> {
     print('Token: $token');
   }
 
+  /// Updates the user's profile information.
+  ///
+  /// - Parameters:
+  ///   - `userProfile`: An instance of `UserProfile` containing updated user details.
   void updateProfile(UserProfile userProfile) {
     if (state is AuthAuthenticated) {
       final currentState = state as AuthAuthenticated;
@@ -27,6 +37,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Logs out the user by resetting the state.
   void logout() {
     emit(AuthInitial());
     print('User profile and token removed from Cubit');

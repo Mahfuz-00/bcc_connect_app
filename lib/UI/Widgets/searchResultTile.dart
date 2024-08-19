@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 
+/// A card widget that displays detailed information about a connection.
+/// This widget is used to present information such as name, organization, mobile number,
+/// connection type, provider, and status in a structured format.
 class SearchConnectionsInfoCard extends StatelessWidget {
-  final String Name;
-  final String OrganizationName;
-  final String MobileNo;
-  final String ConnectionType;
-  final String Provider;
-  final String Status;
+  final String Name; // The name of the person or entity.
+  final String OrganizationName; // The name of the organization.
+  final String MobileNo; // The mobile number associated with the connection.
+  final String
+      ConnectionType; // The type of connection (e.g., Pending, Accepted).
+  final String Provider; // The service provider for the connection.
+  final String Status; // The current status of the connection.
 
   const SearchConnectionsInfoCard({
     Key? key,
-    required this.Name,
-    required this.OrganizationName,
-    required this.MobileNo,
-    required this.ConnectionType,
-    required this.Provider,
-    required this.Status,
+    required this.Name, // Required for displaying the name.
+    required this.OrganizationName, // Required for displaying the organization name.
+    required this.MobileNo, // Required for displaying the mobile number.
+    required this.ConnectionType, // Required for displaying the connection type.
+    required this.Provider, // Required for displaying the provider.
+    required this.Status, // Required for displaying the status.
   }) : super(key: key);
 
   @override
@@ -23,29 +27,40 @@ class SearchConnectionsInfoCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Material(
-      elevation: 5,
-      borderRadius: BorderRadius.circular(10),
+      elevation: 5, // Shadow effect to give a material design feel.
+      borderRadius: BorderRadius.circular(10), // Rounded corners.
       child: Container(
         //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        // Padding inside the card.
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Colors.white, // Background color of the card.
+          borderRadius: const BorderRadius.all(
+              Radius.circular(10)), // Rounded corners for the card.
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          // Align children to the start (left) of the card.
           children: [
             buildProviderRow('Name', Name),
-            const SizedBox(height: 5), // Space between rows
+            // Display name.
+            const SizedBox(height: 5),
+            // Space between rows
             buildProviderRow('Organization', OrganizationName),
-            const SizedBox(height: 5), // Space between rows
+            // Display organization name.
+            const SizedBox(height: 5),
+            // Space between rows
             buildProviderRow('Mobile No', MobileNo),
+            // Display mobile number.
             const SizedBox(height: 5),
             buildProviderRow('Connection Type', ConnectionType),
+            // Display connection type.
             const SizedBox(height: 5),
             buildProviderRow('Provider', Provider),
+            // Display provider.
             const SizedBox(height: 5),
             buildProviderRow('Status', Status),
+            // Display status.
           ],
         ),
       ),
@@ -53,9 +68,15 @@ class SearchConnectionsInfoCard extends StatelessWidget {
   }
 }
 
+/// A helper function that creates a row with a label and a value.
+/// This function is used to format and display information in the card.
+///
+/// [label] is the text label for the information field.
+/// [value] is the value to be displayed next to the label.
 Widget buildProviderRow(String label, String value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
+    // Align children to the start (top) of the row.
     children: [
       Expanded(
         child: Text(
@@ -66,12 +87,12 @@ Widget buildProviderRow(String label, String value) {
               height: 1.6,
               letterSpacing: 1.3,
               fontWeight: FontWeight.bold,
-              fontFamily: 'default'
-          ),
+              fontFamily: 'default'),
         ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        // Space between label and value.
         child: Text(
           ":",
           style: TextStyle(
@@ -90,8 +111,7 @@ Widget buildProviderRow(String label, String value) {
               height: 1.6,
               letterSpacing: 1.3,
               fontWeight: FontWeight.bold,
-              fontFamily: 'default'
-          ),
+              fontFamily: 'default'),
         ),
       ),
     ],

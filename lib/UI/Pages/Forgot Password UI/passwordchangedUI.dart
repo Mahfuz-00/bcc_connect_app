@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../Login UI/loginUI.dart';
 
+/// A screen that displays a confirmation message indicating that the password has been changed successfully.
+///
+/// This screen shows a success message and an image indicating the successful password change.
+/// It also provides a button to navigate back to the login screen.
+///
+/// The screen checks for internet connectivity on initialization to ensure that the network is available.
 class PasswordChanged extends StatefulWidget {
   const PasswordChanged({super.key});
 
@@ -11,8 +17,11 @@ class PasswordChanged extends StatefulWidget {
 }
 
 class _PasswordChangedState extends State<PasswordChanged> {
-  bool _isLoading = false;
+  bool _isLoading = false; // Indicates whether the screen is in loading state
 
+  /// Checks the current internet connection status.
+  ///
+  /// Sets the `_isLoading` state to true if an internet connection is available.
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
@@ -26,6 +35,7 @@ class _PasswordChangedState extends State<PasswordChanged> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Check for internet connection when the widget is initialized
     _checkInternetConnection();
   }
 
@@ -43,7 +53,7 @@ class _PasswordChangedState extends State<PasswordChanged> {
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children:[
+                children: [
                   Center(
                     child: Image(
                       image: AssetImage('Assets/Images/Success-Mark.png'),
@@ -52,7 +62,9 @@ class _PasswordChangedState extends State<PasswordChanged> {
                       alignment: Alignment.center,
                     ),
                   ),
-                  SizedBox(height: 20,),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Text(
                     'Password Changed!',
                     textAlign: TextAlign.center,
@@ -74,7 +86,9 @@ class _PasswordChangedState extends State<PasswordChanged> {
                       fontFamily: 'default',
                     ),
                   ),
-                  SizedBox(height: 50,),
+                  SizedBox(
+                    height: 50,
+                  ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(context,
@@ -85,7 +99,7 @@ class _PasswordChangedState extends State<PasswordChanged> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      fixedSize: Size(screenWidth*0.9, 70),
+                      fixedSize: Size(screenWidth * 0.9, 70),
                     ),
                     child: Text(
                       'Back to Login',

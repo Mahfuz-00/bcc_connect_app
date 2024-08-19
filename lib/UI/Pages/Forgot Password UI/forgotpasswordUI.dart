@@ -6,6 +6,7 @@ import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceForgo
 import '../Login UI/loginUI.dart';
 import 'otpverficationUI.dart';
 
+// StatefulWidget to manage the state of the Forgot Password screen
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
 
@@ -15,21 +16,22 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   late TextEditingController _emailController = TextEditingController();
-
-  bool _isLoading = false;
+  bool _isLoading = false; // Indicates whether data is loading
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController();
+    _emailController = TextEditingController(); // Initialize email controller
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _emailController
+        .dispose(); // Dispose of email controller to free up resources
     super.dispose();
   }
 
+  // Method to send OTP for password reset
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword.create();
 /*    apiService.sendForgotPasswordOTP(email);
@@ -39,18 +41,20 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );*/
     apiService.sendForgotPasswordOTP(email).then((response) {
       if (response == 'Forget password otp send successfully') {
+        // Navigate to OTP verification screen if OTP is sent successfully
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OPTVerfication()),
         );
       } else if (response == 'validation error') {
+        // Show snackbar if there is a validation error
         const snackBar = SnackBar(
           content: Text('Invalid Email'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }).catchError((error) {
-      // Handle registration error
+      // Handle any errors that occur during the API call
       print(error);
       const snackBar = SnackBar(
         content: Text('Invalid Email'),
@@ -88,9 +92,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       child: IconButton(
                         onPressed: () {
-                          // Handle back button press here
                           Navigator.pop(
-                              context); // This will pop the current route off the navigator stack
+                              context); // Navigate back to the previous screen
                         },
                         icon: Icon(Icons.arrow_back_ios),
                         iconSize: 30,
@@ -139,7 +142,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             ),
                             const SizedBox(height: 50),
                             Container(
-                              width: screenWidth*0.9,
+                              width: screenWidth * 0.9,
                               height: 70,
                               child: TextFormField(
                                 controller: _emailController,
@@ -167,9 +170,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             ElevatedButton(
                               onPressed: () async {
                                 String email = _emailController.text;
-                                _sendCode(email);
-                                final prefs = await SharedPreferences.getInstance();
-                                await prefs.setString('email', email);
+                                _sendCode(email); // Call method to send OTP
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString('email',
+                                    email); // Store email in shared preferences
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -177,7 +182,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                fixedSize: Size(screenWidth*0.9, 70),
+                                fixedSize: Size(screenWidth * 0.9, 70),
                               ),
                               child: const Text(
                                 'Send Code',
@@ -217,6 +222,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             ),
                             InkWell(
                               onTap: () {
+                                // Navigate to login screen
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(

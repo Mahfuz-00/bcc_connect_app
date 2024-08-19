@@ -1,5 +1,6 @@
 part of 'auth_cubit.dart';
 
+/// Abstract class representing the base state for authentication.
 abstract class AuthState extends Equatable {
   const AuthState();
 
@@ -7,8 +8,10 @@ abstract class AuthState extends Equatable {
   List<Object> get props => [];
 }
 
+/// State representing the initial state of authentication.
 class AuthInitial extends AuthState {}
 
+/// State representing an authenticated user.
 class AuthAuthenticated extends AuthState {
   final UserProfile userProfile;
   final String token;

@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
+/// Service class for handling full NTTN connection-related operations.
 class NTTNFullConnectionAPIService {
   late final String authToken;
 
+  // Private constructor for singleton pattern.
   NTTNFullConnectionAPIService._();
 
+  /// Creates and initializes a new instance of `NTTNFullConnectionAPIService`.
+  ///
+  /// - Returns: A `Future` that completes with an instance of `NTTNFullConnectionAPIService`.
   static Future<NTTNFullConnectionAPIService> create() async {
     var apiService = NTTNFullConnectionAPIService._();
     await apiService._loadAuthToken();
@@ -20,6 +24,9 @@ class NTTNFullConnectionAPIService {
     print('triggered');
   }*/
 
+  /// Loads the authentication token from shared preferences.
+  ///
+  /// - Returns: A future that completes with the authentication token.
   Future<void> _loadAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     authToken = prefs.getString('token') ?? '';
@@ -27,6 +34,12 @@ class NTTNFullConnectionAPIService {
     print(prefs.getString('token'));
   }
 
+  /// Fetches full NTTN connection-related data from a given URL.
+  ///
+  /// - Parameters:
+  ///   - url: The endpoint from which to fetch the connection data.
+  /// - Returns: A `Future` that completes with a `Map<String, dynamic>` containing the JSON response.
+  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchFullConnections(String url) async {
     final String token = await authToken;
     try {

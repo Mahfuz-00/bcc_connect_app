@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+/// A stateless widget that displays connection information in a card format.
+/// This card includes details such as name, organization name, mobile number,
+/// connection type, provider, application ID, and status.
 class BCCConnectionsInfoCard extends StatelessWidget {
   final String Name;
   final String OrganizationName;
@@ -10,6 +13,9 @@ class BCCConnectionsInfoCard extends StatelessWidget {
   final int ApplicationID;
   final String Status;
 
+  /// Constructor for the `BCCConnectionsInfoCard` widget.
+  ///
+  /// All fields are required and must be passed to the widget when it is instantiated.
   const BCCConnectionsInfoCard({
     Key? key,
     required this.Name,
@@ -27,12 +33,14 @@ class BCCConnectionsInfoCard extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     return Material(
       elevation: 5,
+      // Adds a shadow to the card to give a raised effect.
       borderRadius: BorderRadius.circular(10),
+      // Rounds the corners of the card.
       child: Container(
         //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // Sets the background color of the card.
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Column(
@@ -52,6 +60,12 @@ class BCCConnectionsInfoCard extends StatelessWidget {
   }
 }
 
+/// Builds a row displaying a label and its corresponding value.
+/// This method is used for string values.
+///
+/// - Parameters:
+///   - label: The label text to be displayed.
+///   - value: The value text to be displayed next to the label.
 Widget _buildRow(String label, String value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,6 +123,12 @@ Widget _buildRow(String label, String value) {
   );
 }
 
+/// Builds a row displaying a label and its corresponding integer value.
+/// This method is specifically used for displaying Application ID.
+///
+/// - Parameters:
+///   - label: The label text to be displayed.
+///   - value: The integer value to be displayed next to the label.
 Widget _buildRowApplicationID(String label, int value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,10 +186,14 @@ Widget _buildRowApplicationID(String label, int value) {
   );
 }
 
+/// Builds a row displaying a label and a date/time value formatted as 'Month Day, Year, Time'.
+///
+/// - Parameters:
+///   - label: The label text to be displayed.
+///   - value: The date/time string value in ISO 8601 format to be parsed and displayed next to the label.
 Widget _buildRowTime(String label, String value) {
   //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
 
-  // Option 2: Using separate methods for date and time
   DateTime date = DateTime.parse(value);
   DateFormat dateFormat = DateFormat.yMMMMd('en_US');
   DateFormat timeFormat = DateFormat.jm();
@@ -214,6 +238,3 @@ Widget _buildRowTime(String label, String value) {
     ],
   );
 }
-
-
-

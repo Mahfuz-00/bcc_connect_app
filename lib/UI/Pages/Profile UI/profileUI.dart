@@ -808,6 +808,4 @@ class _ProfileUIState extends State<ProfileUI> {
       print('Error updating profile picture: $e');
     }
   }
-
-
 }

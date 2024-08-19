@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
+/// A custom widget that displays a group of radio buttons in a list tile format.
+/// Allows the user to select one option from the given list of options.
+/// Customizes appearance based on the selected option.
 class RadioListTileGroup extends StatefulWidget {
-  final List<String> options;
-  final String? selectedOption;
-  final Function(String)? onChanged;
+  final List<String>
+      options; // List of options to be displayed as radio buttons.
+  final String? selectedOption; // Currently selected option, if any.
+  final Function(String)?
+      onChanged; // Callback function to handle option changes.
 
   const RadioListTileGroup({
     Key? key,
-    required this.options,
-    this.selectedOption,
-    this.onChanged,
+    required this.options, // Required list of options.
+    this.selectedOption, // Optional parameter for initially selected option.
+    this.onChanged, // Optional callback function for handling changes.
   }) : super(key: key);
 
   @override
@@ -17,12 +22,13 @@ class RadioListTileGroup extends StatefulWidget {
 }
 
 class _RadioListTileGroupState extends State<RadioListTileGroup> {
-  late String _selectedOption;
+  late String _selectedOption; // Holds the currently selected option.
 
   @override
   void initState() {
     super.initState();
-    _selectedOption = widget.selectedOption ?? widget.options.first;
+    _selectedOption = widget.selectedOption ??
+        widget.options.first; // Initialize _selectedOption.
   }
 
   @override
@@ -30,40 +36,49 @@ class _RadioListTileGroupState extends State<RadioListTileGroup> {
     return Theme(
       data: Theme.of(context).copyWith(
         listTileTheme: ListTileThemeData(
-          horizontalTitleGap: 2,
+          horizontalTitleGap:
+              2, // Adjusts the horizontal gap between the tile's content and the edge.
         ),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent, // Disables splash color effect.
+        highlightColor: Colors.transparent, // Disables highlight color effect.
       ),
       child: Wrap(
         children: widget.options.map((option) {
           return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.06,
-            width: MediaQuery.of(context).size.width * 0.45,
+            height: MediaQuery.of(context).size.height *
+                0.06, // Sets height of each radio list tile.
+            width: MediaQuery.of(context).size.width *
+                0.45, // Sets width of each radio list tile.
             child: RadioListTile<String>(
               title: Text(
-                option,
+                option, // Displays the option text.
                 style: TextStyle(
-                  fontFamily: 'default',
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'default', // Sets the font family.
+                  fontWeight: FontWeight.bold, // Makes the text bold.
                   fontSize: 16,
-                  color:
-                  _selectedOption == option ? Colors.deepPurple : Colors.green,
+                  color: _selectedOption == option
+                      ? Colors.deepPurple
+                      : Colors.green, // Changes text color based on selection.
                 ),
               ),
               value: option,
+              // Value associated with this radio button.
               groupValue: _selectedOption,
+              // Currently selected option.
               onChanged: (String? value) {
                 setState(() {
-                  _selectedOption = value!;
+                  _selectedOption = value!; // Update selected option.
                   if (widget.onChanged != null) {
-                    widget.onChanged!(value);
+                    widget
+                        .onChanged!(value); // Invoke the callback if provided.
                   }
                 });
               },
               activeColor:
                   _selectedOption == option ? Colors.deepPurple : Colors.green,
-              contentPadding: EdgeInsets.symmetric(horizontal: 2),
+              // Sets the color of the active radio button.
+              contentPadding: EdgeInsets.symmetric(
+                  horizontal: 2), // Sets padding around the content.
             ),
           );
         }).toList(),

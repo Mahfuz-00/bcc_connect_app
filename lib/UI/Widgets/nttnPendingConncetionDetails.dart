@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../Data/Data Sources/API Service (Accept or Decline)/apiServiceAcceptOrDecline.dart';
 import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 
+/// A stateless widget that displays the details of a pending connection request.
+/// It includes options to accept or reject the request, and handles the navigation and API calls accordingly.
 class PendingConnectionDetailsPage extends StatelessWidget {
-  final String Name;
-  final String OrganizationName;
-  final String MobileNo;
-  final String ConnectionType;
-  final String ApplicationID;
-  final String Location;
-  final String Status;
-  final String LinkCapacity;
-  final String Remark;
-  final int ispConnectionId; // Declare ispConnectionId as a class member
+  final String Name; // The name associated with the connection.
+  final String
+      OrganizationName; // The organization name linked to the connection.
+  final String MobileNo; // The mobile number associated with the connection.
+  final String ConnectionType; // The type of connection (e.g., New, Upgrade).
+  final String ApplicationID; // The unique ID of the application.
+  final String Location; // The location of the connection.
+  final String
+      Status; // The current status of the connection (e.g., Pending, Accepted).
+  final String
+      LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
+  final String Remark; // Any additional remarks about the connection.
+  final int
+      ispConnectionId; // The connection ID parsed from ApplicationID for API operations.
 
   PendingConnectionDetailsPage({
     Key? key,
@@ -27,27 +32,36 @@ class PendingConnectionDetailsPage extends StatelessWidget {
     required this.Status,
     required this.LinkCapacity,
     required this.Remark,
-  })   : ispConnectionId = int.tryParse(ApplicationID) ?? 0, // Initialize ispConnectionId in the constructor initializer list
+  })  : ispConnectionId = int.tryParse(ApplicationID) ?? 0,
+        // Parses ApplicationID to integer for API operations.
+        // Initialize ispConnectionId in the constructor initializer list
         super(key: key);
 
-  late String action; // Enter 'accepted' or 'rejected' here
+  late String action; // Action to be performed ('accepted' or 'rejected').
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context)
+        .size
+        .width; // Fetches the width of the device screen.
+    final screenHeight = MediaQuery.of(context)
+        .size
+        .height; // Fetches the height of the device screen.
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+        // AppBar background color.
         leadingWidth: 40,
         titleSpacing: 10,
         leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Navigates back to the previous screen.
             },
-            icon: Icon(Icons.arrow_back_ios_new_outlined, color: Colors.white,)
-        ),
+            icon: Icon(
+              Icons.arrow_back_ios_new_outlined,
+              color: Colors.white,
+            )),
         title: const Text(
           'Pending Connection Details',
           style: TextStyle(
@@ -124,21 +138,26 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      action = 'accepted';
-                      handleAcceptOrReject(action);
+                      action = 'accepted'; // Set action to 'accepted'.
+                      handleAcceptOrReject(action); // Handle accept action.
                       const snackBar = SnackBar(
-                        content: Text('Processing...'),
+                        content: Text(
+                            'Processing...'), // Display processing message.
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       Future.delayed(Duration(seconds: 2), () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => NTTNDashboard(shouldRefresh: true)),
-                      );
-                      const snackBar = SnackBar(
-                        content: Text('Request Accepted!'),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NTTNDashboard(
+                                  shouldRefresh:
+                                      true)), // Navigate to NTTN Dashboard.
+                        );
+                        const snackBar = SnackBar(
+                          content: Text(
+                              'Request Accepted!'), // Display acceptance message.
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       });
                     },
                     child: Text('Accept',
@@ -149,7 +168,9 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                           fontFamily: 'default',
                         )),
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(
+                    width: 10,
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -160,23 +181,27 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      action = 'rejected';
-                      handleAcceptOrReject(action);
+                      action = 'rejected'; // Set action to 'rejected'.
+                      handleAcceptOrReject(action); // Handle reject action.
                       const snackBar = SnackBar(
-                        content: Text('Processing...'),
+                        content: Text(
+                            'Processing...'), // Display processing message.
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       Future.delayed(Duration(seconds: 2), () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) =>
-                              NTTNDashboard(shouldRefresh: true)),
+                          MaterialPageRoute(
+                              builder: (context) => NTTNDashboard(
+                                  shouldRefresh:
+                                      true)), // Navigate to NTTN Dashboard.
                         );
                         const snackBar = SnackBar(
-                          content: Text('Request Declined!'),
+                          content: Text(
+                              'Request Declined!'), // Display rejection message.
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      });// Validation complete, hide circular progress indicator
+                      }); // Validation complete, hide circular progress indicator
                     },
                     child: Text('Decline',
                         style: TextStyle(
@@ -195,7 +220,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
     );
   }
 
-
+  /// Builds a row displaying a label and value.
   Widget _buildRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +278,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
     );
   }
 
-  // Function to handle accept or reject action
+  /// Handles the accept or reject action by calling the API service.
   Future<void> handleAcceptOrReject(String Action) async {
     final apiService = await ConnectionAcceptRejectAPIService.create();
 
@@ -261,16 +286,17 @@ class PendingConnectionDetailsPage extends StatelessWidget {
     print(ApplicationID);
     print(ispConnectionId);
     if (action.isNotEmpty && ispConnectionId > 0) {
-      await apiService.acceptOrRejectConnection(type: Action, ispConnectionId: ispConnectionId);
+      await apiService.acceptOrRejectConnection(
+          type: Action, ispConnectionId: ispConnectionId);
     } else {
       print('Action or ISP connection ID is missing');
     }
   }
 
+  /// Builds a row displaying a label and a formatted date-time value.
   Widget _buildRowTime(String label, String value) {
     //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
 
-    // Option 2: Using separate methods for date and time
     DateTime date = DateTime.parse(value);
     DateFormat dateFormat = DateFormat.yMMMMd('en_US');
     DateFormat timeFormat = DateFormat.jm();
@@ -315,5 +341,4 @@ class PendingConnectionDetailsPage extends StatelessWidget {
       ],
     );
   }
-
 }
