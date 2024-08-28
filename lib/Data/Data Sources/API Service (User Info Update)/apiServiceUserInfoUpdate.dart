@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../../Models/userInfoUpdateModel.dart';
 
@@ -9,31 +7,7 @@ class APIServiceUpdateUser {
   late final String authToken;
   String URL = "https://bcc.touchandsolve.com/api/user/profile/update";
 
-  // Private constructor for singleton pattern.
-  APIServiceUpdateUser._();
-
-  /// Factory constructor to create an instance of `APIServiceUpdateUser`.
-  static Future<APIServiceUpdateUser> create() async {
-    var apiService = APIServiceUpdateUser._();
-    await apiService._loadAuthToken();
-    print('triggered API');
-    return apiService;
-  }
-
-/*  APIServiceUpdateUser() {
-    authToken = _loadAuthToken(); // Assigning the future here
-    print('triggered');
-  }*/
-
-  /// Loads the authentication token from shared preferences.
-  ///
-  /// - Returns: A future that completes with the authentication token.
-  Future<void> _loadAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    authToken = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-  }
+  APIServiceUpdateUser.create(this.authToken);
 
   /// Updates the user profile with the provided data.
   ///
@@ -41,18 +15,12 @@ class APIServiceUpdateUser {
   ///   - `userData`: An instance of `UserProfileUpdate` containing user profile data.
   /// - Returns: A `Future` that completes with a message from the server.
   Future<String> updateUserProfile(UserProfileUpdate userData) async {
-    final String token = await authToken;
     try {
-      if (token.isEmpty) {
-        await _loadAuthToken();
-        throw Exception('Authentication token is empty.');
-      }
-
+      print('API Token :: $authToken');
       var response = await http.post(
         Uri.parse(URL),
         headers: <String, String>{
-          //'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $authToken'
         },
         body: {
           'userId': userData.userId,
@@ -76,8 +44,7 @@ class APIServiceUpdateUser {
       var response = await http.post(
         Uri.parse(URL),
         headers: <String, String>{
-          //'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $authToken'
         },
         body: {
           'userId': userData.userId,

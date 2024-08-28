@@ -1,27 +1,26 @@
 import 'package:bcc_connect_app/Data/Data%20Sources/API%20Service%20(BCC_Connections)/apiserviceconnectionfullbcc.dart';
-import 'package:bcc_connect_app/UI/Widgets/requestWidget.dart';
-import 'package:bcc_connect_app/UI/Widgets/requestWidgetShowAll.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (BCC_Connections)/apiserviceconnectionbcc.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
 import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/email_cubit.dart';
 import '../../Widgets/bccConnectionsPendingdetailtile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
-import '../../Widgets/templateloadingcontainer.dart';
 import '../Information/information.dart';
 import '../Search UI/searchUI.dart';
 import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 
+/// A dashboard widget that displays pending NTTN connections.
+///
+/// This widget shows the number of active and pending connections,
+/// The active and pending connection counts are displayed prominently
 class BCCDashboard extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -44,10 +43,10 @@ class _BCCDashboardState extends State<BCCDashboard>
   List<Widget> acceptedConnectionRequests = [];
   bool _isFetched = false;
   bool _pageLoading = true;
-  int? adslCountPending;
-  int? adslCountActive;
-  int? sblCountPending;
-  int? sblCountActive;
+  int? adslCountPending = 0;
+  int? adslCountActive = 0;
+  int? sblCountPending = 0;
+  int? sblCountActive = 0;
   List<String> notifications = [];
   ScrollController _scrollController = ScrollController();
   ScrollController _tabScrollController = ScrollController();
@@ -55,24 +54,12 @@ class _BCCDashboardState extends State<BCCDashboard>
   bool canFetchMorePending = false;
   late String url = '';
 
-/*  Future<void> loadUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('userName') ?? '';
-      organizationName = prefs.getString('organizationName') ?? '';
-      photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
-      print('User Name: $userName');
-      print('Organization Name: $organizationName');
-      print('Photo URL: $photoUrl');
-      print('User profile got it!!!!');
-    });
-  }*/
-
   Future<void> fetchConnections() async {
     if (_isFetched) return;
     try {
-      final apiService = await BCCConnectionAPIService.create();
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await BCCConnectionAPIService.create(token);
 
       final Map<String, dynamic> dashboardData =
           await apiService.fetchDashboardItems();
@@ -106,6 +93,9 @@ class _BCCDashboardState extends State<BCCDashboard>
       if (records == null || records.isEmpty) {
         // No records available
         print('No records available');
+        setState(() {
+          _isFetched= true;
+        });
         return;
       }
 
@@ -183,7 +173,9 @@ class _BCCDashboardState extends State<BCCDashboard>
 
     try {
       if (url != '' && url.isNotEmpty) {
-        final apiService = await BCCFullConnectionAPIService.create();
+        final authCubit = context.read<AuthCubit>();
+        final token = (authCubit.state as AuthAuthenticated).token;
+        final apiService = await BCCFullConnectionAPIService.create(token);
         final Map<String, dynamic> dashboardData =
             await apiService.fetchFullDashboardItems(url);
 
@@ -216,14 +208,6 @@ class _BCCDashboardState extends State<BCCDashboard>
 
         final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
         final int currentCount = pendingConnectionRequests.length;
-        /*final int additionalLoadCount =
-            pendingRequestsData.length > currentCount + _itemsToLoad
-                ? _itemsToLoad
-                : pendingRequestsData.length - currentCount;
-        for (var index = 0; index < pendingRequestsData.length; index++) {
-          print(
-              'Pending Request at index $index: ${pendingRequestsData[index]}\n');
-        }*/
 
         if (pendingRequestsData.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -236,14 +220,6 @@ class _BCCDashboardState extends State<BCCDashboard>
         }
 
         print('Current count: $currentCount');
-        // print('Additional load count: $additionalLoadCount');
-
-        /*  if (additionalLoadCount == 0) {
-          // If no additional requests are loaded
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('All requests loaded')),
-          );
-        }*/
 
         // Map pending requests to widgets
         final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
@@ -292,19 +268,18 @@ class _BCCDashboardState extends State<BCCDashboard>
       }
     });
     _tabController = TabController(length: 2, vsync: this);
-    //loadUserProfile();
     Future.delayed(Duration(seconds: 5), () {
-      //loadUserProfile();
       if (widget.shouldRefresh) {
         setState(() {
           _pageLoading = false;
         });
       }
     });
-    if (!_isFetched) {
-      fetchConnections();
-      // _isFetched = true; // Set _isFetched to true after the first call
-    }
+    Future.delayed(Duration(seconds: 2), () {
+      if (!_isFetched) {
+        fetchConnections();
+      }
+    });
   }
 
   @override
@@ -365,8 +340,10 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 ),
                                 onPressed: () async {
                                   _showNotificationsOverlay(context);
+                                  final authCubit = context.read<AuthCubit>();
+                                  final token = (authCubit.state as AuthAuthenticated).token;
                                   var notificationApiService =
-                                      await NotificationReadApiService.create();
+                                      await NotificationReadApiService.create(token);
                                   notificationApiService.readNotification();
                                 },
                               ),
@@ -433,16 +410,6 @@ class _BCCDashboardState extends State<BCCDashboard>
                                       fontFamily: 'default',
                                     ),
                                   ),
-                                  /*  SizedBox(height: 10),
-                            Text(
-                              organizationName,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                            ),*/
                                 ],
                               ),
                             ),
@@ -460,7 +427,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                     MaterialPageRoute(
                                         builder: (context) => BCCDashboard(
                                               shouldRefresh: true,
-                                            ))); // Close the drawer
+                                            )));
                               },
                             ),
                             Divider(),
@@ -496,7 +463,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                     MaterialPageRoute(
                                         builder: (context) => ProfileUI(
                                               shouldRefresh: true,
-                                            ))); // Close the drawer
+                                            )));
                               },
                             ),
                             Divider(),
@@ -515,15 +482,11 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 );
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
-                                /*   // Clear user data from SharedPreferences
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('userName');
-                                await prefs.remove('organizationName');
-                                await prefs.remove('photoUrl');*/
-                                // Create an instance of LogOutApiService
+
+                                final authCubit = context.read<AuthCubit>();
+                                final token = (authCubit.state as AuthAuthenticated).token;
                                 var logoutApiService =
-                                    await LogOutApiService.create();
+                                    await LogOutApiService.create(token);
 
                                 // Wait for authToken to be initialized
                                 logoutApiService.authToken;
@@ -535,13 +498,15 @@ class _BCCDashboardState extends State<BCCDashboard>
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-                                  // Call logout method in AuthCubit/AuthBloc
+
                                   context.read<AuthCubit>().logout();
+                                  final emailCubit = EmailCubit();
+                                  emailCubit.clearEmail();
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              Login())); // Close the drawer
+                                              Login()));
                                 }
                               },
                             ),

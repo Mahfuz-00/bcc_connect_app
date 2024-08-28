@@ -26,15 +26,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // Ensure Flutter is initialized
     WidgetsFlutterBinding.ensureInitialized();
-    // Initialize the animation controller
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1500));
 
-    // Define the animations
     SlideAnimation = Tween(begin: const Offset(0, 3), end: const Offset(0, 0))
         .animate(CurvedAnimation(
             parent: animationController, curve: Curves.easeInOutCirc));
@@ -44,15 +40,12 @@ class _SplashScreenState extends State<SplashScreen>
         .animate(
             CurvedAnimation(parent: animationController, curve: Curves.easeIn));
 
-    // Start the animation after a delay
     Future.delayed(const Duration(seconds: 5), () {
       animationController.forward();
     });
-// Check internet connectivity
     _checkInternetConnection();
   }
 
-  /// Checks for internet connectivity and updates the loading state.
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
@@ -73,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen>
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Return the main app screen
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
@@ -124,7 +116,6 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             // Display buttons with animations
             Stack(
-              //fit: StackFit.expand,
               alignment: Alignment.bottomCenter,
               children: [
                 FadeTransition(
@@ -138,14 +129,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 SlideTransition(
                   position: SlideAnimation,
-                  /*CurvedAnimation(
-                    parent: animationController,
-                    curve: Curves.easeInOutCirc, // Adjust values for desired timing
-                  ).drive(Tween<Offset>(
-                    begin: Offset(0, 2), // Start beyond the bottom edge
-                    end: Offset(0, 0),
-                  )),*/
-                  //position: SlideAnimation,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -163,9 +146,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 const Color.fromRGBO(25, 192, 122, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
-                              //side: BorderSide(color: Colors.black, width: 2),
                             ),
-                            //elevation: 3,
                             fixedSize: Size(screenWidth * 0.9, 70),
                           ),
                           child: const Text('Login',
@@ -194,7 +175,6 @@ class _SplashScreenState extends State<SplashScreen>
                               side: const BorderSide(
                                   color: Colors.black, width: 2),
                             ),
-                            //elevation: 3,
                             fixedSize: Size(screenWidth * 0.9, 70),
                           ),
                           child: const Text('Register',

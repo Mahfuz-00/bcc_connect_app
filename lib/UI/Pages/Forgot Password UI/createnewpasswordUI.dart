@@ -1,8 +1,8 @@
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceCreateNewPassword.dart';
+import '../../Bloc/email_cubit.dart';
 import 'passwordchangedUI.dart';
 
 // StatefulWidget to manage the state of creating a new password
@@ -21,7 +21,6 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     // Simulates a loading period before the UI is displayed
     Future.delayed(Duration(seconds: 3), () {
@@ -199,14 +198,13 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(snackBar);
                                         } else {
-                                          // Retrieve the stored email from shared preferences
-                                          final prefs = await SharedPreferences
-                                              .getInstance();
-                                          String email =
-                                              await prefs.getString('email') ??
-                                                  '';
+                                          final email = (context
+                                                  .read<EmailCubit>()
+                                                  .state as EmailSaved)
+                                              .email;
+                                          print(
+                                              'Retrieved email from Cubit: $email');
                                           print(email);
-                                          // Call method to create a new password
                                           _createNewPassword(
                                               email,
                                               _newPasswordcontroller.text,

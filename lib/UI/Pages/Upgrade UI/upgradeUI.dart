@@ -1,14 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Fetch Connections)/apiServiceFetchconnectionlist.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/email_cubit.dart';
 import '../../Widgets/templateerrorcontainer.dart';
 import '../../Widgets/upgradeConnectionDetails.dart';
 import '../Connection Form (ISP)/connectionform.dart';
@@ -37,47 +36,25 @@ class UpgradeUI extends StatefulWidget {
 class _ISPDashboardState extends State<UpgradeUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  //late List<ISPConnectionDetails> connectionRequests;
   // Lists to hold the pending and accepted connection request widgets
   List<Widget> pendingConnectionRequests = [];
   List<Widget> acceptedConnectionRequests = [];
   bool _isFetched = false;
   bool _isLoading = false;
   bool _pageLoading = true;
-  bool _errorOccurred = false;
 
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
   late String Id;
 
-/*  List<String> notifications = [];*/
-
-  /// Loads the user profile information from SharedPreferences and updates the state.
-  Future<void> loadUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('userName') ?? '';
-      organizationName = prefs.getString('organizationName') ?? '';
-      photoUrl = prefs.getString('photoUrl') ?? '';
-      Id = prefs.getString('id') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
-      print('User Name: $userName');
-      print('Organization Name: $organizationName');
-      print('Photo URL: $photoUrl');
-      print('User ID: $Id');
-      print('User profile got it!!!!');
-    });
-  }
-
   /// Fetches the connection requests from the API and updates the state with the fetched data.
   Future<void> fetchConnectionRequests() async {
     if (_isFetched) return;
     try {
-      final apiService = await FetchedConnectionListAPIService.create();
-      final prefs = await SharedPreferences.getInstance();
-    /*  Id = prefs.getString('id') ?? '';
-      print('User ID: $Id');*/
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await FetchedConnectionListAPIService.create(token);
 
       final authState = context.read<AuthCubit>().state;
       int userId = 0;
@@ -99,6 +76,9 @@ class _ISPDashboardState extends State<UpgradeUI> {
       final List<dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
+        setState(() {
+          _isFetched = true;
+        });
         return;
       }
 
@@ -111,35 +91,8 @@ class _ISPDashboardState extends State<UpgradeUI> {
         _isLoading = true;
       });
 
-      // Extract notifications
-      /*    notifications = List<String>.from(records['notifications'] ?? []);*/
-
       // Simulate fetching data for 1 seconds
       await Future.delayed(Duration(seconds: 1));
-
-/*      final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
-      for (var index = 0; index < pendingRequestsData.length; index++) {
-        print(
-            'Pending Request at index $index: ${pendingRequestsData[index]}\n');
-      }
-      final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
-      for (var index = 0; index < acceptedRequestsData.length; index++) {
-        print(
-            'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
-      }*/
-
-      // Map pending requests to widgets
-/*      final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
-        return ConnectionRequestInfoCard(
-          ConnectionType: request['connection_type'],
-          NTTNProvider: request['provider'],
-          ApplicationID: request['application_id'].toString(),
-          MobileNo: request['phone'],
-          Location: request['location'],
-          Time: request['created_at'],
-          Status: request['status'],
-        );
-      }).toList();*/
 
       // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = records.map((request) {
@@ -156,7 +109,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
       }).toList();
 
       setState(() {
-        /* pendingConnectionRequests = pendingWidgets;*/
         acceptedConnectionRequests = acceptedWidgets;
         _isFetched = true;
       });
@@ -166,86 +118,16 @@ class _ISPDashboardState extends State<UpgradeUI> {
     }
   }
 
-/*  // Function to check if more than 10 items are available in the list
-  bool shouldShowSeeAllButton(List list) {
-    return list.length > 10;
-  }
-
-  // Build the button to navigate to the page showing all data
-  Widget buildSeeAllButtonRequestList(BuildContext context) {
-    return Center(
-      child: Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            fixedSize: Size(MediaQuery.of(context).size.width * 0.9,
-                MediaQuery.of(context).size.height * 0.08),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ISPRequestList()));
-          },
-          child: Text('See All Request',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              )),
-        ),
-      ),
-    );
-  }
-
-  // Build the button to navigate to the page showing all data
-  Widget buildSeeAllButtonReviewedList(BuildContext context) {
-    return Center(
-      child: Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            fixedSize: Size(MediaQuery.of(context).size.width * 0.9,
-                MediaQuery.of(context).size.height * 0.08),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ISPReviewedList()));
-          },
-          child: Text('See All Reviewed Request',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              )),
-        ),
-      ),
-    );
-  }*/
-
   @override
   void initState() {
     super.initState();
     print('initState called');
     if (!_isFetched) {
       fetchConnectionRequests();
-      //_isFetched = true; // Set _isFetched to true after the first call
     }
     Future.delayed(Duration(seconds: 5), () {
       if (widget.shouldRefresh && !_isFetched) {
-      //  loadUserProfile();
         print('Page Loading Done!!');
-        // connectionRequests = [];
       }
       // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
@@ -264,7 +146,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
         ? Scaffold(
             backgroundColor: Colors.white,
             body: Center(
-              // Show circular loading indicator while waiting
               child: CircularProgressIndicator(),
             ),
           )
@@ -297,48 +178,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
                           fontFamily: 'default',
                         ),
                       ),
-                      /*actions: [
-                                Stack(
-                                  children: [
-                                    IconButton(
-                  icon: const Icon(
-                    Icons.notifications,
-                    color: Colors.white,
-                  ),
-                  onPressed: () async {
-                    _showNotificationsOverlay(context);
-                    var notificationApiService =
-                    await NotificationReadApiService.create();
-                    notificationApiService.readNotification();
-                  },
-                                    ),
-                                    if (notifications.isNotEmpty)
-                  Positioned(
-                    right: 11,
-                    top: 11,
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 12,
-                        minHeight: 12,
-                      ),
-                      child: Text(
-                        '${notifications.length}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                                  ],
-                                ),
-                              ],*/
                     ),
                     drawer: Drawer(
                       child: ListView(
@@ -351,18 +190,10 @@ class _ISPDashboardState extends State<UpgradeUI> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                /*Container(
-                      height: 60,
-                      width: 60,
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(photoUrl),
-                        radius: 30,
-                      ),
-                    ),*/
                                 // Display user profile picture
                                 Container(
-                                  width: 60, // Adjust width as needed
-                                  height: 60, // Adjust height as needed
+                                  width: 60,
+                                  height: 60,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
@@ -373,8 +204,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   ),
                                 ),
                                 Text(
-                                  userProfile
-                                      .name /*userProfileInfo.userName*/,
+                                  userProfile.name,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
@@ -384,8 +214,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                 ),
                                 SizedBox(height: 10),
                                 Text(
-                                  userProfile
-                                      .organization /*userProfileInfo.organizationName*/,
+                                  userProfile.organization,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -409,9 +238,8 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ISPDashboard(
-                                          shouldRefresh:
-                                              true))); // Navigate to ISPDashboard
+                                      builder: (context) =>
+                                          ISPDashboard(shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -446,9 +274,8 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ISPRequestList(
-                                          shouldRefresh:
-                                              true))); // Navigate to ISPRequestList
+                                      builder: (context) =>
+                                          ISPRequestList(shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -466,8 +293,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => ISPReviewedList(
-                                          shouldRefresh:
-                                              true))); // Navigate to ISPReviewedList
+                                          shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -502,9 +328,8 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ProfileUI(
-                                          shouldRefresh:
-                                              true))); // Close the drawer
+                                      builder: (context) =>
+                                          ProfileUI(shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -517,28 +342,28 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   fontFamily: 'default',
                                 )),
                             onTap: () async {
-                              // Clear user data from SharedPreferences
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.remove('userName');
-                              await prefs.remove('organizationName');
-                              await prefs.remove('photoUrl');
-                              //await prefs.clear(); // Clear shared preferences on logout
-                              // Create an instance of LogOutApiService
+                              final authCubit = context.read<AuthCubit>();
+                              final token =
+                                  (authCubit.state as AuthAuthenticated).token;
                               var logoutApiService =
-                                  await LogOutApiService.create();
+                                  await LogOutApiService.create(token);
 
-                              // Wait for authToken to be initialized
                               logoutApiService.authToken;
 
-                              // Call the signOut method on the instance
                               if (await logoutApiService.signOut()) {
-                                Navigator.pop(context);
+                                const snackBar = SnackBar(
+                                  content: Text('Logged out'),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+
+                                context.read<AuthCubit>().logout();
+                                final emailCubit = EmailCubit();
+                                emailCubit.clearEmail();
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            Login())); // Close the drawer
+                                        builder: (context) => Login()));
                               }
                             },
                           ),
@@ -588,109 +413,17 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                 ),
                                 Divider(),
                                 const SizedBox(height: 5),
-                                /*             Container(
-                      //height: screenHeight*0.25,
-                      child: FutureBuilder<void>(
-                          future: _isLoading
-                              ? null
-                              : fetchConnectionRequests(),
-                          builder: (context, snapshot) {
-                            if (!_isFetched) {
-                              // Return a loading indicator while waiting for data
-                              return Container(
-                                height: 200, // Adjust height as needed
-                                width:
-                                screenWidth, // Adjust width as needed
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                  BorderRadius.circular(10),
-                                ),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              // Handle errors
-                              return buildNoRequestsWidget(screenWidth,
-                                  'Error: ${snapshot.error}');
-                            } else if (_isFetched) {
-                              if (pendingConnectionRequests
-                                  .isNotEmpty) {
-                                // If data is loaded successfully, display the ListView
-                                return Container(
-                                  child: Column(
-                                    children: [
-                                      ListView.separated(
-                                        shrinkWrap: true,
-                                        physics:
-                                        NeverScrollableScrollPhysics(),
-                                        itemCount:
-                                        pendingConnectionRequests
-                                            .length >
-                                            10
-                                            ? 10
-                                            : pendingConnectionRequests
-                                            .length,
-                                        itemBuilder: (context, index) {
-                                          // Display each connection request using ConnectionRequestInfoCard
-                                          return pendingConnectionRequests[
-                                          index];
-                                        },
-                                        separatorBuilder: (context,
-                                            index) =>
-                                        const SizedBox(height: 10),
-                                      ),
-                                      SizedBox(height: 10,),
-                                      if (shouldShowSeeAllButton(
-                                          pendingConnectionRequests))
-                                        buildSeeAllButtonRequestList(
-                                            context),
-                                    ],
-                                  ),
-                                );
-                              } else if (pendingConnectionRequests
-                                  .isEmpty) {
-                                // Handle the case when there are no pending connection requests
-                                return buildNoRequestsWidget(
-                                    screenWidth,
-                                    'You currently don\'t have any new requests pending.');
-                              }
-                            }
-                            // Return a default widget if none of the conditions above are met
-                            return SizedBox(); // You can return an empty SizedBox or any other default widget
-                          }),
-                    ),
-                    Divider(),
-                    const SizedBox(height: 25),
-                    Container(
-                      child: const Text('Reviewed List',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          )),
-                    ),
-                    Divider(),
-                    const SizedBox(height: 5),*/
                                 // FutureBuilder to handle fetching and displaying connection requests
                                 Container(
-                                  //height: screenHeight*0.25,
-                                  // Display a loading indicator while waiting for data
                                   child: FutureBuilder<void>(
                                       future: _isLoading
                                           ? null
                                           : fetchConnectionRequests(),
                                       builder: (context, snapshot) {
                                         if (!_isFetched) {
-                                          // Return a loading indicator while waiting for data
                                           return Container(
                                             height: 200,
-                                            // Height for the loading indicator container
                                             width: screenWidth,
-                                            // Width for the loading indicator container
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
@@ -708,13 +441,11 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                         } else if (_isFetched) {
                                           if (acceptedConnectionRequests
                                               .isEmpty) {
-                                            // Display a message when there are no connection requests
                                             return buildNoRequestsWidget(
                                                 screenWidth,
-                                                'You don\'t have any Connection, please create a new connection.');
+                                                'You don\'t have any Approved Connection, please create a new connection.');
                                           } else if (acceptedConnectionRequests
                                               .isNotEmpty) {
-                                            // Display the list of accepted connection requests
                                             return Container(
                                               child: Column(
                                                 children: [
@@ -731,7 +462,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                                                 .length,
                                                     itemBuilder:
                                                         (context, index) {
-                                                      // Display each connection request using ConnectionRequestInfoCard
                                                       return acceptedConnectionRequests[
                                                           index];
                                                     },
@@ -743,10 +473,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                                   SizedBox(
                                                     height: 10,
                                                   ),
-                                                  /*    if (shouldShowSeeAllButton(
-                                          acceptedConnectionRequests))
-                                        buildSeeAllButtonReviewedList(
-                                            context),*/
                                                 ],
                                               ),
                                             );
@@ -757,39 +483,6 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                 ),
                                 Divider(),
                                 const SizedBox(height: 30),
-                                /*      Center(
-                      child: Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(10),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                            const Color.fromRGBO(25, 192, 122, 1),
-                            fixedSize: Size(
-                                MediaQuery.of(context).size.width * 0.8,
-                                MediaQuery.of(context).size.height *
-                                    0.1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ConnectionForm()));
-                          },
-                          child: const Text('New Connection Request',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              )),
-                        ),
-                      ),
-                    )*/
                               ],
                             ),
                           ),
@@ -844,8 +537,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          ConnectionForm()));
+                                      builder: (context) => ConnectionForm()));
                             },
                             behavior: HitTestBehavior.translucent,
                             child: Container(
@@ -938,78 +630,4 @@ class _ISPDashboardState extends State<UpgradeUI> {
             },
           );
   }
-
-/*  void _showNotificationsOverlay(BuildContext context) {
-    final overlay = Overlay.of(context);
-    late OverlayEntry overlayEntry;
-
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: kToolbarHeight + 10.0,
-        right: 10.0,
-        width: 250,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: notifications.isEmpty
-                ? Container(
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_off),
-                  SizedBox(width: 10,),
-                  Text(
-                    'No new notifications',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
-              padding: EdgeInsets.all(8),
-              shrinkWrap: true,
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text(notifications[index]),
-                      onTap: () {
-                        // Handle notification tap if necessary
-                        overlayEntry.remove();
-                      },
-                    ),
-                    if (index < notifications.length - 1)
-                      Divider()
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    overlay?.insert(overlayEntry);
-
-    // Remove the overlay when tapping outside
-    Future.delayed(Duration(seconds: 5), () {
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-    });
-  }*/
 }

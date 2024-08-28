@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/searchmodel.dart';
 
 /// Service class for handling search region operations.
@@ -8,38 +7,7 @@ class APIServiceSearchRegion {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  // Private constructor for singleton pattern.
-  APIServiceSearchRegion._();
-
-  /// Creates and initializes a new instance of `APIServiceSearchRegion`.
-  ///
-  /// - Returns: A `Future` that completes with an instance of `APIServiceSearchRegion`.
-  static Future<APIServiceSearchRegion> create() async {
-    var apiService = APIServiceSearchRegion._();
-    await apiService._loadAuthToken();
-    print('triggered API');
-    return apiService;
-  }
-
-  /// Initializes a new instance of `APIServiceSearchRegion` and loads the authentication token.
-  APIServiceSearchRegion() {
-    _loadAuthToken();
-    print('triggered');
-  }
-
-  /// Loads the authentication token from shared preferences.
-  ///
-  /// - Returns: A future that completes with the authentication token.
-  Future<void> _loadAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    authToken = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-  }
-
-/*  void setAuthToken(String token) {
-    authToken = token;
-  }*/
+  APIServiceSearchRegion.create(this.authToken);
 
   /// Fetches a list of divisions from the API.
   ///
@@ -47,15 +15,7 @@ class APIServiceSearchRegion {
   /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<DivisionSearch>> fetchDivisions() async {
     try {
-      if (authToken.isEmpty) {
-        print('Authen:: $authToken');
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
-      print('Token:: $authToken');
+      print('API Token :: $authToken');
 
       final response = await http.get(
         Uri.parse('$URL/division'),
@@ -63,8 +23,6 @@ class APIServiceSearchRegion {
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        /*print(data);
-        print(data.runtimeType);*/
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'] ?? [];
           //print('Record:: $records');
@@ -102,13 +60,7 @@ class APIServiceSearchRegion {
   Future<List<DistrictSearch>> fetchDistricts(String divisionId) async {
     print(divisionId);
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/district/$divisionId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -148,13 +100,7 @@ class APIServiceSearchRegion {
   /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<UpazilaSearch>> fetchUpazilas(String districtId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/upazila/$districtId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -194,13 +140,7 @@ class APIServiceSearchRegion {
   /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<UnionSearch>> fetchUnions(String upazilaId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/union/$upazilaId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -242,13 +182,7 @@ class APIServiceSearchRegion {
   /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<NTTNProviderResult>> fetchNTTNProviders(String unionId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/nttn/provider/$unionId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {

@@ -1,4 +1,7 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../Data/Data Sources/API Service (User Info Update)/apiServicePasswordUpdate.dart';
+import '../../Bloc/auth_cubit.dart';
 import 'profileUI.dart';
 import 'package:flutter/material.dart';
 
@@ -84,8 +87,6 @@ class _PasswordChangeState extends State<PasswordChange> {
               SizedBox(height: 10),
               TextFormField(
                 keyboardType: TextInputType.text,
-                /* onSaved: (input) =>
-                _registerRequest.password = input!,*/
                 validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
@@ -126,8 +127,6 @@ class _PasswordChangeState extends State<PasswordChange> {
               SizedBox(height: 10),
               TextFormField(
                 keyboardType: TextInputType.text,
-                /* onSaved: (input) =>
-                _registerRequest.password = input!,*/
                 validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
@@ -166,8 +165,6 @@ class _PasswordChangeState extends State<PasswordChange> {
               SizedBox(height: 10),
               TextFormField(
                 keyboardType: TextInputType.text,
-                /* onSaved: (input) =>
-                _registerRequest.password = input!,*/
                 validator: (input) => input!.length < 8
                     ? "Password should be more than 7 characters"
                     : null,
@@ -213,7 +210,7 @@ class _PasswordChangeState extends State<PasswordChange> {
                       _updatePassword();
                     },
                     child: _isButtonClicked
-                        ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                        ? CircularProgressIndicator()
                         : Text(
                             'Update',
                             style: TextStyle(
@@ -241,15 +238,15 @@ class _PasswordChangeState extends State<PasswordChange> {
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _isButtonClicked =
-            false; // Validation complete, hide circular progress indicator
+            false;
       });
       const snackBar = SnackBar(
         content: Text('New Password and Confirm Password are not Matched!'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      return false; // Return false if passwords do not match
+      return false;
     } else {
-      return true; // Return true if passwords match
+      return true;
     }
   }
 
@@ -260,7 +257,7 @@ class _PasswordChangeState extends State<PasswordChange> {
   void _updatePassword() async {
     setState(() {
       _isButtonClicked =
-          true; // Validation complete, hide circular progress indicator
+          true;
     });
     if (checkConfirmPassword()) {
       String currentPassword = _currentPasswordController.text;
@@ -268,8 +265,10 @@ class _PasswordChangeState extends State<PasswordChange> {
       String confirmPassword = _confirmPasswordController.text;
 
       try {
+        final authCubit = context.read<AuthCubit>();
+        final token = (authCubit.state as AuthAuthenticated).token;
         APIServicePasswordUpdate apiService =
-            await APIServicePasswordUpdate.create();
+            await APIServicePasswordUpdate.create(token);
         final response = await apiService
             .updatePassword(
           currentPassword: currentPassword,
@@ -279,7 +278,7 @@ class _PasswordChangeState extends State<PasswordChange> {
             .then((response) {
           setState(() {
             _isButtonClicked =
-                false; // Validation complete, hide circular progress indicator
+                false;
           });
           print("Submitted");
           print(response);

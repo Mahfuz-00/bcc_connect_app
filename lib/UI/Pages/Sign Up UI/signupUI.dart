@@ -1,21 +1,23 @@
 import 'dart:io';
 import 'dart:async';
-
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:footer/footer.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Sign Up)/apiserviceregister.dart';
 import '../../../Data/Models/registermodels.dart';
+import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfield.dart';
 import '../Login UI/loginUI.dart';
 
-
+/// A widget representing the signup user interface.
+///
+/// This widget provides fields for user input necessary for the signup process,
+/// including username, email, password, and a confirm password field. It also includes
+/// a button to submit the signup form. Upon submission, it validates the input fields
+/// and displays error messages if the validation fails.
 class Signup extends StatefulWidget {
   const Signup({super.key});
 
@@ -121,7 +123,6 @@ class _SignupState extends State<Signup> {
         canPop: false,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          //resizeToAvoidBottomInset: false,
           body: SingleChildScrollView(
             child: SafeArea(
               child: Container(
@@ -159,104 +160,41 @@ class _SignupState extends State<Signup> {
                           key: globalfromkey,
                           child: Column(
                             children: [
-                              Container(
-                                width: screenWidth*0.9,
-                                height: 70,
-                                child: TextFormField(
-                                  controller: _fullNameController,
-                                  validator: (input) {
-                                    if (input == null || input.isEmpty) {
-                                      return 'Please enter your full name';
-                                    }
-                                    return null;
-                                  },
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Full Name',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                  ),
-                                ),
+                              CustomTextInput(
+                                controller: _fullNameController,
+                                label: 'Full Name',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your full name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 5),
+                              CustomTextInput(
+                                controller: _organizationController,
+                                label: 'Organization Name',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your organization name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 5),
+                              CustomTextInput(
+                                controller: _designationController,
+                                label: 'Designation',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your designation';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: screenWidth*0.9,
-                                height: 70,
-                                child: TextFormField(
-                                  controller: _organizationController,
-                                  validator: (input) {
-                                    if (input == null || input.isEmpty) {
-                                      return 'Please enter your organization name';
-                                    }
-                                    return null;
-                                  },
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Organization Name',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Container(
-                                width: screenWidth*0.9,
-                                height: 70,
-                                child: TextFormField(
-                                  controller: _designationController,
-                                  validator: (input) {
-                                    if (input == null || input.isEmpty) {
-                                      return 'Please enter your designation';
-                                    }
-                                    return null;
-                                  },
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Designation',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Container(
-                                width: screenWidth*0.9,
+                                width: screenWidth * 0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.emailAddress,
@@ -294,14 +232,13 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: screenWidth*0.9,
+                                width: screenWidth * 0.9,
                                 height: 70,
                                 child: TextFormField(
                                   controller: _phoneController,
                                   keyboardType: TextInputType.phone,
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
-                                    // Only allow digits
                                     LengthLimitingTextInputFormatter(11),
                                   ],
                                   validator: (input) {
@@ -311,7 +248,7 @@ class _SignupState extends State<Signup> {
                                     if (input.length != 11) {
                                       return 'Mobile number must be 11 digits';
                                     }
-                                    return null; // Return null if the input is valid
+                                    return null;
                                   },
                                   style: const TextStyle(
                                     color: Color.fromRGBO(143, 150, 158, 1),
@@ -335,7 +272,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: screenWidth*0.9,
+                                width: screenWidth * 0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
@@ -378,7 +315,7 @@ class _SignupState extends State<Signup> {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: screenWidth*0.9,
+                                width: screenWidth * 0.9,
                                 height: 70,
                                 child: TextFormField(
                                   keyboardType: TextInputType.text,
@@ -431,41 +368,25 @@ class _SignupState extends State<Signup> {
                                 },
                               ),
                               const SizedBox(height: 20),
-                              Container(
-                                width: screenWidth*0.9,
-                                height: 70,
-                                child: TextFormField(
-                                  controller: _licenseNumberController,
-                                  validator: (input) {
-                                    if (input == null || input.isEmpty) {
-                                      return 'Please enter your license number';
-                                    }
-                                    return null;
-                                  },
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
-                                    labelText: 'License Number',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                  ),
-                                ),
+                              CustomTextInput(
+                                controller: _licenseNumberController,
+                                label: 'License Number',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your license number';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                width: (_imageWidth != 0 ? (_imageWidth + 10).clamp(0, screenWidth*0.9) : screenWidth*0.9),
-                                height: (_imageHeight != 0 ? (_imageHeight + 10).clamp(0, 200) : 80),
+                                width: (_imageWidth != 0
+                                    ? (_imageWidth + 10)
+                                        .clamp(0, screenWidth * 0.9)
+                                    : screenWidth * 0.9),
+                                height: (_imageHeight != 0
+                                    ? (_imageHeight + 10).clamp(0, 200)
+                                    : 80),
                                 child: InkWell(
                                   onTap: _selectImage,
                                   child: InputDecorator(
@@ -473,8 +394,8 @@ class _SignupState extends State<Signup> {
                                       filled: true,
                                       fillColor: Colors.white,
                                       border: OutlineInputBorder(
-                                          borderSide:
-                                              Divider.createBorderSide(context)),
+                                          borderSide: Divider.createBorderSide(
+                                              context)),
                                       labelText: 'Add Profile Picture',
                                       labelStyle: TextStyle(
                                         color: Colors.black87,
@@ -484,9 +405,8 @@ class _SignupState extends State<Signup> {
                                       ),
                                       errorMaxLines: null,
                                       errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors
-                                                .red), // Customize error border color
+                                        borderSide:
+                                            BorderSide(color: Colors.red),
                                       ),
                                     ),
                                     child: Row(
@@ -503,15 +423,19 @@ class _SignupState extends State<Signup> {
                                                   size: 60, color: Colors.grey),
                                         ),
                                         SizedBox(width: 8),
-                                        VerticalDivider(thickness: 5,),
-                                        Text('Upload',
+                                        VerticalDivider(
+                                          thickness: 5,
+                                        ),
+                                        Text(
+                                          'Upload',
                                           style: TextStyle(
-                                            color: Color.fromRGBO(25, 192, 122, 1),
+                                            color:
+                                                Color.fromRGBO(25, 192, 122, 1),
                                             fontWeight: FontWeight.bold,
                                             fontSize: 20,
                                             fontFamily: 'default',
-                                          ),),
-                                        // Customize upload text style
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -529,18 +453,18 @@ class _SignupState extends State<Signup> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              fixedSize: Size(screenWidth*0.9, 70),
+                              fixedSize: Size(screenWidth * 0.9, 70),
                             ),
                             child: _isButtonLoading
-                                ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                ? CircularProgressIndicator()
                                 : const Text('Register',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'default',
-                                ))),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontFamily: 'default',
+                                    ))),
                       ])),
                       Footer(
                         backgroundColor: Color.fromRGBO(246, 246, 246, 255),
@@ -598,13 +522,11 @@ class _SignupState extends State<Signup> {
 
   void _registerUser() {
     setState(() {
-      _isButtonLoading =
-      true; // Button clicked, show circular progress indicator
+      _isButtonLoading = true;
     });
     if (validateAndSave() && checkConfirmPassword()) {
       const snackBar = SnackBar(
-        content: Text(
-            'Processing'),
+        content: Text('Processing'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       final registerRequest = RegisterRequestmodel(
@@ -623,10 +545,11 @@ class _SignupState extends State<Signup> {
       // Call register method passing registerRequestModel, _imageFile, and authToken
       apiService.register(registerRequest, _imageFile).then((response) {
         print("Submitted");
-        if (response != null && response == "Registration is completed. Your account is under verification.") {
+        if (response != null &&
+            response ==
+                "Registration is completed. Your account is under verification.") {
           setState(() {
-            _isButtonLoading =
-            false; // Validation complete, hide circular progress indicator
+            _isButtonLoading = false;
           });
           clearForm();
           Navigator.pushReplacement(
@@ -637,23 +560,27 @@ class _SignupState extends State<Signup> {
             content: Text('Registration Submitted!'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else if (response != null && response == "The email has already been taken."){
+        } else if (response != null &&
+            response == "The email has already been taken.") {
           setState(() {
             _isButtonLoading = false;
           });
           const snackBar = SnackBar(
-            content: Text('The Email is Taken!, Please Try entering a different Email'),
+            content: Text(
+                'The Email is Taken!, Please Try entering a different Email'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else if (response != null && response == "The phone has already been taken."){
+        } else if (response != null &&
+            response == "The phone has already been taken.") {
           setState(() {
             _isButtonLoading = false;
           });
           const snackBar = SnackBar(
-            content: Text('The Phone Number is Taken!, Please Try a different Number'),
+            content: Text(
+                'The Phone Number is Taken!, Please Try a different Number'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else{
+        } else {
           setState(() {
             _isButtonLoading = false;
           });
@@ -666,7 +593,6 @@ class _SignupState extends State<Signup> {
         setState(() {
           _isButtonLoading = false;
         });
-        // Handle registration error
         print(error);
         const snackBar = SnackBar(
           content: Text('Registration failed!'),
@@ -675,10 +601,9 @@ class _SignupState extends State<Signup> {
       });
     } else {
       setState(() {
-        _isButtonLoading =
-        false; // Validation complete, hide circular progress indicator
+        _isButtonLoading = false;
       });
-      if(_passwordController.text != _confirmPasswordController.text){
+      if (_passwordController.text != _confirmPasswordController.text) {
         const snackBar = SnackBar(
           content: Text('Passwords do not match'),
         );
@@ -731,5 +656,4 @@ class _SignupState extends State<Signup> {
       _imageFile = null;
     });
   }
-
 }

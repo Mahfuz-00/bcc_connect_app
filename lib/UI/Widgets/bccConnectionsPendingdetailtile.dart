@@ -37,10 +37,9 @@ class BCCConnectionsInfoCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       // Rounds the corners of the card.
       child: Container(
-        //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         decoration: BoxDecoration(
-          color: Colors.white, // Sets the background color of the card.
+          color: Colors.white,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Column(
@@ -192,8 +191,6 @@ Widget _buildRowApplicationID(String label, int value) {
 ///   - label: The label text to be displayed.
 ///   - value: The date/time string value in ISO 8601 format to be parsed and displayed next to the label.
 Widget _buildRowTime(String label, String value) {
-  //String formattedDateTime = DateFormat('dd/MM/yyyy hh:mm a').format(value); // 'a' for AM/PM
-
   DateTime date = DateTime.parse(value);
   DateFormat dateFormat = DateFormat.yMMMMd('en_US');
   DateFormat timeFormat = DateFormat.jm();

@@ -9,38 +9,7 @@ class APIServiceRegion {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  // Private constructor for singleton pattern.
-  APIServiceRegion._();
-
-  /// Creates and initializes a new instance of `APIServiceRegion`.
-  ///
-  /// - Returns: A `Future` that completes with an instance of `APIServiceRegion`.
-  static Future<APIServiceRegion> create() async {
-    var apiService = APIServiceRegion._();
-    await apiService._loadAuthToken();
-    print('triggered API');
-    return apiService;
-  }
-
-  /// Initializes a new instance of `APIServiceRegion` and loads the authentication token.
-  APIServiceRegion() {
-    _loadAuthToken();
-    print('triggered');
-  }
-
-  /// Loads the authentication token from shared preferences.
-  ///
-  /// - Returns: A future that completes with the authentication token.
-  Future<void> _loadAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    authToken = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-  }
-
-/*  void setAuthToken(String token) {
-    authToken = token;
-  }*/
+  APIServiceRegion.create(this.authToken);
 
   /// Fetches a list of divisions from the API.
   ///
@@ -48,15 +17,7 @@ class APIServiceRegion {
   /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<List<Division>> fetchDivisions() async {
     try {
-      if (authToken.isEmpty) {
-        print('Authen:: $authToken');
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
-      print('Token:: $authToken');
+      print('API Token :: $authToken');
 
       final response = await http.get(
         Uri.parse('$URL/division'),
@@ -64,11 +25,8 @@ class APIServiceRegion {
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        /*print(data);
-        print(data.runtimeType);*/
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'] ?? [];
-          //print('Record:: $records');
           final List<Division> divisions =
               records.map((record) => Division.fromJson(record)).toList();
           print(divisions);
@@ -97,13 +55,7 @@ class APIServiceRegion {
   Future<List<District>> fetchDistricts(String divisionId) async {
     print(divisionId);
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/district/$divisionId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -137,13 +89,7 @@ class APIServiceRegion {
 
   Future<List<Upazila>> fetchUpazilas(String districtId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/upazila/$districtId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -177,13 +123,7 @@ class APIServiceRegion {
 
   Future<List<Union>> fetchUnions(String upazilaId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/union/$upazilaId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {
@@ -219,13 +159,7 @@ class APIServiceRegion {
 
   Future<List<NTTNProvider>> fetchNTTNProviders(String unionId) async {
     try {
-      if (authToken.isEmpty) {
-        await _loadAuthToken();
-
-        if (authToken.isEmpty) {
-          throw Exception('Authentication token is empty.');
-        }
-      }
+      print('API Token :: $authToken');
       final response = await http.get(Uri.parse('$URL/nttn/provider/$unionId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {

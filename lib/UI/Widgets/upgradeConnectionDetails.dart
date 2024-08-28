@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Data/Data Sources/API Service (Upgrade Connection)/apiServiceUpgradeConnection.dart';
+import '../Bloc/auth_cubit.dart';
 
 /// A widget that displays detailed information about a connection upgrade request.
 ///
@@ -197,8 +198,11 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                       print('Remark: $remark');
 
                       try {
+                        final authCubit = context.read<AuthCubit>();
+                        final token =
+                            (authCubit.state as AuthAuthenticated).token;
                         UpgradeConnectionAPIService apiService =
-                            await UpgradeConnectionAPIService.create();
+                            await UpgradeConnectionAPIService.create(token);
                         var response = await apiService.updateConnection(
                           id: widget.ApplicationID,
                           requestType: 'Upgrade',

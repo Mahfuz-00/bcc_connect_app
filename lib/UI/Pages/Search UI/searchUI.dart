@@ -1,11 +1,12 @@
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Search)/apiservicefilter.dart';
 import '../../../Data/Data Sources/API Service (Search)/apiservicesearchregion.dart';
 import '../../../Data/Models/connectionSearchModel.dart';
 import '../../../Data/Models/searchmodel.dart';
+import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/searchResultTile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
@@ -43,7 +44,9 @@ class _SearchUserState extends State<SearchUser> {
   late APIServiceSearchRegion apiService;
 
   Future<APIServiceSearchRegion> initializeApiService() async {
-    apiService = await APIServiceSearchRegion.create();
+    final authCubit = context.read<AuthCubit>();
+    final token = (authCubit.state as AuthAuthenticated).token;
+    apiService = await APIServiceSearchRegion.create(token);
     return apiService;
   }
 
@@ -96,7 +99,6 @@ class _SearchUserState extends State<SearchUser> {
       });
     } catch (e) {
       print('Error fetching divisions: $e');
-      // Handle error
     }
   }
 
@@ -119,7 +121,6 @@ class _SearchUserState extends State<SearchUser> {
       });
     } catch (e) {
       print('Error fetching districts: $e');
-      // Handle error
     }
   }
 
@@ -142,7 +143,6 @@ class _SearchUserState extends State<SearchUser> {
       });
     } catch (e) {
       print('Error fetching upazilas: $e');
-      // Handle error
     }
   }
 
@@ -165,7 +165,6 @@ class _SearchUserState extends State<SearchUser> {
       });
     } catch (e) {
       print('Error fetching unions: $e');
-      // Handle error
     }
   }
 
@@ -189,7 +188,6 @@ class _SearchUserState extends State<SearchUser> {
       });
     } catch (e) {
       print('Error fetching NTTN providers: $e');
-      // Handle error
     }
   }
 
@@ -273,10 +271,10 @@ class _SearchUserState extends State<SearchUser> {
                                 onChanged: (newValue) {
                                   setState(() {
                                     //It Takes Name String
-                                    selectedDistrict = null; // Reset
-                                    selectedUpazila = null; // Reset
-                                    selectedUnion = null; // Reset
-                                    selectedNTTNProvider = null; // Reset
+                                    selectedDistrict = null;
+                                    selectedUpazila = null;
+                                    selectedUnion = null;
+                                    selectedNTTNProvider = null;
                                     print(
                                         'Selected District: ${selectedDistrict}');
                                     selectedDivision = newValue;
@@ -289,10 +287,8 @@ class _SearchUserState extends State<SearchUser> {
                                     DivisionSearch selectedDivisionObject =
                                         divisions.firstWhere(
                                       (division) => division.name == newValue,
-                                      /*orElse: () => null,*/
                                     );
                                     if (selectedDivisionObject != null) {
-                                      //It Takes ID Int
                                       _divisionID = selectedDivisionObject.id;
                                       // Pass the ID of the selected division to fetchDistricts
                                       fetchDistricts(selectedDivisionObject.id);
@@ -337,9 +333,9 @@ class _SearchUserState extends State<SearchUser> {
                                 initialValue: selectedDistrict,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    selectedUpazila = null; // Reset
-                                    selectedUnion = null; // Reset
-                                    selectedNTTNProvider = null; // Reset
+                                    selectedUpazila = null;
+                                    selectedUnion = null;
+                                    selectedNTTNProvider = null;
                                     selectedDistrict = newValue;
                                     if (_isLoading) {
                                       CircularProgressIndicator();
@@ -350,7 +346,6 @@ class _SearchUserState extends State<SearchUser> {
                                     DistrictSearch selectedDistrictObject =
                                         districts.firstWhere(
                                       (district) => district.name == newValue,
-                                      /*orElse: () => null,*/
                                     );
                                     if (selectedDistrictObject != null) {
                                       _districtID = selectedDistrictObject.id;
@@ -402,15 +397,12 @@ class _SearchUserState extends State<SearchUser> {
                                     if (_isLoading) {
                                       CircularProgressIndicator();
                                     }
-                                    /* _upazilaID = newValue ?? '';
-                              print(_upazilaID);*/
                                   });
                                   if (newValue != null) {
                                     // Find the selected division object
                                     UpazilaSearch selectedUpazilaObject =
                                         upazilas.firstWhere(
                                       (upazila) => upazila.name == newValue,
-                                      /*orElse: () => null,*/
                                     );
                                     if (selectedUpazilaObject != null) {
                                       _upazilaID = selectedUpazilaObject.id;
@@ -456,25 +448,20 @@ class _SearchUserState extends State<SearchUser> {
                                 initialValue: selectedUnion,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    selectedNTTNProvider = null; // Reset
+                                    selectedNTTNProvider = null;
                                     selectedUnion = newValue;
                                     if (_isLoading) {
                                       CircularProgressIndicator();
                                     }
-                                    /*_unionID = newValue ?? '';
-                              print(_unionID);*/
                                   });
                                   if (newValue != null) {
                                     // Find the selected division object
                                     UnionSearch selectedUnionObject =
                                         unions.firstWhere(
                                       (union) => union.name == newValue,
-                                      /*orElse: () => null,*/
                                     );
                                     if (selectedUnionObject != null) {
                                       _unionID = selectedUnionObject.id;
-                                      // Pass the ID of the selected division to fetchDistricts
-                                      /*fetchNTTNProviders(selectedUnionObject.id);*/
                                     }
                                   }
                                 },
@@ -535,12 +522,9 @@ class _SearchUserState extends State<SearchUser> {
                                               builder: (context, snapshot) {
                                                 if (snapshot.connectionState ==
                                                     ConnectionState.waiting) {
-                                                  // Return a loading indicator while waiting for data
                                                   return Container(
                                                     height: 200,
-                                                    // Adjust height as needed
                                                     width: screenWidth,
-                                                    // Adjust width as needed
                                                     decoration: BoxDecoration(
                                                       color: Colors.white,
                                                       borderRadius:
@@ -553,7 +537,6 @@ class _SearchUserState extends State<SearchUser> {
                                                     ),
                                                   );
                                                 } else if (snapshot.hasError) {
-                                                  // Handle errors
                                                   return buildNoRequestsWidget(
                                                       screenWidth,
                                                       'Error: ${snapshot.error}');
@@ -562,20 +545,15 @@ class _SearchUserState extends State<SearchUser> {
                                                     ConnectionState.done) {
                                                   if (searchresults
                                                       .isNotEmpty) {
-                                                    // If data is loaded successfully, display the ListView
                                                     return Container(
                                                       child: ListView.separated(
                                                         shrinkWrap: true,
                                                         physics:
                                                             NeverScrollableScrollPhysics(),
-                                                        itemCount: /*pendingConnectionRequests.length > 10
-                                        ? 10
-                                        :*/
-                                                            searchresults
-                                                                .length,
+                                                        itemCount: searchresults
+                                                            .length,
                                                         itemBuilder:
                                                             (context, index) {
-                                                          // Display each connection request using ConnectionRequestInfoCard
                                                           return searchresults[
                                                               index];
                                                         },
@@ -586,14 +564,12 @@ class _SearchUserState extends State<SearchUser> {
                                                       ),
                                                     );
                                                   } else {
-                                                    // Handle the case when there are no pending connection requests
                                                     return buildNoRequestsWidget(
                                                         screenWidth,
                                                         'No Connection Found!');
                                                   }
                                                 }
-                                                // Return a default widget if none of the conditions above are met
-                                                return SizedBox(); // You can return an empty SizedBox or any other default widget
+                                                return SizedBox();
                                               }),
                                         ),
                                       ],
@@ -640,7 +616,9 @@ class _SearchUserState extends State<SearchUser> {
   ///
   /// Errors during the API call are caught and logged for debugging purposes.
   Future<void> filterNTTNConnections() async {
-    final apiService = await SearchFilterAPIService.create();
+    final authCubit = context.read<AuthCubit>();
+    final token = (authCubit.state as AuthAuthenticated).token;
+    final apiService = await SearchFilterAPIService.create(token);
     print(_divisionID);
     print(_districtID);
     print(_upazilaID);
@@ -675,7 +653,6 @@ class _SearchUserState extends State<SearchUser> {
       if (filteredData.containsKey('records')) {
         List<dynamic> connections = filteredData['records'];
         print('Connections:: $connections');
-        // Map pending requests to widgets
         final List<Widget> searchWidgets = connections.map((request) {
           return SearchConnectionsInfoCard(
             Name: request['name'],
@@ -688,10 +665,7 @@ class _SearchUserState extends State<SearchUser> {
         }).toList();
         setState(() {
           searchresults = searchWidgets;
-          //filteredConnections.add(connection);
         });
-
-        //print('Fetched Connection:: $filteredConnections');
       }
     } catch (e) {
       print('Error filtering NTTN connections: $e');

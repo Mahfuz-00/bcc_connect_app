@@ -2,14 +2,10 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Profile)/apiserviceprofile.dart';
 import '../../../Data/Data Sources/API Service (User Info Update)/apiServiceImageUpdate.dart';
@@ -21,6 +17,23 @@ import '../../Bloc/auth_cubit.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import 'passwordChange.dart';
 
+/// ProfileUI is a widget that displays the user's profile information,
+/// including their name, email, profile picture, and a brief bio.
+///
+/// The widget retrieves user data from a provided UserProfile model and
+/// displays it in a user-friendly layout. It allows users to update
+/// their profile picture and edit their personal information through
+/// navigation to an EditProfile screen. The layout is responsive and
+/// adapts to various screen sizes, ensuring an optimal user experience.
+///
+/// Key Features:
+/// - Displays user's profile picture, name, email, and bio.
+/// - Allows users to tap on the profile picture to change it.
+/// - Includes an 'Edit' button to navigate to the profile editing screen.
+///
+/// Parameters:
+/// - [UserProfile userProfile]: The user profile data to be displayed.
+/// - [Function onEdit]: Callback function to be executed when the
 class ProfileUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -42,11 +55,11 @@ class _ProfileUIState extends State<ProfileUI> {
   File? _imageFile;
   var globalKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> globalfromkey = GlobalKey<FormState>();
-  bool _isLoading = false;
   late final UserProfileFull? userProfile;
   late final String name;
   bool isloaded = false;
   bool _pageLoading = true;
+  late String type = '';
 
   List<DropdownMenuItem<String>> types = [
     DropdownMenuItem(child: Text("Nationwide"), value: "Nationwide"),
@@ -56,20 +69,9 @@ class _ProfileUIState extends State<ProfileUI> {
     DropdownMenuItem(child: Text("Others"), value: "Others"),
   ];
 
-  IconData _getIconPassword() {
-    return _isObscuredPassword ? Icons.visibility_off : Icons.visibility;
-  }
-
-  IconData _getIconConfirmPassword() {
-    return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
-  }
-
   Future<void> _fetchUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-
+    final authCubit = context.read<AuthCubit>();
+    final token = (authCubit.state as AuthAuthenticated).token;
     final apiService = await APIProfileService();
     final profile = await apiService.fetchUserProfile(token);
     userProfile = UserProfileFull.fromJson(profile);
@@ -78,39 +80,20 @@ class _ProfileUIState extends State<ProfileUI> {
     print(userProfile!.id);
 
     setState(() {
-      // Map UserProfileFull to UserProfile or use directly if they match
       userProfileCubit = UserProfile(
         Id: userProfile!.id,
         name: userProfile!.name,
         organization: userProfile!.organization,
         photo: userProfile!.photo,
-        // Add other fields as needed
       );
     });
 
-    // Update the UserProfileCubit state using context.read
     context.read<AuthCubit>().updateProfile(UserProfile(
             Id: userProfile!.id,
             name: userProfile!.name,
             organization: userProfile!.organization,
             photo: userProfile!.photo)
-        // Add other fields as needed
         );
-
-/*    try {
-      await prefs.setString('userName', userProfile!.name);
-      await prefs.setString('organizationName', userProfile!.organization);
-      await prefs.setString('photoUrl', userProfile!.photo);
-      final String? UserName = prefs.getString('userName');
-      final String? OrganizationName = prefs.getString('organizationName');
-      final String? PhotoURL = prefs.getString('photoUrl');
-      print('User Name: $UserName');
-      print('Organization Name: $OrganizationName');
-      print('Photo URL: $PhotoURL');
-      print('User profile saved successfully');
-    } catch (e) {
-      print('Error saving user profile: $e');
-    }*/
   }
 
   late UserProfile userProfileCubit;
@@ -120,10 +103,14 @@ class _ProfileUIState extends State<ProfileUI> {
     super.initState();
     print('initState called');
     _fetchUserProfile();
+
+    final authCubit = context.read<AuthCubit>();
+    type = (authCubit.state as AuthAuthenticated).usertype;
+    print('Profile Usertype: $type');
+
     Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh && !isloaded) {
         isloaded = true;
-        // Initialize controllers after user profile data is fetched
         _fullNameController = TextEditingController();
         _organizationController = TextEditingController();
         _designationController = TextEditingController();
@@ -154,7 +141,6 @@ class _ProfileUIState extends State<ProfileUI> {
         canPop: true,
         child: Scaffold(
           backgroundColor: Colors.grey[100],
-          //resizeToAvoidBottomInset: false,
           appBar: AppBar(
             backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
             leading: IconButton(
@@ -178,7 +164,7 @@ class _ProfileUIState extends State<ProfileUI> {
             centerTitle: true,
           ),
           body: _pageLoading
-              ? Center(child: CircularProgressIndicator()) // Show indicator
+              ? Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                   child: SafeArea(
                     child: Container(
@@ -193,8 +179,8 @@ class _ProfileUIState extends State<ProfileUI> {
                               Stack(
                                 children: [
                                   Container(
-                                    width: 120, // Adjust width as needed
-                                    height: 120, // Adjust height as needed
+                                    width: 120,
+                                    height: 120,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
@@ -209,7 +195,6 @@ class _ProfileUIState extends State<ProfileUI> {
                                     child: Container(
                                       height: 35,
                                       width: 35,
-                                      //padding: EdgeInsets.all(5),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
@@ -286,16 +271,18 @@ class _ProfileUIState extends State<ProfileUI> {
                                           'Phone no',
                                           userProfile!.phone as String),
                                       Divider(),
-                                      _buildDataCouple(
-                                          Icons.book,
-                                          'License Number',
-                                          userProfile!.license),
-                                      Divider(),
-                                      _buildDataCouple(
-                                          Icons.supervised_user_circle_rounded,
-                                          'UserType',
-                                          userProfile!.ISPuserType),
-                                      Divider(),
+                                      if(type == 'isp_staff') ... [
+                                        _buildDataCouple(
+                                            Icons.book,
+                                            'License Number',
+                                            userProfile!.license),
+                                        Divider(),
+                                        _buildDataCouple(
+                                            Icons.supervised_user_circle_rounded,
+                                            'UserType',
+                                            userProfile!.ISPuserType),
+                                        Divider(),
+                                      ],
                                       _buildDataCouple(Icons.mail, 'Email',
                                           userProfile!.email),
                                       Divider(),
@@ -410,7 +397,7 @@ class _ProfileUIState extends State<ProfileUI> {
                   ),
                 ),
           floatingActionButton: _pageLoading
-              ? null // Show indicator
+              ? null
               : FloatingActionButton(
                   onPressed: () {
                     _showEditDialog();
@@ -421,15 +408,11 @@ class _ProfileUIState extends State<ProfileUI> {
                     size: 30,
                   ),
                   backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                  // Change the background color as needed
                   elevation: 8,
-                  // Increase the elevation to make it appear larger
                   highlightElevation: 12,
-                  // Increase the highlight elevation for the pressed state
-
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
-                        30), // Adjust the border radius as needed
+                        30),
                   ),
                 ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -508,7 +491,6 @@ class _ProfileUIState extends State<ProfileUI> {
                         fontSize: 20,
                         height: 1.6,
                         letterSpacing: 1.3,
-                        // fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                       ),
                     ),
@@ -538,7 +520,7 @@ class _ProfileUIState extends State<ProfileUI> {
               )),
           content: SingleChildScrollView(
             child: Form(
-              key: globalfromkey, // Use the global form key
+              key: globalfromkey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -562,11 +544,13 @@ class _ProfileUIState extends State<ProfileUI> {
                   SizedBox(
                     height: 5,
                   ),
-                  _buildTextField('License Number', userProfile!.license,
-                      _licenseNumberController),
-                  SizedBox(
-                    height: 5,
-                  ),
+                  if(type == 'isp_staff') ...[
+                    _buildTextField('License Number', userProfile!.license,
+                        _licenseNumberController),
+                    SizedBox(
+                      height: 5,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -586,7 +570,7 @@ class _ProfileUIState extends State<ProfileUI> {
                       ),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
+                      Navigator.of(context).pop();
                       print('Dialog closed');
                     },
                     child: Text('Cancel',
@@ -619,18 +603,17 @@ class _ProfileUIState extends State<ProfileUI> {
                       print(userProfile!.phone);
                       print(userProfile!.license);
 
-                      // Validate the form
-                      // If validation succeeds, update the profile
                       final userProfileUpdate = UserProfileUpdate(
                         userId: userProfile!.id.toString(),
-                        // Provide the user ID here
                         name: _fullNameController.text,
                         organization: _organizationController.text,
                         designation: _designationController.text,
                         phone: _phoneController.text,
                         licenseNumber: _licenseNumberController.text,
                       );
-                      final apiService = await APIServiceUpdateUser.create();
+                      final authCubit = context.read<AuthCubit>();
+                      final token = (authCubit.state as AuthAuthenticated).token;
+                      final apiService = await APIServiceUpdateUser.create(token);
                       final result =
                           await apiService.updateUserProfile(userProfileUpdate);
                       Navigator.of(context).pop();
@@ -643,10 +626,9 @@ class _ProfileUIState extends State<ProfileUI> {
                           MaterialPageRoute(
                               builder: (context) =>
                                   ProfileUI(shouldRefresh: true)));
-                      // Handle the result as needed, e.g., show a toast message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(result)),
-                      ); // Close the dialog
+                      );
                     }
                   },
                   child: Text('Update',
@@ -667,17 +649,12 @@ class _ProfileUIState extends State<ProfileUI> {
 
   Widget _buildTextField(
       String label, String initialValue, TextEditingController controller) {
-    // Initialize the controller with the initial value if provided
     if (initialValue != null && controller != null) {
       controller.text = initialValue;
     }
 
-    // Add a listener to the controller to track changes in the text field
     controller.addListener(() {
-      // This function will be called whenever the text changes
       String updatedValue = controller.text;
-
-      // Do something with the updated value
       print("Updated value: $updatedValue");
     });
 
@@ -686,7 +663,6 @@ class _ProfileUIState extends State<ProfileUI> {
       height: 70,
       child: TextFormField(
         controller: controller,
-        // Use the provided controller
         validator: (input) {
           if (input == null || input.isEmpty) {
             return 'Please enter your $label';
@@ -786,7 +762,9 @@ class _ProfileUIState extends State<ProfileUI> {
             'Profile Picture Updating ....'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      final apiService = await APIProfilePictureUpdate.create();
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await APIProfilePictureUpdate.create(token);
       print(imageFile.path);
       print(imageFile);
       final response = await apiService.updateProfilePicture(image: imageFile);

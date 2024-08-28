@@ -1,37 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service class for handling password updates.
 class APIServicePasswordUpdate {
   String baseURL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  // Private constructor for singleton pattern.
-  APIServicePasswordUpdate._();
-
-  /// Factory constructor to create an instance of `APIServicePasswordUpdate`.
-  static Future<APIServicePasswordUpdate> create() async {
-    var apiService = APIServicePasswordUpdate._();
-    await apiService._loadAuthToken();
-    print('triggered API');
-    return apiService;
-  }
-
-/*  APIServiceUpdateUser() {
-    authToken = _loadAuthToken(); // Assigning the future here
-    print('triggered');
-  }*/
-
-  /// Loads the authentication token from shared preferences.
-  ///
-  /// - Returns: A future that completes with the authentication token.
-  Future<void> _loadAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    authToken = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-  }
+  APIServicePasswordUpdate.create(this.authToken);
 
   /// Updates the user's password.
   ///
@@ -46,13 +21,8 @@ class APIServicePasswordUpdate {
     required String passwordConfirmation,
   }) async {
     final String token = await authToken;
-    print('Authen:: $authToken');
     try {
-      if (token.isEmpty) {
-        await _loadAuthToken();
-        throw Exception('Authentication token is empty.');
-      }
-
+      print('API Token :: $authToken');
       print('Current $currentPassword');
       print('New $newPassword');
       print('Confirm $passwordConfirmation');

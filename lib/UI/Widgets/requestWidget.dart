@@ -121,6 +121,7 @@ class RequestsWidget extends StatelessWidget {
           },
           child: Text(
             seeAllButtonText, // Text displayed on the button.
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,

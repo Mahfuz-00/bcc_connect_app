@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:footer/footer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Data/Data Sources/API Service (Login)/apiservicelogin.dart';
 import '../../../Data/Data Sources/API Service (Profile)/apiserviceprofile.dart';
 import '../../../Data/Models/loginmodels.dart';
@@ -14,6 +12,13 @@ import '../ISP Dashboard/ispDashboard.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
 import '../Sign Up UI/signupUI.dart';
 
+/// A StatefulWidget representing the Login screen.
+///
+/// The Login screen allows users to input their email and password,
+/// authenticate against the backend, and navigate to different dashboards
+/// based on user type. It includes error handling for incorrect credentials,
+/// a password visibility toggle, and navigation options for forgotten passwords
+/// and account registration.
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -78,7 +83,6 @@ class _LoginState extends State<Login> {
                 Expanded(
                   child: Center(
                     child: Container(
-                      //alignment: Alignment.center,
                       child: Column(
                         children: [
                           const Text(
@@ -248,7 +252,6 @@ class _LoginState extends State<Login> {
                                 });
                                 if (await validateAndSave(
                                     globalfromkey, context)) {
-                                  //print(_loginRequest.toJSON());
                                   print('Checking $userType');
                                   if (userType != null) {
                                     if (userType == 'isp_staff') {
@@ -381,17 +384,12 @@ class _LoginState extends State<Login> {
       try {
         final response = await apiService.login(loginRequestModel);
         if (response != null) {
-          // Handle successful login
-          storeTokenLocally(response.token);
           userType = response.userType;
           print('UserType :: $userType');
           _fetchUserProfile(response.token);
 
           return true;
-        } /*else {
-          showTopToast(context, 'Email or password is not valid.');
-          return false;
-        }*/
+        }
       } catch (e) {
         // Handle login error
         String errorMessage = 'Incorrect Email and Password.';
@@ -408,7 +406,6 @@ class _LoginState extends State<Login> {
         return false;
       }
     }
-    // Return false if form validation fails
     return false;
   }
 
@@ -417,7 +414,7 @@ class _LoginState extends State<Login> {
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         top: MediaQuery.of(context).padding.top +
-            10, // 10 is for a little margin from the top
+            10,
         left: 20,
         right: 20,
         child: Material(
@@ -450,12 +447,6 @@ class _LoginState extends State<Login> {
   late final String? OrganizationName;
   late final String? PhotoURL;
 
-  Future<void> storeTokenLocally(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-    print(prefs.getString('token'));
-  }
-
   Future<void> _fetchUserProfile(String token) async {
     try {
       final apiService = await APIProfileService();
@@ -470,24 +461,9 @@ class _LoginState extends State<Login> {
 
       print('Mounted Again');
 
-      authCubit.login(userProfile, token);
+      authCubit.login(userProfile, token, userType);
 
-     /* // Save user profile data in SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      try {
-        await prefs.setString('userName', userProfile.name);
-        await prefs.setString('organizationName', userProfile.organization);
-        await prefs.setString('photoUrl', userProfile.photo);
-        UserName = prefs.getString('userName');
-        OrganizationName = prefs.getString('organizationName');
-        PhotoURL = prefs.getString('photoUrl');
-        print('User Name: $UserName');
-        print('Organization Name: $OrganizationName');
-        print('Photo URL: $PhotoURL');
-        print('User profile saved successfully');
-      } catch (e) {
-        print('Error saving user profile: $e');
-      }*/
+      print('Cubit UserType:: $userType');
     } catch (e) {
       print('Error fetching user profile: $e');
       // Handle error as needed

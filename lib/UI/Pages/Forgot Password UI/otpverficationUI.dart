@@ -1,9 +1,7 @@
 import 'package:flutter/services.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceForgotPassword.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceOTPVerification.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:footer/footer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,21 +32,12 @@ class _OPTVerficationState extends State<OPTVerfication> {
 
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword();
-/*    apiService.sendForgotPasswordOTP(email);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => OPTVerfication()),
-    );*/
     apiService.sendForgotPasswordOTP(email).then((response) {
       if (response == 'Forget password otp send successfully') {
         const snackBar = SnackBar(
           content: Text('Code Sent to your Email.'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      /*  Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => OPTVerfication()),
-        );*/
       } else if (response == 'validation error') {
         const snackBar = SnackBar(
           content: Text('Invalid Email'),
@@ -56,19 +45,16 @@ class _OPTVerficationState extends State<OPTVerfication> {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }).catchError((error) {
-      // Handle registration error
       print(error);
       const snackBar = SnackBar(
         content: Text('Invalid Email'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
-    // Navigate to OTP verification screen
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     // Simulates a loading delay before showing the actual UI
     Future.delayed(Duration(seconds: 3), () {
@@ -303,8 +289,10 @@ class _OPTVerficationState extends State<OPTVerfication> {
                                 ),
                                 InkWell(
                                   onTap: () async {
-                                    final prefs = await SharedPreferences.getInstance();
-                                    final String? email = await prefs.getString('email');
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    final String? email =
+                                        await prefs.getString('email');
                                     _sendCode(email!);
                                   },
                                   child: Text(

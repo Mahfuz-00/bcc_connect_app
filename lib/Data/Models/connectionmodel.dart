@@ -36,7 +36,6 @@ class ConnectionRequestModel {
     required this.upazilaId,
     required this.unionId,
     required this.nttnProvider,
-/*    required this.requestType,*/
     required this.linkCapacity,
     required this.remark,
   });
@@ -51,7 +50,6 @@ class ConnectionRequestModel {
       'upazila': upazilaId,
       'union': unionId,
       'nttn_provider': nttnProvider,
-/*      'request_type': requestType,*/
       'link_capacity': linkCapacity,
       'remark': remark,
     };

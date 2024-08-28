@@ -30,7 +30,6 @@ class SearchConnectionsInfoCard extends StatelessWidget {
       elevation: 5, // Shadow effect to give a material design feel.
       borderRadius: BorderRadius.circular(10), // Rounded corners.
       child: Container(
-        //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         // Padding inside the card.
         decoration: BoxDecoration(

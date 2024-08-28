@@ -39,7 +39,6 @@ class ConnectionRequestInfoCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       // Rounds the corners of the card.
       child: Container(
-        //width: screenWidth*0.9,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         // Padding inside the container.
         decoration: BoxDecoration(

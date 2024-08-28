@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:footer/footer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceForgotPassword.dart';
+import '../../Bloc/email_cubit.dart';
 import '../Login UI/loginUI.dart';
 import 'otpverficationUI.dart';
 
@@ -16,7 +17,6 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   late TextEditingController _emailController = TextEditingController();
-  bool _isLoading = false; // Indicates whether data is loading
 
   @override
   void initState() {
@@ -34,11 +34,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   // Method to send OTP for password reset
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword.create();
-/*    apiService.sendForgotPasswordOTP(email);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => OPTVerfication()),
-    );*/
     apiService.sendForgotPasswordOTP(email).then((response) {
       if (response == 'Forget password otp send successfully') {
         // Navigate to OTP verification screen if OTP is sent successfully
@@ -170,11 +165,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             ElevatedButton(
                               onPressed: () async {
                                 String email = _emailController.text;
-                                _sendCode(email); // Call method to send OTP
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setString('email',
-                                    email); // Store email in shared preferences
+                                _sendCode(email);
+                                final emailCubit = context.read<EmailCubit>();
+                                emailCubit.saveEmail(email);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:

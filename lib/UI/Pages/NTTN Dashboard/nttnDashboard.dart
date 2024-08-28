@@ -1,16 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttn.dart';
 import '../../../Data/Data Sources/API Service (Notification)/apiServiceNotificationRead.dart';
 import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/email_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/nttnPendingConncetionDetails.dart';
@@ -22,6 +20,12 @@ import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 
+/// A dashboard widget that displays active and pending NTTN connections.
+///
+/// This widget shows the number of active and pending connections, along
+/// with buttons that allow users to navigate to the full lists of each type.
+/// The active and pending connection counts are displayed prominently, with
+/// the ability to view all connections for both statuses.
 class NTTNDashboard extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -39,8 +43,8 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   List<Widget> acceptedConnectionRequests = [];
   bool _isFetched = false;
   bool _errorOccurred = false;
-  int? CountPending;
-  int? CountActive;
+  int? CountPending = 0;
+  int? CountActive = 0;
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
@@ -54,7 +58,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
   Future<void> fetchConnectionApplications() async {
     if (_isFetched) return;
     try {
-      final apiService = await NTTNConnectionAPIService.create();
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await NTTNConnectionAPIService.create(token);
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -81,6 +87,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       if (records == null || records.isEmpty) {
         // No records available
         print('No records available');
+        setState(() {
+          _isFetched = true;
+        });
         return;
       }
 
@@ -91,8 +100,6 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
       acceptedPagination = Pagination.fromJson(pagination['accepted']);
       print(pendingPagination.nextPage);
       print(acceptedPagination.nextPage);
-
-      //recentPagination = Pagination.fromJson(pagination['recent']);
 
       canFetchMorePending = pendingPagination.canFetchNext;
       canFetchMoreAccepted = acceptedPagination.canFetchNext;
@@ -194,99 +201,10 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
     }
   }
 
-/*  Future<void> loadUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('userName') ?? '';
-      //organizationName = prefs.getString('organizationName') ?? '';
-      photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
-      print('User Name: $userName');
-      //print('Organization Name: $organizationName');
-      print('Photo URL: $photoUrl');
-      print('User profile got it!!!!');
-    });
-  }*/
-
-/*  // Function to check if more than 10 items are available in the list
-  bool shouldShowSeeAllButton(List list) {
-    return list.length > 10;
-  }
-
-  // Build the button to navigate to the page showing all data
-  Widget buildSeeAllButtonPendingList(BuildContext context) {
-    return Center(
-      child: Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            fixedSize: Size(MediaQuery.of(context).size.width * 0.9,
-                MediaQuery.of(context).size.height * 0.08),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NTTNPendingConnectionList()));
-          },
-          child: Text('See All Request',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              )),
-        ),
-      ),
-    );
-  }
-
-  // Build the button to navigate to the page showing all data
-  Widget buildSeeAllButtonActiveList(BuildContext context) {
-    return Center(
-      child: Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(10),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            fixedSize: Size(MediaQuery.of(context).size.width * 0.9,
-                MediaQuery.of(context).size.height * 0.08),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NTTNActiveConnectionList()));
-          },
-          child: Text('See All Reviewed Request',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              )),
-        ),
-      ),
-    );
-  }*/
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // loadUserProfile();
     if (widget.shouldRefresh) {
-      // loadUserProfile();
-      // Refresh logic here, e.g., fetch data again
       Future.delayed(Duration(seconds: 5), () {
         // After 5 seconds, set isLoading to false to stop showing the loading indicator
         setState(() {
@@ -294,10 +212,11 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         });
       });
     }
-    if (!_isFetched) {
-      fetchConnectionApplications();
-      //_isFetched = true; // Set _isFetched to true after the first call
-    }
+    Future.delayed(Duration(seconds: 2), () {
+      if (!_isFetched) {
+        fetchConnectionApplications();
+      }
+    });
   }
 
   @override
@@ -309,7 +228,6 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
         ? Scaffold(
             backgroundColor: Colors.white,
             body: Center(
-              // Show circular loading indicator while waiting
               child: CircularProgressIndicator(),
             ),
           )
@@ -353,8 +271,13 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 ),
                                 onPressed: () async {
                                   _showNotificationsOverlay(context);
+                                  final authCubit = context.read<AuthCubit>();
+                                  final token =
+                                      (authCubit.state as AuthAuthenticated)
+                                          .token;
                                   var notificationApiService =
-                                      await NotificationReadApiService.create();
+                                      await NotificationReadApiService.create(
+                                          token);
                                   notificationApiService.readNotification();
                                 },
                               ),
@@ -409,7 +332,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 20,),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
                                   Text(
                                     userProfile.name,
                                     style: TextStyle(
@@ -420,15 +345,6 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     ),
                                   ),
                                   SizedBox(height: 10),
-                                  /*   Text(
-                              organizationName,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              ),
-                            ),*/
                                 ],
                               ),
                             ),
@@ -444,8 +360,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            NTTNDashboard(shouldRefresh: true,))); // Close the drawer
+                                        builder: (context) => NTTNDashboard(
+                                              shouldRefresh: true,
+                                            ))); // Close the drawer
                               },
                             ),
                             Divider(),
@@ -463,7 +380,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNPendingConnectionList(shouldRefresh: true,)));
+                                            NTTNPendingConnectionList(
+                                              shouldRefresh: true,
+                                            )));
                               },
                             ),
                             Divider(),
@@ -481,7 +400,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNActiveConnectionList(shouldRefresh: true,)));
+                                            NTTNActiveConnectionList(
+                                              shouldRefresh: true,
+                                            )));
                               },
                             ),
                             Divider(),
@@ -515,8 +436,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            ProfileUI(shouldRefresh: true,))); // Close the drawer
+                                        builder: (context) => ProfileUI(
+                                              shouldRefresh: true,
+                                            )));
                               },
                             ),
                             Divider(),
@@ -535,15 +457,13 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 );
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
-                                /*   // Clear user data from SharedPreferences
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('userName');
-                                await prefs.remove('organizationName');
-                                await prefs.remove('photoUrl');*/
-                                // Create an instance of LogOutApiService
+
+                                final authCubit = context.read<AuthCubit>();
+                                final token =
+                                    (authCubit.state as AuthAuthenticated)
+                                        .token;
                                 var logoutApiService =
-                                    await LogOutApiService.create();
+                                    await LogOutApiService.create(token);
 
                                 // Wait for authToken to be initialized
                                 logoutApiService.authToken;
@@ -555,13 +475,15 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-                                  // Call logout method in AuthCubit/AuthBloc
+
                                   context.read<AuthCubit>().logout();
+                                  final emailCubit = EmailCubit();
+                                  emailCubit.clearEmail();
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              Login())); // Close the drawer
+                                              Login()));
                                 }
                               },
                             ),
@@ -597,7 +519,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                   ),
                                   Center(
                                     child: Text(
-                                          'Connection Status',
+                                      'Connection Status',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.black,
@@ -720,79 +642,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       fetchData: fetchConnectionApplications(),
                                       showSeeAllButton: canFetchMorePending,
                                       seeAllButtonText: 'See All Request',
-                                      nextPage: NTTNPendingConnectionList(shouldRefresh: true,)),
-                                  /* Container(
-                              //height: screenHeight*0.25,
-                              child: FutureBuilder<void>(
-                                  future: fetchConnectionApplications(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      // Return a loading indicator while waiting for data
-                                      return Container(
-                                        height: 200, // Adjust height as needed
-                                        width:
-                                            screenWidth, // Adjust width as needed
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    } else if (snapshot.hasError) {
-                                      // Handle errors
-                                      return buildNoRequestsWidget(screenWidth,
-                                          'Error: ${snapshot.error}');
-                                    } else if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (pendingConnectionRequests
-                                          .isNotEmpty) {
-                                        // If data is loaded successfully, display the ListView
-                                        return Container(
-                                          child: Column(
-                                            children: [
-                                              ListView.separated(
-                                                shrinkWrap: true,
-                                                physics:
-                                                    NeverScrollableScrollPhysics(),
-                                                itemCount:
-                                                    pendingConnectionRequests
-                                                                .length >
-                                                            10
-                                                        ? 10
-                                                        : pendingConnectionRequests
-                                                            .length,
-                                                itemBuilder: (context, index) {
-                                                  // Display each connection request using ConnectionRequestInfoCard
-                                                  return pendingConnectionRequests[
-                                                      index];
-                                                },
-                                                separatorBuilder: (context,
-                                                        index) =>
-                                                    const SizedBox(height: 10),
-                                              ),
-                                              SizedBox(height: 10,),
-                                              if (shouldShowSeeAllButton(
-                                                  pendingConnectionRequests))
-                                                buildSeeAllButtonPendingList(
-                                                    context),
-                                            ],
-                                          ),
-                                        );
-                                      }else {
-                                        // Handle the case when there are no pending connection requests
-                                        return buildNoRequestsWidget(
-                                            screenWidth,
-                                            'There is no new connection request at this moment.');
-                                      }
-                                    }
-                                    // Return a default widget if none of the conditions above are met
-                                    return SizedBox(); // You can return an empty SizedBox or any other default widget
-                                  }),
-                            ),*/
+                                      nextPage: NTTNPendingConnectionList(
+                                        shouldRefresh: true,
+                                      )),
                                   Divider(),
                                   const SizedBox(height: 5),
                                   Container(
@@ -816,77 +668,9 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       showSeeAllButton: canFetchMoreAccepted,
                                       seeAllButtonText:
                                           'See All Reviewed Request',
-                                      nextPage: NTTNActiveConnectionList(shouldRefresh: true,)),
-                                  /*      Container(
-                              //height: screenHeight*0.25,
-                              child: FutureBuilder<void>(
-                                  future: fetchConnectionApplications(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      // Return a loading indicator while waiting for data
-                                      return Container(
-                                        height: 200, // Adjust height as needed
-                                        width:
-                                            screenWidth, // Adjust width as needed
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    } else if (snapshot.hasError) {
-                                      // Handle errors
-                                      return buildNoRequestsWidget(screenWidth,
-                                          'Error: ${snapshot.error}');
-                                    } else if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (acceptedConnectionRequests.isEmpty) {
-                                        // Handle the case when there are no pending connection requests
-                                        return buildNoRequestsWidget(
-                                            screenWidth,
-                                            'No Active connection.');
-                                      } else {
-                                        // If data is loaded successfully, display the ListView
-                                        return Column(
-                                          children: [
-                                            Container(
-                                              child: ListView.separated(
-                                                shrinkWrap: true,
-                                                physics:
-                                                    NeverScrollableScrollPhysics(),
-                                                itemCount:
-                                                    acceptedConnectionRequests
-                                                                .length >
-                                                            10
-                                                        ? 10
-                                                        : acceptedConnectionRequests
-                                                            .length,
-                                                itemBuilder: (context, index) {
-                                                  // Display each connection request using ConnectionRequestInfoCard
-                                                  return acceptedConnectionRequests[
-                                                      index];
-                                                },
-                                                separatorBuilder: (context,
-                                                        index) =>
-                                                    const SizedBox(height: 10),
-                                              ),
-                                            ),
-                                            SizedBox(height: 10,),
-                                            if (shouldShowSeeAllButton(
-                                                acceptedConnectionRequests))
-                                              buildSeeAllButtonActiveList(
-                                                  context),
-                                          ],
-                                        );
-                                      }
-                                    }
-                                    return SizedBox();
-                                  }),
-                            ),*/
+                                      nextPage: NTTNActiveConnectionList(
+                                        shouldRefresh: true,
+                                      )),
                                 ],
                               ),
                             ),

@@ -28,8 +28,6 @@ class APIService {
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         print("Error:: ${jsonResponse}");
         return LoginResponseModel.fromJson(jsonResponse);
-        /*Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse['token'];*/
       } else {
         throw Exception('Failed to login: ${response.body}');
       }

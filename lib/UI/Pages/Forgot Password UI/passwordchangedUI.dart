@@ -1,6 +1,7 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
+import '../../Bloc/email_cubit.dart';
 import '../Login UI/loginUI.dart';
 
 /// A screen that displays a confirmation message indicating that the password has been changed successfully.
@@ -33,7 +34,6 @@ class _PasswordChangedState extends State<PasswordChanged> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     // Check for internet connection when the widget is initialized
     _checkInternetConnection();
@@ -91,6 +91,8 @@ class _PasswordChangedState extends State<PasswordChanged> {
                   ),
                   ElevatedButton(
                     onPressed: () {
+                      final emailCubit = EmailCubit();
+                      emailCubit.clearEmail();
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) => Login()));
                     },

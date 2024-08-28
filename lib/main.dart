@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:rename_app/rename_app.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'UI/Bloc/auth_cubit.dart';
+import 'UI/Bloc/email_cubit.dart';
 import 'UI/Pages/Splashscreen UI/splashscreenUI.dart';
 
 /// The entry point of the application.
@@ -37,8 +35,11 @@ class MyApp extends StatelessWidget {
       statusBarColor: Color.fromRGBO(25, 192, 122, 1),
     ));
 
-    return BlocProvider(
-      create: (context) => AuthCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => AuthCubit()),
+        BlocProvider(create: (context) => EmailCubit()), // Provide EmailCubit
+      ],
       // Provide the AuthCubit for managing authentication state
       child: MaterialApp(
         debugShowCheckedModeBanner: false, // Hide the debug banner

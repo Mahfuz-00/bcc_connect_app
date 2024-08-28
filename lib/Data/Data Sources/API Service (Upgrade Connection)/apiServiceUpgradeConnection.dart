@@ -1,32 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service class for handling connection upgrade operations.
 class UpgradeConnectionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  // Private constructor for singleton pattern.
-  UpgradeConnectionAPIService._();
-
-  /// Factory constructor to create an instance of `UpgradeConnectionAPIService`.
-  static Future<UpgradeConnectionAPIService> create() async {
-    var apiService = UpgradeConnectionAPIService._();
-    await apiService._loadAuthToken();
-    print('triggered API');
-    return apiService;
-  }
-
-  /// Loads the authentication token from shared preferences.
-  ///
-  /// - Returns: A future that completes with the authentication token.
-  Future<void> _loadAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    authToken = prefs.getString('token') ?? '';
-    print('Load Token');
-    print(prefs.getString('token'));
-  }
+  UpgradeConnectionAPIService.create(this.authToken);
 
   /// Updates the connection with the provided details.
   ///
@@ -42,16 +22,12 @@ class UpgradeConnectionAPIService {
     required String linkCapacity,
     required String remark,
   }) async {
-    final String token = authToken;
     try {
-      if (token.isEmpty) {
-        throw Exception('Authentication token is empty.');
-      }
-
+      print('API Token :: $authToken');
       final response = await http.post(
         Uri.parse('$URL/isp/update-connection'),
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({

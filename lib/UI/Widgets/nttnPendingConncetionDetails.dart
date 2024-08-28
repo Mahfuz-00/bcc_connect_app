@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../Data/Data Sources/API Service (Accept or Decline)/apiServiceAcceptOrDecline.dart';
+import '../Bloc/auth_cubit.dart';
 import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 
 /// A stateless widget that displays the details of a pending connection request.
@@ -139,7 +141,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                     ),
                     onPressed: () {
                       action = 'accepted'; // Set action to 'accepted'.
-                      handleAcceptOrReject(action); // Handle accept action.
+                      handleAcceptOrReject(action, context); // Handle accept action.
                       const snackBar = SnackBar(
                         content: Text(
                             'Processing...'), // Display processing message.
@@ -182,7 +184,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                     ),
                     onPressed: () {
                       action = 'rejected'; // Set action to 'rejected'.
-                      handleAcceptOrReject(action); // Handle reject action.
+                      handleAcceptOrReject(action, context); // Handle reject action.
                       const snackBar = SnackBar(
                         content: Text(
                             'Processing...'), // Display processing message.
@@ -279,8 +281,10 @@ class PendingConnectionDetailsPage extends StatelessWidget {
   }
 
   /// Handles the accept or reject action by calling the API service.
-  Future<void> handleAcceptOrReject(String Action) async {
-    final apiService = await ConnectionAcceptRejectAPIService.create();
+  Future<void> handleAcceptOrReject(String Action, BuildContext context) async {
+    final authCubit = context.read<AuthCubit>();
+    final token = (authCubit.state as AuthAuthenticated).token;
+    final apiService = await ConnectionAcceptRejectAPIService.create(token);
 
     print(Action);
     print(ApplicationID);

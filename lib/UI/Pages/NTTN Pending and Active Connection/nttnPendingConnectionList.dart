@@ -1,20 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
-import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectionfulldetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttn.dart';
+import '../../../Data/Data Sources/API Service (NTTN_Connection)/apiserviceconnectionnttnfull.dart';
 import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/email_cubit.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/nttnPendingConncetionDetails.dart';
 import '../../Widgets/templateerrorcontainer.dart';
-import '../../Widgets/templateloadingcontainer.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
@@ -22,6 +19,38 @@ import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 import 'nttnActiveConnectionList.dart';
 
+/// The [NTTNPendingConnectionList] widget displays a list of pending
+/// connection requests for the user. It allows users to view, tap on,
+/// and navigate to details about each connection request.
+///
+/// The widget is designed to be a StatefulWidget to manage its state,
+/// particularly for loading and displaying pending connection requests
+/// fetched from an API.
+///
+/// ### Parameters:
+/// - `shouldRefresh` (bool): A flag to indicate whether the widget
+///   should refresh its content upon initialization. Defaults to `false`.
+///
+/// ### State Management:
+/// This widget utilizes the BLoC pattern to manage authentication state
+/// through the [AuthCubit]. It fetches data from the API and handles
+/// pagination for loading more connection requests when the user scrolls
+/// to the bottom of the list.
+///
+/// ### Features:
+/// - **Loading State**: Displays a loading indicator while fetching data.
+/// - **Pagination**: Automatically fetches more connection requests when
+///   the user scrolls to the bottom of the list, if more data is available.
+/// - **Error Handling**: Prints error messages to the console when
+///   API calls fail, allowing for debugging during development.
+/// - **User Interface**: Contains a drawer for navigation to different
+///   parts of the app, including a profile view and logout option.
+///
+/// ### Navigation:
+/// - Each connection request is displayed as a tile, which can be tapped
+///   to navigate to a detailed view of the selected connection request.
+/// - The app bar includes options for navigation and updates the UI
+///   based on user interactions.
 class NTTNPendingConnectionList extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -50,7 +79,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
   Future<void> fetchConnectionApplications() async {
     if (_isFetched) return;
     try {
-      final apiService = await NTTNConnectionAPIService.create();
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await NTTNConnectionAPIService.create(token);
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -68,6 +99,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       if (records == null || records.isEmpty) {
         // No records available
         print('No records available');
+        setState(() {
+          _isFetched= true;
+        });
         return;
       }
 
@@ -140,9 +174,11 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
     try {
       if (url != '' && url.isNotEmpty) {
-        final apiService = await APIServiceISPConnectionFull.create();
+        final authCubit = context.read<AuthCubit>();
+        final token = (authCubit.state as AuthAuthenticated).token;
+        final apiService = await NTTNFullConnectionAPIService.create(token);
         final Map<String, dynamic> dashboardData =
-            await apiService.fetchFullData(url);
+            await apiService.fetchFullConnections(url);
 
         if (dashboardData == null || dashboardData.isEmpty) {
           print(
@@ -153,6 +189,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
         final Map<String, dynamic> records = dashboardData['records'];
         if (records == null || records.isEmpty) {
           print('No records available');
+          setState(() {
+            _isFetched= true;
+          });
           return;
         }
 
@@ -173,14 +212,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
         final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
         final int currentCount = pendingConnectionRequests.length;
-        /*final int additionalLoadCount =
-            pendingRequestsData.length > currentCount + _itemsToLoad
-                ? _itemsToLoad
-                : pendingRequestsData.length - currentCount;
-        for (var index = 0; index < pendingRequestsData.length; index++) {
-          print(
-              'Pending Request at index $index: ${pendingRequestsData[index]}\n');
-        }*/
 
         if (pendingRequestsData.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -193,14 +224,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
         }
 
         print('Current count: $currentCount');
-        // print('Additional load count: $additionalLoadCount');
-
-        /*  if (additionalLoadCount == 0) {
-          // If no additional requests are loaded
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('All requests loaded')),
-          );
-        }*/
 
         // Map pending requests to widgets
         final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
@@ -257,23 +280,8 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
     }
   }
 
-  Future<void> loadUserProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('userName') ?? '';
-      organizationName = prefs.getString('organizationName') ?? '';
-      photoUrl = prefs.getString('photoUrl') ?? '';
-      photoUrl = 'https://bcc.touchandsolve.com' + photoUrl;
-      print('User Name: $userName');
-      print('Organization Name: $organizationName');
-      print('Photo URL: $photoUrl');
-      print('User profile got it!!!!');
-    });
-  }
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _scrollController.addListener(() {
       print("Scroll Position: ${_scrollController.position.pixels}");
@@ -286,14 +294,10 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
     });
     if (!_isFetched) {
       fetchConnectionApplications();
-      //_isFetched = true; // Set _isFetched to true after the first call
     }
     Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh) {
-        loadUserProfile();
-        // Refresh logic here, e.g., fetch data again
         print('Page Loading Done!!');
-        // connectionRequests = [];
       }
       // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
@@ -349,8 +353,8 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 60, // Adjust width as needed
-                            height: 60, // Adjust height as needed
+                            width: 60,
+                            height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
@@ -374,7 +378,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                           SizedBox(height: 5),
                           Text(
                             userProfile.organization,
-                            /*organizationName,*/
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -399,7 +402,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                             MaterialPageRoute(
                                 builder: (context) => NTTNDashboard(
                                       shouldRefresh: true,
-                                    ))); // Close the drawer
+                                    )));
                       },
                     ),
                     Divider(),
@@ -454,7 +457,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                             MaterialPageRoute(
                                 builder: (context) => ProfileUI(
                                       shouldRefresh: true,
-                                    ))); // Close the drawer
+                                    )));
                       },
                     ),
                     Divider(),
@@ -472,14 +475,10 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                           content: Text('Logging out'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        /*   // Clear user data from SharedPreferences
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.remove('userName');
-                              await prefs.remove('organizationName');
-                              await prefs.remove('photoUrl');*/
-                        // Create an instance of LogOutApiService
-                        var logoutApiService = await LogOutApiService.create();
+
+                        final authCubit = context.read<AuthCubit>();
+                        final token = (authCubit.state as AuthAuthenticated).token;
+                        var logoutApiService = await LogOutApiService.create(token);
 
                         // Wait for authToken to be initialized
                         logoutApiService.authToken;
@@ -490,8 +489,10 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                             content: Text('Logged out'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          // Call logout method in AuthCubit/AuthBloc
+
                           context.read<AuthCubit>().logout();
+                          final emailCubit = EmailCubit();
+                          emailCubit.clearEmail();
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -506,7 +507,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
               ),
               body: _pageLoading
                   ? Center(
-                      // Show circular loading indicator while waiting
                       child: CircularProgressIndicator(),
                     )
                   : SingleChildScrollView(

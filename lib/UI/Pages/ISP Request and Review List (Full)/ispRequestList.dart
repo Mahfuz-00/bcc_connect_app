@@ -1,18 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectiondetails.dart';
 import '../../../Data/Data Sources/API Service (ISP_Connection)/apiserviceispconnectionfulldetails.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
 import '../../../Data/Models/paginationModel.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/email_cubit.dart';
 import '../../Widgets/ispRequestdetailstile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
-import '../../Widgets/templateloadingcontainer.dart';
 import '../Connection Form (ISP)/connectionform.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import '../Information/information.dart';
@@ -20,6 +17,38 @@ import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import 'ispReviewedList.dart';
 
+/// The [ISPRequestList] widget displays a list of active
+/// connection requests for the user. It allows users to view, tap on,
+/// and navigate to details about each connection request.
+///
+/// The widget is designed to be a StatefulWidget to manage its state,
+/// particularly for loading and displaying pending connection requests
+/// fetched from an API.
+///
+/// ### Parameters:
+/// - `shouldRefresh` (bool): A flag to indicate whether the widget
+///   should refresh its content upon initialization. Defaults to `false`.
+///
+/// ### State Management:
+/// This widget utilizes the BLoC pattern to manage authentication state
+/// through the [AuthCubit]. It fetches data from the API and handles
+/// pagination for loading more connection requests when the user scrolls
+/// to the bottom of the list.
+///
+/// ### Features:
+/// - **Loading State**: Displays a loading indicator while fetching data.
+/// - **Pagination**: Automatically fetches more connection requests when
+///   the user scrolls to the bottom of the list, if more data is available.
+/// - **Error Handling**: Prints error messages to the console when
+///   API calls fail, allowing for debugging during development.
+/// - **User Interface**: Contains a drawer for navigation to different
+///   parts of the app, including a profile view and logout option.
+///
+/// ### Navigation:
+/// - Each connection request is displayed as a tile, which can be tapped
+///   to navigate to a detailed view of the selected connection request.
+/// - The app bar includes options for navigation and updates the UI
+///   based on user interactions.
 class ISPRequestList extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -35,7 +64,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
   List<Widget> pendingConnectionRequests = [];
   bool _isFetched = false;
   bool _isLoading = false;
-  bool _isInitialLoading = false;
   bool _pageLoading = true;
   int _itemsToLoad = 3;
   ScrollController _scrollController = ScrollController();
@@ -46,7 +74,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
   Future<void> fetchConnectionRequests() async {
     if (_isFetched) return;
     try {
-      final apiService = await APIServiceISPConnection.create();
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+      final apiService = await APIServiceISPConnection.create(token);
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -62,6 +92,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
       if (records == null || records.isEmpty) {
         // No records available
         print('No records available');
+        setState(() {
+          _isFetched= true;
+        });
         return;
       }
 
@@ -121,7 +154,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
     try {
       if (url != '' && url.isNotEmpty) {
-        final apiService = await APIServiceISPConnectionFull.create();
+        final authCubit = context.read<AuthCubit>();
+        final token = (authCubit.state as AuthAuthenticated).token;
+        final apiService = await APIServiceISPConnectionFull.create(token);
         final Map<String, dynamic> dashboardData =
             await apiService.fetchFullData(url);
 
@@ -154,14 +189,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
         final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
         final int currentCount = pendingConnectionRequests.length;
-        /*final int additionalLoadCount =
-            pendingRequestsData.length > currentCount + _itemsToLoad
-                ? _itemsToLoad
-                : pendingRequestsData.length - currentCount;
-        for (var index = 0; index < pendingRequestsData.length; index++) {
-          print(
-              'Pending Request at index $index: ${pendingRequestsData[index]}\n');
-        }*/
 
         if (pendingRequestsData.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -174,18 +201,8 @@ class _ISPRequestListState extends State<ISPRequestList> {
         }
 
         print('Current count: $currentCount');
-        // print('Additional load count: $additionalLoadCount');
-
-        /*  if (additionalLoadCount == 0) {
-          // If no additional requests are loaded
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('All requests loaded')),
-          );
-        }*/
 
         final List<Widget> pendingWidgets = pendingRequestsData
-            //.skip(currentCount)
-            //.take(additionalLoadCount)
             .map((request) {
           return ConnectionRequestInfoCard(
             ConnectionType: request['connection_type'],
@@ -232,15 +249,14 @@ class _ISPRequestListState extends State<ISPRequestList> {
       }
     });
     print('initState called');
-    if (!_isFetched) {
-      fetchConnectionRequests();
-      //_isFetched = true; // Set _isFetched to true after the first call
-    }
+    Future.delayed(Duration(seconds: 1), () {
+      if (!_isFetched) {
+        fetchConnectionRequests();
+      }
+    });
     Future.delayed(Duration(seconds: 2), () {
       if (widget.shouldRefresh) {
-        // Refresh logic here, e.g., fetch data again
         print('Page Loading Done!!');
-        // connectionRequests = [];
       }
       // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
@@ -303,8 +319,8 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 60, // Adjust width as needed
-                            height: 60, // Adjust height as needed
+                            width: 60,
+                            height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
@@ -317,7 +333,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
                           SizedBox(height: 10),
                           Text(
                             userProfile.name,
-                            /*userName,*/
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -328,7 +343,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
                           SizedBox(height: 5),
                           Text(
                             userProfile.organization,
-                            /*organizationName,*/
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -353,7 +367,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                             MaterialPageRoute(
                                 builder: (context) => ISPDashboard(
                                       shouldRefresh: true,
-                                    ))); // Close the drawer
+                                    )));
                       },
                     ),
                     Divider(),
@@ -424,7 +438,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                             MaterialPageRoute(
                                 builder: (context) => ProfileUI(
                                       shouldRefresh: true,
-                                    ))); // Close the drawer
+                                    )));
                       },
                     ),
                     Divider(),
@@ -442,14 +456,10 @@ class _ISPRequestListState extends State<ISPRequestList> {
                           content: Text('Logging out'),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        /*   // Clear user data from SharedPreferences
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('userName');
-                                await prefs.remove('organizationName');
-                                await prefs.remove('photoUrl');*/
-                        // Create an instance of LogOutApiService
-                        var logoutApiService = await LogOutApiService.create();
+
+                        final authCubit = context.read<AuthCubit>();
+                        final token = (authCubit.state as AuthAuthenticated).token;
+                        var logoutApiService = await LogOutApiService.create(token);
 
                         // Wait for authToken to be initialized
                         logoutApiService.authToken;
@@ -460,13 +470,15 @@ class _ISPRequestListState extends State<ISPRequestList> {
                             content: Text('Logged out'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          // Call logout method in AuthCubit/AuthBloc
+
                           context.read<AuthCubit>().logout();
+                          final emailCubit = EmailCubit();
+                          emailCubit.clearEmail();
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      Login())); // Close the drawer
+                                      Login()));
                         }
                       },
                     ),
@@ -718,90 +730,3 @@ class _ISPRequestListState extends State<ISPRequestList> {
     );
   }
 }
-
-/*NestedScrollView(
-                      headerSliverBuilder: (context, innerBoxIsScrolled) {
-                        return [
-                          SliverToBoxAdapter(
-                            child: SafeArea(
-                              child: Container(
-                                color: Colors.grey[100],
-                                padding: const EdgeInsets.only(
-                                    left: 10, right: 10, top: 20, bottom: 5),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        'Welcome, ${userProfile.name}',
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'default',
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 10,),
-                                    Center(
-                                      child: Text(
-                                            'All Requests List',
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'default',
-                                        ),
-                                      ),
-                                    ),
-                                    Divider(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ];
-                      },
-                      body: pendingConnectionRequests.isNotEmpty
-                          ? NotificationListener<ScrollNotification>(
-                              onNotification: (scrollInfo) {
-                                if (!scrollInfo.metrics.outOfRange &&
-                                    scrollInfo.metrics.pixels ==
-                                        scrollInfo.metrics.maxScrollExtent &&
-                                    !_isLoading &&
-                                    canFetchMorePending) {
-                                  fetchMoreConnectionRequests();
-                                }
-                                return true;
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: ListView.separated(
-                                  addAutomaticKeepAlives: false,
-                                  shrinkWrap: true,
-                                  controller: _scrollController,
-                                  itemCount:
-                                      pendingConnectionRequests.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index ==
-                                        pendingConnectionRequests.length) {
-                                      return Center(
-                                        child: _isLoading
-                                            ? Padding(padding: EdgeInsets.symmetric(vertical: 20),
-                                            child: CircularProgressIndicator())
-                                            : SizedBox.shrink(),
-                                      );
-                                    }
-                                    return pendingConnectionRequests[index];
-                                  },
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(height: 10),
-                                ),
-                              ),
-                            )
-                          : buildNoRequestsWidget(screenWidth,
-                              'You currently don\'t have any new requests pending.'),
-                    ),*/

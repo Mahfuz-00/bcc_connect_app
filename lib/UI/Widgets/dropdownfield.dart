@@ -33,7 +33,6 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Material(
-      //elevation: 0, // shadow for this widget.
       borderRadius: BorderRadius.circular(10),
       // Rounded corners for the container.
       child: Container(
