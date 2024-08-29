@@ -1,22 +1,15 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:footer/footer.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceForgotPassword.dart';
 import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceOTPVerification.dart';
-import 'package:flutter/material.dart';
-import 'package:footer/footer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../Widgets/otpbox.dart';
+import '../../Bloc/email_cubit.dart';
+import '../../Widgets/forgotpasswordotpbox.dart';
 import 'createnewpasswordUI.dart';
 
-/// A screen for OTP (One Time Password) verification.
-///
-/// This screen allows users to enter the OTP sent to their email address.
-/// Once the OTP is verified, users are navigated to the 'CreateNewPassword' screen.
-///
-/// The screen also includes a loading indicator that is displayed while
-/// the initial setup is being completed.
 class OPTVerfication extends StatefulWidget {
-  /// Creates an instance of [OPTVerfication].
   const OPTVerfication({super.key});
 
   @override
@@ -25,10 +18,20 @@ class OPTVerfication extends StatefulWidget {
 
 class _OPTVerficationState extends State<OPTVerfication> {
   bool _isLoading = true;
-  late TextEditingController _firstdigitcontroller = TextEditingController();
-  late TextEditingController _seconddigitcontroller = TextEditingController();
-  late TextEditingController _thirddigitcontroller = TextEditingController();
-  late TextEditingController _forthdigitcontroller = TextEditingController();
+  bool _pageloading = false;
+  final List<TextEditingController> _controllers =
+      List.generate(4, (index) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
 
   Future<void> _sendCode(String email) async {
     final apiService = await APIServiceForgotPassword();
@@ -53,38 +56,32 @@ class _OPTVerficationState extends State<OPTVerfication> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Simulates a loading delay before showing the actual UI
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
-  }
-
-  /// Sends the OTP for verification.
-  ///
-  /// Calls the API to verify the OTP entered by the user. If successful, navigates to
-  /// the 'CreateNewPassword' screen. If the OTP is incorrect, shows an error message.
-  ///
-  /// [email] - The email address associated with the OTP.
-  /// [OTP] - The OTP entered by the user.
   Future<void> _sendOTP(String email, String OTP) async {
+    setState(() {
+      _pageloading = true;
+    });
     final apiService = await APIServiceOTPVerification.create();
     apiService.OTPVerification(email, OTP).then((response) {
       if (response == 'Otp Verified Successfully') {
+        setState(() {
+          _pageloading = false;
+        });
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => CreateNewPassword()));
       } else if (response ==
           'Otp not match. Please resend forget password otp') {
+        setState(() {
+          _pageloading = false;
+        });
         const snackBar = SnackBar(
           content: Text('OTP did not Match. Try again!'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }).catchError((error) {
+      setState(() {
+        _pageloading = false;
+      });
       print(error);
       const snackBar = SnackBar(
         content: Text('OTP did not Match. Try again!'),
@@ -130,8 +127,9 @@ class _OPTVerficationState extends State<OPTVerfication> {
                           ),
                           child: IconButton(
                             onPressed: () {
+                              // Handle back button press here
                               Navigator.pop(
-                                  context); // Navigate back to the previous screen
+                                  context); // This will pop the current route off the navigator stack
                             },
                             icon: Icon(Icons.arrow_back_ios),
                             iconSize: 30,
@@ -178,43 +176,26 @@ class _OPTVerficationState extends State<OPTVerfication> {
                                   ),
                                 ),
                                 const SizedBox(height: 50),
-                                Container(
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 20, right: 20),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(4, (index) {
+                                      return Row(
                                         children: [
-                                          CustomTextFormField(
-                                            textController:
-                                                _firstdigitcontroller,
+                                          ForgotPasswordCustomTextFormField(
+                                            textController: _controllers[index],
+                                            currentFocusNode:
+                                                _focusNodes[index],
+                                            nextFocusNode: index < 3
+                                                ? _focusNodes[index + 1]
+                                                : null,
                                           ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          CustomTextFormField(
-                                            textController:
-                                                _seconddigitcontroller,
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          CustomTextFormField(
-                                            textController:
-                                                _thirddigitcontroller,
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          CustomTextFormField(
-                                            textController:
-                                                _forthdigitcontroller,
-                                          ),
+                                          if (index < 3) SizedBox(width: 10),
                                         ],
-                                      ),
-                                    ),
+                                      );
+                                    }),
                                   ),
                                 ),
                                 SizedBox(
@@ -222,27 +203,29 @@ class _OPTVerficationState extends State<OPTVerfication> {
                                 ),
                                 ElevatedButton(
                                     onPressed: () async {
-                                      // Verify the entered OTP
-                                      if (_firstdigitcontroller.text.isNotEmpty &&
-                                          _seconddigitcontroller
-                                              .text.isNotEmpty &&
-                                          _thirddigitcontroller
-                                              .text.isNotEmpty &&
-                                          _forthdigitcontroller
-                                              .text.isNotEmpty) {
-                                        String OTP =
-                                            _firstdigitcontroller.text +
-                                                _seconddigitcontroller.text +
-                                                _thirddigitcontroller.text +
-                                                _forthdigitcontroller.text;
-                                        print(OTP);
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        String email =
-                                            await prefs.getString('email') ??
-                                                '';
-                                        print(email);
+                                      bool allFieldsFilled = _controllers.every(
+                                          (controller) =>
+                                              controller.text.isNotEmpty);
+                                      if (allFieldsFilled) {
+                                        String OTP = _controllers
+                                            .map(
+                                                (controller) => controller.text)
+                                            .join();
+                                        final emailcubit =
+                                            context.read<EmailCubit>();
+                                        final emailState = emailcubit.state;
+                                        String email = '';
+                                        if (emailState is EmailSaved) {
+                                          email = emailState.email;
+                                        }
                                         _sendOTP(email, OTP);
+                                      } else {
+                                        const snackBar = SnackBar(
+                                          content: Text(
+                                              'Please fill all OTP fields'),
+                                        );
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBar);
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -253,14 +236,16 @@ class _OPTVerficationState extends State<OPTVerfication> {
                                       ),
                                       fixedSize: Size(screenWidth * 0.9, 70),
                                     ),
-                                    child: const Text('Verify',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          fontFamily: 'default',
-                                        ))),
+                                    child: _pageloading
+                                        ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                        : const Text('Verify',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              fontFamily: 'default',
+                                            ))),
                               ],
                             ),
                           ),
@@ -289,10 +274,13 @@ class _OPTVerficationState extends State<OPTVerfication> {
                                 ),
                                 InkWell(
                                   onTap: () async {
-                                    final prefs =
-                                        await SharedPreferences.getInstance();
-                                    final String? email =
-                                        await prefs.getString('email');
+                                    final emailcubit =
+                                        context.read<EmailCubit>();
+                                    final emailState = emailcubit.state;
+                                    String email = '';
+                                    if (emailState is EmailSaved) {
+                                      email = emailState.email;
+                                    }
                                     _sendCode(email!);
                                   },
                                   child: Text(

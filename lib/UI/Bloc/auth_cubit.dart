@@ -1,8 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../Data/Models/profilemodel.dart';
-import '../../Data/Models/profileModelFull.dart';
-import 'email_cubit.dart';
 
 part 'auth_state.dart';
 

@@ -18,6 +18,19 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   late TextEditingController _newPasswordcontroller = TextEditingController();
   late TextEditingController _confirmPasswordcontroller =
       TextEditingController();
+  bool _pageloading = false;
+  bool _isObscuredPassword = true;
+  bool _isObscuredConfirmPassword = true;
+
+  /// Returns the icon for the new password field based on its obscurity state.
+  IconData _getIconPassword() {
+    return _isObscuredPassword ? Icons.visibility_off : Icons.visibility;
+  }
+
+  /// Returns the icon for the confirm password field based on its obscurity state.
+  IconData _getIconConfirmPassword() {
+    return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
+  }
 
   @override
   void initState() {
@@ -33,14 +46,23 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   // Method to handle the creation of a new password
   Future<void> _createNewPassword(
       String email, String password, String confirmPassword) async {
+    setState(() {
+      _pageloading = true;
+    });
     final apiService = await APIServiceCreateNewPassword.create();
     apiService.NewPassword(email, password, confirmPassword).then((response) {
       if (response == 'Password Update Successfully') {
+        setState(() {
+          _pageloading = false;
+        });
         // Navigate to the PasswordChanged screen if password update is successful
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => PasswordChanged()));
       }
     }).catchError((error) {
+      setState(() {
+        _pageloading = false;
+      });
       print(error);
       const snackBar = SnackBar(
         content: Text('There was an error. Try again'),
@@ -132,13 +154,14 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                   height: 70,
                                   child: TextFormField(
                                     controller: _newPasswordcontroller,
+                                    obscureText: _isObscuredPassword,
                                     style: const TextStyle(
                                       color: Color.fromRGBO(143, 150, 158, 1),
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'default',
                                     ),
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       filled: true,
                                       fillColor:
                                           Color.fromRGBO(247, 248, 250, 1),
@@ -150,21 +173,32 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         fontSize: 16,
                                         fontFamily: 'default',
                                       ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(_getIconPassword()),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isObscuredPassword = !_isObscuredPassword;
+                                            _newPasswordcontroller.text = _newPasswordcontroller.text;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 10,),
                                 Container(
                                   width: screenWidth * 0.9,
                                   height: 70,
                                   child: TextFormField(
                                     controller: _confirmPasswordcontroller,
+                                    obscureText: _isObscuredConfirmPassword,
                                     style: const TextStyle(
                                       color: Color.fromRGBO(143, 150, 158, 1),
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'default',
                                     ),
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       filled: true,
                                       fillColor:
                                           Color.fromRGBO(247, 248, 250, 1),
@@ -175,6 +209,17 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
                                         fontFamily: 'default',
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(_getIconConfirmPassword()),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isObscuredConfirmPassword =
+                                            !_isObscuredConfirmPassword;
+                                            _confirmPasswordcontroller.text =
+                                                _confirmPasswordcontroller.text;
+                                          });
+                                        },
                                       ),
                                     ),
                                   ),
@@ -220,14 +265,16 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       ),
                                       fixedSize: Size(screenWidth * 0.9, 70),
                                     ),
-                                    child: const Text('Submit',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          fontFamily: 'default',
-                                        ))),
+                                    child: _pageloading
+                                        ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                        : const Text('Submit',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              fontFamily: 'default',
+                                            ))),
                               ],
                             ),
                           ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'UI/Bloc/auth_cubit.dart';
 import 'UI/Bloc/email_cubit.dart';
 import 'UI/Pages/Splashscreen UI/splashscreenUI.dart';
@@ -10,8 +12,23 @@ import 'UI/Pages/Splashscreen UI/splashscreenUI.dart';
 ///
 /// This function initializes the app and sets up the necessary configurations before running the app.
 /// It starts by running the `MyApp` widget.
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await checkAndClearCache();
+  runApp(MyApp());
+}
+
+/// Checks the app version and clears the cache if the app has been updated.
+Future<void> checkAndClearCache() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  String currentVersion = packageInfo.version;
+  String? storedVersion = prefs.getString('app_version');
+
+  if (storedVersion == null || storedVersion != currentVersion) {
+    await DefaultCacheManager().emptyCache();
+    await prefs.setString('app_version', currentVersion);
+  }
 }
 
 /// The root widget of the application.

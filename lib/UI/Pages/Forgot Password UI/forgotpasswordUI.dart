@@ -17,6 +17,7 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   late TextEditingController _emailController = TextEditingController();
+  bool _isloading = false;
 
   @override
   void initState() {
@@ -33,15 +34,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   // Method to send OTP for password reset
   Future<void> _sendCode(String email) async {
+    setState(() {
+      _isloading = true;
+    });
     final apiService = await APIServiceForgotPassword.create();
     apiService.sendForgotPasswordOTP(email).then((response) {
       if (response == 'Forget password otp send successfully') {
         // Navigate to OTP verification screen if OTP is sent successfully
+        setState(() {
+          _isloading = false;
+        });
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OPTVerfication()),
         );
       } else if (response == 'validation error') {
+        setState(() {
+          _isloading = false;
+        });
         // Show snackbar if there is a validation error
         const snackBar = SnackBar(
           content: Text('Invalid Email'),
@@ -49,6 +59,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }).catchError((error) {
+      setState(() {
+        _isloading = false;
+      });
       // Handle any errors that occur during the API call
       print(error);
       const snackBar = SnackBar(
@@ -177,16 +190,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 ),
                                 fixedSize: Size(screenWidth * 0.9, 70),
                               ),
-                              child: const Text(
-                                'Send Code',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'default',
-                                ),
-                              ),
+                              child: _isloading
+                                  ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                  : const Text(
+                                      'Send Code',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
                             ),
                           ],
                         ),
