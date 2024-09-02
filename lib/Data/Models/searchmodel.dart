@@ -1,4 +1,13 @@
 /// Represents a division in the search results.
+///
+/// This class encapsulates the unique identifier, names, and associated URL
+/// of a division.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the division.
+/// - [name]: Name of the division.
+/// - [bn_name]: Name of the division in Bengali.
+/// - [url]: URL associated with the division.
 class DivisionSearch {
   /// Unique identifier for the division.
   final String id;
@@ -41,6 +50,12 @@ class DivisionSearch {
 }
 
 /// Represents a district in the search results.
+///
+/// This class encapsulates the unique identifier and name of a district.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the district.
+/// - [name]: Name of the district.
 class DistrictSearch {
   /// Unique identifier for the district.
   final String id;
@@ -67,6 +82,12 @@ class DistrictSearch {
 }
 
 /// Represents an upazila in the search results.
+///
+/// This class encapsulates the unique identifier and name of an upazila.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the upazila.
+/// - [name]: Name of the upazila.
 class UpazilaSearch {
   /// Unique identifier for the upazila.
   final String id;
@@ -93,6 +114,12 @@ class UpazilaSearch {
 }
 
 /// Represents a union in the search results.
+///
+/// This class encapsulates the unique identifier and name of a union.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the union.
+/// - [name]: Name of the union.
 class UnionSearch {
   /// Unique identifier for the union.
   final String id;
@@ -119,6 +146,14 @@ class UnionSearch {
 }
 
 /// Represents the result of an NTTN provider search.
+///
+/// This class encapsulates the unique identifier, name, and phone number
+/// of an NTTN provider.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the NTTN provider.
+/// - [name]: Name of the NTTN provider.
+/// - [phonenumber]: Phone number of the NTTN provider.
 class NTTNProviderResult {
   /// Unique identifier for the NTTN provider.
   final String id;

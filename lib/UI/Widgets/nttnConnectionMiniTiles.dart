@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 
-/// A stateless widget that displays a tile representing a connection.
-/// The tile includes information such as the connection's name and organization name.
-/// It also provides a tap gesture to trigger an action defined by the `onPressed` callback.
+/// A widget that represents a connection tile, displaying key information
+/// related to a specific connection.
+///
+/// This tile includes details such as [Name], [OrganizationName], [MobileNo],
+/// [ConnectionType], [ApplicationID], [Location], [Status], [LinkCapacity],
+/// and [Remark]. It also features a tap callback to handle user interactions.
+///
+/// [Name] - The name associated with the connection.
+/// [OrganizationName] - The organization name linked to the connection.
+/// [MobileNo] - The mobile number associated with the connection.
+/// [ConnectionType] - The type of connection (e.g., New, Upgrade).
+/// [ApplicationID] - The unique ID of the application.
+/// [Location] - The location of the connection.
+/// [Status] - The current status of the connection (e.g., Pending, Accepted).
+/// [LinkCapacity] - The link capacity (e.g., bandwidth) of the connection.
+/// [Remark] - Any additional remarks about the connection.
+/// [onPressed] - Callback function to be executed when the tile is tapped.
+///
+/// The tile is visually styled with a background color, elevation, and rounded corners.
+/// It includes a [ListTile] to display the [Name] and [OrganizationName], along
+/// with a trailing arrow icon indicating it is clickable.
 class ConnectionsTile extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String

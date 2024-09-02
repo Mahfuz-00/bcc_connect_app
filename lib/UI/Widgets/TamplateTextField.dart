@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// A customizable text input field widget for forms.
+///
+/// This widget encapsulates a [TextFormField] with customizable properties.
+/// It supports various input types, validation, and styling.
+///
+/// **Variables:**
+/// - [controller]: A [TextEditingController] for managing the text input.
+/// - [label]: The label text displayed for the input field.
+/// - [validator]: An optional function for validating the input.
+/// - [keyboardType]: Specifies the type of keyboard to be displayed (default is [TextInputType.text]).
+/// - [obscureText]: A boolean that determines if the text should be obscured (for passwords).
 class CustomTextInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;

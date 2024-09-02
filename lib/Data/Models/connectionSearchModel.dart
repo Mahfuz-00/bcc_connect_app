@@ -1,6 +1,15 @@
-/// The `Connections` class represents a connection request or status in the
-/// BCC Connect Network App, encapsulating details such as the applicant's name,
-/// organization, and the connection's current status.
+/// Represents a connection request item.
+///
+/// This class contains all necessary information about a connection request
+/// including applicant details and connection status.
+///
+/// **Variables:**
+/// - [name]: A String representing the name of the applicant or organization contact.
+/// - [organization]: A String representing the name of the organization associated with the connection.
+/// - [mobile]: A String representing the mobile number of the applicant or contact person.
+/// - [connectionType]: A String representing the type of connection requested (e.g., New, Upgrade).
+/// - [provider]: A String representing the name of the provider handling the connection.
+/// - [status]: A String representing the current status of the connection (e.g., Pending, Accepted, Rejected).
 class Connections {
   /// The name of the applicant or organization contact.
   final String name;

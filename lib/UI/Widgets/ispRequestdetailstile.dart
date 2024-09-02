@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// A stateless widget that displays detailed information about a connection request
-/// in a structured format, including fields like Connection Type, NTTN Provider,
-/// Application ID, Mobile No, Location, Time, and Status.
+/// The [ConnectionRequestInfoCard] class is a stateless widget that displays
+/// detailed information about a connection request. It presents various
+/// attributes related to the request in a visually structured format.
+///
+/// This card includes:
+///
+/// - [ConnectionType]: The type of connection requested.
+/// - [NTTNProvider]: The NTTN (Nationwide Telecommunications Transmission Network)
+///   provider involved in the request.
+/// - [ApplicationID]: The unique identifier for the application associated with
+///   the request.
+/// - [MobileNo]: The mobile number linked to the request.
+/// - [Location]: The geographical location where the connection is requested.
+/// - [Time]: The timestamp indicating when the request was made.
+/// - [Status]: The current status of the connection request.
+///
+/// The [build] method creates and returns a material design card that contains
+/// the structured information, including rows for each attribute displayed
+/// in a readable format. The time is formatted for better readability.
 class ConnectionRequestInfoCard extends StatelessWidget {
   final String ConnectionType; // The type of connection requested.
   final String

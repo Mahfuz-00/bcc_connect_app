@@ -1,5 +1,16 @@
-/// The `ISPConnectionDetails` class represents the details of an ISP connection
-/// request, including its type, provider, and status.
+/// Represents the details of an ISP connection request.
+///
+/// This class encapsulates all necessary information regarding an ISP connection request,
+/// including the connection type, provider details, and status.
+///
+/// **Variables:**
+/// - [connectionType]: A String representing the type of connection (e.g., New, Update).
+/// - [provider]: A String representing the name of the provider handling the connection.
+/// - [applicationId]: A String representing the unique application ID associated with the connection request.
+/// - [phone]: A String representing the phone number associated with the connection request.
+/// - [location]: A String representing the location where the connection is requested.
+/// - [time]: A String representing the time when the connection request was created.
+/// - [status]: A String representing the current status of the connection request.
 class ISPConnectionDetails {
   /// The type of connection (e.g., New, Update).
   final String connectionType;

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// A custom widget that displays a group of radio buttons in a list tile format.
-/// Allows the user to select one option from the given list of options.
-/// Customizes appearance based on the selected option.
+/// A widget that displays a group of radio buttons based on a list of options.
+///
+/// This widget allows users to select one option from a list of radio buttons.
+///
+/// **Variables:**
+/// - [options]: List of options to be displayed as radio buttons.
+/// - [selectedOption]: Currently selected option, if any.
+/// - [onChanged]: Callback function to handle option changes.
 class RadioListTileGroup extends StatefulWidget {
   final List<String>
       options; // List of options to be displayed as radio buttons.

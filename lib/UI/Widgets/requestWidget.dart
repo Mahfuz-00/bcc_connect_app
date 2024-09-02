@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'templateerrorcontainer.dart';
 
-/// A custom widget that handles the display of a list of requests or errors.
-/// It supports showing loading indicators, handling errors, displaying lists,
-/// and providing a "See All" button to navigate to the next page.
+/// A widget that displays a list of requests with loading and error handling.
+///
+/// This widget manages the state of data fetching and displays either a loading indicator,
+/// an error message, or the list of requests based on the provided parameters.
+///
+/// **Variables:**
+/// - [loading]: Indicates whether data is currently loading.
+/// - [fetch]: Indicates whether data fetching is complete.
+/// - [errorText]: Error message to be displayed if there's an error.
+/// - [fetchData]: Future that represents the data fetching process.
+/// - [listWidget]: List of widgets to be displayed if data is successfully fetched.
+/// - [showSeeAllButton]: Determines if the "See All" button should be shown.
+/// - [seeAllButtonText]: Text to be displayed on the "See All" button.
+/// - [nextPage]: Widget to navigate to when the "See All" button is pressed.
 class RequestsWidget extends StatelessWidget {
   final bool loading; // Indicates whether data is currently loading.
   final bool fetch; // Indicates whether data fetching is complete.

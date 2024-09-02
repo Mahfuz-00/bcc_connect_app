@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// A stateless widget that displays connection information in a card format.
-/// This card includes details such as name, organization name, mobile number,
-/// connection type, provider, application ID, and status.
+/// The [BCCConnectionsInfoCard] class is a stateless widget that
+/// displays detailed information about a BCC connection, including
+/// the [Name], [OrganizationName], [MobileNo], [ConnectionType],
+/// [Provider], [ApplicationID], and [Status].
+///
+/// This widget is styled as a card with rounded corners and a shadow
+/// effect for visual elevation. It organizes the information into
+/// rows, each showing a label and its corresponding value, making
+/// it easy to read and understand the connection details.
+///
+/// All fields are required and must be provided when instantiating
+/// the widget. The card is designed for use in BCC-related
+/// applications where displaying connection information is necessary.
 class BCCConnectionsInfoCard extends StatelessWidget {
   final String Name;
   final String OrganizationName;

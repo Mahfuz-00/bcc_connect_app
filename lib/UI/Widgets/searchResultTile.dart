@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// A card widget that displays detailed information about a connection.
-/// This widget is used to present information such as name, organization, mobile number,
+/// A widget that displays connection information for a person or entity.
+///
+/// This widget shows details such as the name, organization name, mobile number,
 /// connection type, provider, and status in a structured format.
+///
+/// **Variables:**
+/// - [Name]: The name of the person or entity.
+/// - [OrganizationName]: The name of the organization.
+/// - [MobileNo]: The mobile number associated with the connection.
+/// - [ConnectionType]: The type of connection (e.g., Pending, Accepted).
+/// - [Provider]: The service provider for the connection.
+/// - [Status]: The current status of the connection.
 class SearchConnectionsInfoCard extends StatelessWidget {
   final String Name; // The name of the person or entity.
   final String OrganizationName; // The name of the organization.

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// A stateless widget that displays detailed information about an active connection.
-/// It includes fields such as Name, Organization Name, Mobile No, Connection Type,
-/// Application ID, Location, Status, Link Capacity, and Remark.
+/// A [StatelessWidget] that displays the details of an active connection.
+///
+/// This page includes the following details:
+/// - [Name]: The name of the individual associated with the connection.
+/// - [OrganizationName]: The organization name linked to the connection.
+/// - [MobileNo]: The mobile number associated with the connection.
+/// - [ConnectionType]: The type of connection (e.g., New, Upgrade).
+/// - [ApplicationID]: The unique ID of the application.
+/// - [Location]: The location of the connection.
+/// - [Status]: The current status of the connection (e.g., Pending, Accepted).
+/// - [LinkCapacity]: The link capacity (e.g., bandwidth) of the connection.
+/// - [Remark]: Any additional remarks about the connection.
 class ActiveConnectionDetailsPage extends StatelessWidget {
   final String
       Name; // The name of the individual associated with the connection.

@@ -1,5 +1,18 @@
-/// The `NTTNConnectionsDetails` class represents the detailed information of an NTTN connection request,
-/// including the connection’s name, organization, contact details, and additional information.
+/// Represents the details of an NTTN connection request.
+///
+/// This class encapsulates all necessary information regarding an NTTN connection request,
+/// including the requester’s details, connection type, and status.
+///
+/// **Variables:**
+/// - [name]: A String representing the name of the individual or entity requesting the connection.
+/// - [organization]: A String representing the organization to which the requester belongs.
+/// - [mobile]: A String representing the mobile phone number of the requester.
+/// - [connectionType]: A String representing the type of connection requested (e.g., New, Upgrade).
+/// - [applicationId]: A String representing the unique application ID associated with the connection request.
+/// - [location]: A String representing the location where the connection is requested.
+/// - [status]: A String representing the current status of the connection request.
+/// - [link]: A String representing a link related to the connection request.
+/// - [remark]: A String representing any additional remarks or comments related to the connection request.
 class NTTNConnectionsDetails {
   /// The name of the individual or entity requesting the connection.
   final String name;

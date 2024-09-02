@@ -5,8 +5,18 @@ import '../../Data/Data Sources/API Service (Accept or Decline)/apiServiceAccept
 import '../Bloc/auth_cubit.dart';
 import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 
-/// A stateless widget that displays the details of a pending connection request.
-/// It includes options to accept or reject the request, and handles the navigation and API calls accordingly.
+/// A [StatelessWidget] that displays the details of a pending connection.
+///
+/// This page provides information such as the connection's [Name],
+/// [OrganizationName], [MobileNo], [ConnectionType], [ApplicationID],
+/// [Location], [Status], [LinkCapacity], and [Remark]. Users can accept
+/// or reject the connection request, triggering the appropriate API call.
+///
+/// [ispConnectionId] is derived from [ApplicationID] for API operations.
+///
+/// The actions that can be performed are:
+/// - Accepting the connection, which sets the [action] to 'accepted'.
+/// - Rejecting the connection, which sets the [action] to 'rejected'.
 class PendingConnectionDetailsPage extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String

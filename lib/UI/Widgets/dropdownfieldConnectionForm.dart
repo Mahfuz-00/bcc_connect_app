@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
-/// A custom dropdown form field widget that provides a list of selectable items.
-/// It allows users to choose from a list of strings and can be initialized with a value.
+/// The [DropdownFormField] class is a stateful widget that creates a dropdown
+/// selection field, allowing users to select an item from a predefined list.
+///
+/// This widget is particularly useful in forms where user selection is
+/// required, such as in settings or input forms. It includes:
+///
+/// - [hintText]: A placeholder displayed when no value is selected.
+/// - [dropdownItems]: A list of items that populate the dropdown menu.
+/// - [initialValue]: An optional parameter to set the initial selected value.
+/// - [onChanged]: A callback function that is triggered when the selection changes.
+///
+/// The dropdown is styled with a hint text and padding for better user experience.
+/// The currently selected value is stored in the [_selectedValue] variable.
+///
+/// The widget updates its state when a new item is selected, and invokes the
+/// [onChanged] callback if provided.
 class DropdownFormField extends StatefulWidget {
   final String hintText; // The placeholder text when no value is selected.
   final List<String>

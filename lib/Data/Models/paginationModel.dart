@@ -1,5 +1,15 @@
-/// The `Pagination` class is used to manage pagination information in API responses.
-/// It includes details about the availability of next and previous pages in the data set.
+/// Represents the pagination information for a data response.
+///
+/// This class encapsulates details about the current pagination state,
+/// including the URLs for the next and previous pages of data.
+///
+/// **Variables:**
+/// - [nextPage]: A String? that holds the URL for the next page of results, if available.
+/// - [previousPage]: A String? that holds the URL for the previous page of results, if available.
+///
+/// **Actions:**
+/// - [canFetchNext]: A boolean getter that determines if there is a next page to fetch.
+/// - [canFetchPrevious]: A boolean getter that determines if there is a previous page to fetch.
 class Pagination {
   /// The URL or identifier for the next page of results.
   final String? nextPage;

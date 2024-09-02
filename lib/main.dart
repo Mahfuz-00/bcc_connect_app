@@ -8,17 +8,28 @@ import 'UI/Bloc/auth_cubit.dart';
 import 'UI/Bloc/email_cubit.dart';
 import 'UI/Pages/Splashscreen UI/splashscreenUI.dart';
 
-/// The entry point of the application.
+/// The entry point of the Flutter application.
 ///
-/// This function initializes the app and sets up the necessary configurations before running the app.
-/// It starts by running the `MyApp` widget.
+/// This function initializes necessary services, checks and clears the cache,
+/// and then runs the main application widget.
+///
+/// Actions:
+/// - Calls [checkAndClearCache] to ensure any old cache is cleared
+///   when the app version changes.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await checkAndClearCache();
   runApp(MyApp());
 }
 
-/// Checks the app version and clears the cache if the app has been updated.
+/// Checks the current application version against the stored version
+/// in [SharedPreferences]. If the versions differ, it clears the cache
+/// using [DefaultCacheManager] and updates the stored version.
+///
+/// - [prefs]: Instance of [SharedPreferences] used to access stored data.
+/// - [packageInfo]: Instance of [PackageInfo] that holds version information.
+/// - [currentVersion]: A string representing the current version of the app.
+/// - [storedVersion]: The previously stored version of the app, retrieved from [SharedPreferences].
 Future<void> checkAndClearCache() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -31,14 +42,15 @@ Future<void> checkAndClearCache() async {
   }
 }
 
-/// The root widget of the application.
+//// The root widget of the application.
 ///
 /// This widget sets up the application's root widget and the global theme.
-/// It also initializes the `AuthCubit` using the `BlocProvider`, which provides authentication state
-/// management across the app. The status bar color is set to a custom color.
+/// It also initializes the [AuthCubit] and [EmailCubit] using the [BlocProvider],
+/// which provides authentication and email state management across the app.
+/// The status bar color is set to a custom color.
 ///
-/// The `MaterialApp` is configured with a title, a custom theme, and a home widget, which is the
-/// `SplashScreen` widget.
+/// The [MaterialApp] is configured with a title, a custom theme, and a home widget,
+/// which is the [SplashScreen] widget.
 ///
 /// This widget is responsible for configuring the app's appearance and initializing its core functionality.
 class MyApp extends StatelessWidget {

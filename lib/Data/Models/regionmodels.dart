@@ -1,4 +1,13 @@
 /// Represents a geographical division with its details.
+///
+/// This class encapsulates the unique identifier, names, and associated URL
+/// of a division.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the division.
+/// - [name]: Name of the division in English.
+/// - [bn_name]: Name of the division in Bengali.
+/// - [url]: URL associated with the division.
 class Division {
   /// Unique identifier for the division.
   final String id;
@@ -47,6 +56,12 @@ class Division {
 }
 
 /// Represents a district with its details.
+///
+/// This class encapsulates the unique identifier and name of a district.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the district.
+/// - [name]: Name of the district.
 class District {
   /// Unique identifier for the district.
   final String id;
@@ -73,6 +88,12 @@ class District {
 }
 
 /// Represents an upazila with its details.
+///
+/// This class encapsulates the unique identifier and name of an upazila.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the upazila.
+/// - [name]: Name of the upazila.
 class Upazila {
   /// Unique identifier for the upazila.
   final String id;
@@ -99,6 +120,12 @@ class Upazila {
 }
 
 /// Represents a union with its details.
+///
+/// This class encapsulates the unique identifier and name of a union.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the union.
+/// - [name]: Name of the union.
 class Union {
   /// Unique identifier for the union.
   final String id;
@@ -125,6 +152,12 @@ class Union {
 }
 
 /// Represents an NTTN provider with its details.
+///
+/// This class encapsulates the unique identifier and name of an NTTN provider.
+///
+/// **Variables:**
+/// - [id]: Unique identifier for the NTTN provider.
+/// - [provider]: Name of the NTTN provider.
 class NTTNProvider {
   /// Unique identifier for the NTTN provider.
   final int id;

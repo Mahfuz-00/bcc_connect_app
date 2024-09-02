@@ -1,5 +1,16 @@
-/// The `DashboardItem` class represents an item displayed on the dashboard of the
-/// BCC Connect Network App, summarizing the connection details for a particular application.
+/// Represents a dashboard item for connection requests.
+///
+/// This class contains all necessary information about a connection request
+/// to be displayed in the dashboard.
+///
+/// **Variables:**
+/// - [name]: A String representing the name of the applicant or organization contact.
+/// - [organization]: A String representing the name of the organization associated with the connection request.
+/// - [mobile]: A String representing the mobile number of the applicant or contact person.
+/// - [connectionType]: A String representing the type of connection requested (e.g., New, Upgrade).
+/// - [provider]: A String representing the name of the provider handling the connection.
+/// - [applicationID]: An integer representing the unique ID of the application.
+/// - [status]: A String representing the current status of the application (e.g., Pending, Accepted, Rejected).
 class DashboardItem {
   /// The name of the applicant or organization contact.
   final String name;

@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
-/// A builder class that constructs a customizable dropdown form field widget.
-/// This widget allows users to select from a list of options that are dynamically determined
-/// based on the selected value of another dropdown or any other condition.
+/// The [DropdownFormFieldBuilder] class provides a way to create a dropdown
+/// form field that displays a list of options based on the selected value.
+///
+/// It allows users to select an item from a list that corresponds to the
+/// currently selected key in the options map. This widget includes:
+///
+/// - [options]: A map where each key has an associated list of items.
+/// - [labelText]: The label displayed above the dropdown field.
+/// - [selectedValue]: The currently selected value in the dropdown, which
+///   determines the items displayed.
+/// - [onChanged]: A callback function that is triggered when the selection
+///   changes, allowing external handling of selection updates.
+///
+/// The [build] method creates and returns a customized dropdown widget
+/// based on the provided parameters, with proper styling and layout.
 class DropdownFormFieldBuilder {
   final Map<String, List<String>>
       options; // A map of options where each key has an associated list of items.

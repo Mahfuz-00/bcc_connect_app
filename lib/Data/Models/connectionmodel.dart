@@ -1,8 +1,15 @@
-/// The `ConnectionRequestModel` class represents a model for creating a connection request
-/// in the BCC Connect Network App.
+/// Represents a connection request model.
 ///
-/// It holds details about the location, NTTN provider, link capacity, and additional remarks
-/// related to the connection request.
+/// This class contains all necessary information to create a connection request.
+///
+/// **Variables:**
+/// - [divisionId]: A String representing the ID of the division where the connection is requested.
+/// - [districtId]: A String representing the ID of the district where the connection is requested.
+/// - [upazilaId]: A String representing the ID of the upazila (sub-district) where the connection is requested.
+/// - [unionId]: A String representing the ID of the union where the connection is requested.
+/// - [nttnProvider]: An integer representing the ID of the NTTN provider selected for the connection.
+/// - [linkCapacity]: A String representing the capacity of the link being requested.
+/// - [remark]: A String containing any additional remarks or comments about the connection request.
 class ConnectionRequestModel {
   /// The ID of the division where the connection is requested.
   final String divisionId;

@@ -1,6 +1,11 @@
-/// The `ConnectionStatus` class represents the status of a connection in the BCC Connect Network App.
+/// Represents the connection status for an ISP connection.
 ///
-/// It holds details about the type of connection and the corresponding ISP connection ID.
+/// This class encapsulates the information related to the connection status,
+/// including the type of connection and the associated ISP connection ID.
+///
+/// **Variables:**
+/// - [type]: A string representing the type of connection (e.g., Fiber, DSL).
+/// - [ispConnectionId]: An int representing the unique identifier for the ISP connection.
 class ConnectionStatus {
   /// The type of connection (e.g., "New", "Update").
   final String type;

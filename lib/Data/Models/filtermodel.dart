@@ -1,5 +1,10 @@
-/// The `Division` class represents a geographic division entity,
-/// primarily used for identifying and handling divisions within the application.
+/// Represents a geographic division entity.
+///
+/// This class is primarily used for identifying and handling divisions
+/// within the application.
+///
+/// **Variables:**
+/// - [id]: An optional integer representing the unique identifier for the division.
 class Division {
   /// The unique identifier for the division.
   final int? id;
@@ -21,8 +26,13 @@ class Division {
   }
 }
 
-/// The `District` class represents a district entity,
-/// primarily used for identifying and handling districts within the application.
+/// Represents a district entity.
+///
+/// This class is primarily used for identifying and handling districts
+/// within the application.
+///
+/// **Variables:**
+/// - [id]: An optional integer representing the unique identifier for the district.
 class District {
   /// The unique identifier for the district.
   final int? id;
@@ -44,8 +54,13 @@ class District {
   }
 }
 
-/// The `Upazila` class represents an upazila entity,
-/// primarily used for identifying and handling upazilas within the application.
+/// Represents an upazila entity.
+///
+/// This class is primarily used for identifying and handling upazilas
+/// within the application.
+///
+/// **Variables:**
+/// - [id]: An optional integer representing the unique identifier for the upazila.
 class Upazila {
   /// The unique identifier for the upazila.
   final int? id;
@@ -66,8 +81,13 @@ class Upazila {
   }
 }
 
-/// The `Union` class represents a union entity,
-/// primarily used for identifying and handling unions within the application.
+/// Represents a union entity.
+///
+/// This class is primarily used for identifying and handling unions
+/// within the application.
+///
+/// **Variables:**
+/// - [id]: An optional integer representing the unique identifier for the union.
 class Union {
   /// The unique identifier for the union.
   final int? id;
