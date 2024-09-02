@@ -7,7 +7,17 @@ import '../../Bloc/email_cubit.dart';
 import '../Login UI/loginUI.dart';
 import 'otpverficationUI.dart';
 
-// StatefulWidget to manage the state of the Forgot Password screen
+/// This StatefulWidget represents the Forgot Password screen of the application.
+/// It allows users to enter their email address to receive an OTP for password reset.
+///
+/// It uses [APIServiceForgotPassword] to handle the API calls for sending the OTP.
+/// It utilizes the [EmailCubit] to manage the email state across the application.
+///
+/// Key features include:
+/// - User input for email address
+/// - Error handling for invalid email submissions
+/// - Loading indicator while the OTP is being sent
+/// - Navigation to OTP verification screen upon successful OTP request
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
 

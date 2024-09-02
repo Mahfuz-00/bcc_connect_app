@@ -1,15 +1,21 @@
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../Bloc/email_cubit.dart';
 import '../Login UI/loginUI.dart';
 
-/// A screen that displays a confirmation message indicating that the password has been changed successfully.
+//// A screen displayed after a user's password has been successfully changed.
 ///
-/// This screen shows a success message and an image indicating the successful password change.
-/// It also provides a button to navigate back to the login screen.
+/// This screen informs the user that their password change was successful
+/// and provides a button to navigate back to the login screen. The screen
+/// includes a success image, a title, and a message indicating the
+/// password change status.
 ///
-/// The screen checks for internet connectivity on initialization to ensure that the network is available.
+/// ## Key Variables:
+/// - [screenWidth]: The width of the current screen, used to set the button size.
+/// - [screenHeight]: The height of the current screen (not directly used in this implementation).
+///
+/// ## Actions:
+/// - Navigate back to the login screen when the "Back to Login" button is pressed.
 class PasswordChanged extends StatefulWidget {
   const PasswordChanged({super.key});
 
@@ -18,26 +24,6 @@ class PasswordChanged extends StatefulWidget {
 }
 
 class _PasswordChangedState extends State<PasswordChanged> {
-  bool _isLoading = false; // Indicates whether the screen is in loading state
-
-  /// Checks the current internet connection status.
-  ///
-  /// Sets the `_isLoading` state to true if an internet connection is available.
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Check for internet connection when the widget is initialized
-    _checkInternetConnection();
-  }
 
   @override
   Widget build(BuildContext context) {

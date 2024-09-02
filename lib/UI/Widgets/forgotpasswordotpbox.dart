@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// A custom text form field designed for entering a single-digit code
+/// during password reset.
+///
+/// This widget provides an input field restricted to a single digit,
+/// making it suitable for scenarios like OTP or password reset code entry.
+///
+/// **Parameters:**
+/// - [textController]: A [TextEditingController] for managing the text input.
+/// - [currentFocusNode]: A [FocusNode] for managing the focus state of this field.
+/// - [nextFocusNode]: An optional [FocusNode] to move the focus to the next field
+///   when a digit is entered.
 class ForgotPasswordCustomTextFormField extends StatelessWidget {
   final TextEditingController textController;
   final FocusNode currentFocusNode;

@@ -9,6 +9,28 @@ import '../../Bloc/email_cubit.dart';
 import '../../Widgets/forgotpasswordotpbox.dart';
 import 'createnewpasswordUI.dart';
 
+/// The [OPTVerification] widget is responsible for displaying the OTP
+/// (One-Time Password) verification screen. It allows users to enter
+/// the OTP sent to their email address and verify it.
+///
+/// The widget includes:
+/// - A loading indicator while the verification code is being processed.
+/// - Text fields for entering the OTP, with focus management for
+///   user convenience.
+/// - A button to verify the OTP, which triggers the API call for
+///   verification and navigates to the password creation screen upon success.
+/// - A footer for resending the OTP if the user did not receive it.
+///
+/// It uses the [EmailCubit] to retrieve the user's email and
+/// provides visual feedback through snack bars for various actions.
+///
+/// The following variables and actions are highlighted:
+/// - [_isLoading]: Indicates whether the loading spinner is visible.
+/// - [_pageloading]: Indicates whether the page is currently processing a request.
+/// - [_controllers]: A list of controllers for the OTP input fields.
+/// - [_focusNodes]: A list of focus nodes for managing input field focus.
+/// - [_sendCode(String email)]: Sends the OTP to the user's email.
+/// - [_sendOTP(String email, String OTP)]: Verifies the entered OTP.
 class OPTVerfication extends StatefulWidget {
   const OPTVerfication({super.key});
 

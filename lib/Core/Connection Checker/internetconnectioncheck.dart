@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
 
+/// A widget that checks the internet connectivity status.
+///
+/// This widget wraps its child and monitors the internet connection state.
+/// If no internet connection is found, it displays a message with a retry button.
 class InternetChecker extends StatefulWidget {
   final Widget child;
 

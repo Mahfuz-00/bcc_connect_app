@@ -5,7 +5,26 @@ import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceCreat
 import '../../Bloc/email_cubit.dart';
 import 'passwordchangedUI.dart';
 
-// StatefulWidget to manage the state of creating a new password
+/// [CreateNewPassword] is a [StatefulWidget] that allows users to create a new password
+/// as part of the password recovery process. It manages the input fields for the new
+/// password and confirmation, validates the input, and interacts with the API to update
+/// the password.
+///
+/// This widget includes:
+/// - [_newPasswordcontroller]: Controller for the new password input field.
+/// - [_confirmPasswordcontroller]: Controller for the confirm password input field.
+/// - [_isLoading]: Indicates if the data is loading.
+/// - [_pageloading]: Indicates if the password creation process is ongoing.
+/// - [_isObscuredPassword]: Controls the visibility of the new password field.
+/// - [_isObscuredConfirmPassword]: Controls the visibility of the confirm password field.
+///
+/// It features:
+/// - A loading indicator while data is being fetched.
+/// - Input validation to ensure passwords match and are not empty.
+/// - Error handling for API responses with snack bars for user feedback.
+///
+/// Usage:
+/// - Upon successful password update, it navigates to the [PasswordChanged] screen.
 class CreateNewPassword extends StatefulWidget {
   const CreateNewPassword({super.key});
 
