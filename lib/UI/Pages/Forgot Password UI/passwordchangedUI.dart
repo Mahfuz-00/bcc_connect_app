@@ -16,20 +16,20 @@ import '../Login UI/loginUI.dart';
 ///
 /// ## Actions:
 /// - Navigate back to the login screen when the "Back to Login" button is pressed.
-class PasswordChanged extends StatefulWidget {
-  const PasswordChanged({super.key});
+class PasswordChangedUI extends StatefulWidget {
+  const PasswordChangedUI({super.key});
 
   @override
-  State<PasswordChanged> createState() => _PasswordChangedState();
+  State<PasswordChangedUI> createState() => _PasswordChangedUIState();
 }
 
-class _PasswordChangedState extends State<PasswordChanged> {
+class _PasswordChangedUIState extends State<PasswordChangedUI> {
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: PopScope(
         canPop: false,
         child: Scaffold(
@@ -80,7 +80,7 @@ class _PasswordChangedState extends State<PasswordChanged> {
                       final emailCubit = EmailCubit();
                       emailCubit.clearEmail();
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Login()));
+                          MaterialPageRoute(builder: (context) => LoginUI()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromRGBO(25, 192, 122, 1),

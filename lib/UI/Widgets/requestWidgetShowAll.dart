@@ -12,7 +12,7 @@ import 'templateerrorcontainer.dart';
 /// - [errorText]: Error message to be displayed if there's an error.
 /// - [fetchData]: Future that represents the data fetching process.
 /// - [listWidget]: List of widgets to be displayed if data is successfully fetched.
-class RequestsWidgetShowAll extends StatelessWidget {
+class AllRequestsWidget extends StatelessWidget {
   final bool loading; // Indicates whether data is currently loading.
   final bool fetch; // Indicates whether data fetching is complete.
   final String errorText; // Error message to be displayed if there's an error.
@@ -21,7 +21,7 @@ class RequestsWidgetShowAll extends StatelessWidget {
   final List<Widget>
       listWidget; // List of widgets to be displayed if data is successfully fetched.
 
-  const RequestsWidgetShowAll({
+  const AllRequestsWidget({
     Key? key,
     required this.loading,
     required this.fetch,

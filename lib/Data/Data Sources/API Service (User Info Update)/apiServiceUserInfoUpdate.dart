@@ -2,19 +2,26 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../Models/userInfoUpdateModel.dart';
 
-/// Service class for handling user profile updates.
-class APIServiceUpdateUser {
+/// A service class for updating user profile information via an API.
+///
+/// This class is responsible for sending a request to update user details
+/// such as name, organization, designation, phone, and license number.
+///
+/// **Variables:**
+/// - [authToken]: The authentication token used for API requests.
+/// - [URL]: The endpoint URL for updating user profiles.
+///
+/// **Actions:**
+/// - [updateUserProfile]: Sends a POST request to update the user's profile
+///   using the provided [userData], which includes [userId], [name],
+///   [organization], [designation], [phone], and [licenseNumber].
+class UpdateUserAPIService {
   late final String authToken;
   String URL = "https://bcc.touchandsolve.com/api/user/profile/update";
 
-  APIServiceUpdateUser.create(this.authToken);
+  UpdateUserAPIService.create(this.authToken);
 
-  /// Updates the user profile with the provided data.
-  ///
-  /// - Parameters:
-  ///   - `userData`: An instance of `UserProfileUpdate` containing user profile data.
-  /// - Returns: A `Future` that completes with a message from the server.
-  Future<String> updateUserProfile(UserProfileUpdate userData) async {
+  Future<String> updateUserProfile(UserProfileUpdateModel userData) async {
     try {
       print('API Token :: $authToken');
       var response = await http.post(

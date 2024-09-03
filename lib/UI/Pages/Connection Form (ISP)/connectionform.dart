@@ -9,33 +9,56 @@ import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
-/// A form that allows users to select an NTTN provider based on various geographical criteria
-/// such as division, district, upazila, and union. The form also enables users to specify
-/// the connection link capacity and any additional remarks.
+/// [ConnectionFormUI] is a [StatefulWidget] that represents a form for users to fill out
+/// connection requests in a user interface.
 ///
-/// This widget facilitates the selection process by providing dropdown menus for each
-/// geographical area, ensuring that the user can easily navigate through the hierarchy of
-/// divisions, districts, upazilas, and unions. Users can also enter details regarding the
-/// required connection capacity and provide remarks for better clarity on their needs.
+/// This class manages the state of various form elements such as divisions, districts,
+/// upazilas, unions, NTTN providers, and other form fields related to the connection request.
 ///
-/// ## Usage
-/// The `ConnectionForm` can be included in any widget tree where users need to select an
-/// NTTN provider. It manages its internal state and handles form validation for user inputs.
+/// The [GlobalKey<ScaffoldState>] [_scaffoldKey] is used to manage the scaffold of the form UI.
+/// The [_connectionRequest] holds the connection request details that are filled in the form.
 ///
-/// ## Features
-/// - Dropdown selection for division, district, upazila, and union
-/// - Input field for specifying the connection link capacity
-/// - Text field for additional remarks
-/// - Form validation to ensure all necessary fields are filled out
-/// - Callback to handle form submission
-class ConnectionForm extends StatefulWidget {
-  const ConnectionForm({super.key});
+/// Key state variables include:
+/// - [String?] [selectedLinkCapacity]: Holds the selected link capacity option.
+/// - [ConnectionRequestModel] [_connectionRequest]: Stores the connection request data.
+/// - [String] [_requestType]: Holds the type of request (e.g., new connection, upgrade).
+/// - [String] [_divisionID], [_districtID], [_upazilaID], [_unionID]: Hold the IDs of selected division, district, upazila, and union.
+/// - [int] [_NTTNID]: Stores the ID of the selected NTTN provider.
+/// - [TextEditingController] [_remark]: Manages the input of remarks by the user.
+/// - [bool] [_isButtonEnabled]: Tracks whether the submit button should be enabled based on user input.
+///
+/// Dropdown options and selected values for various form fields are stored in the following variables:
+/// - [Set<String>] [linkCapacityOptions]: Available options for link capacity.
+/// - [List<Division>] [divisions]: List of available divisions.
+/// - [List<District>] [districts]: List of available districts.
+/// - [List<Upazila>] [upazilas]: List of available upazilas.
+/// - [List<Union>] [unions]: List of available unions.
+/// - [List<NTTNProvider>] [nttnProviders]: List of available NTTN providers.
+/// - [String?] [selectedDivision], [selectedDistrict], [selectedUpazila], [selectedUnion], [selectedNTTNProvider]: Store selected values for each dropdown.
+///
+/// Loading states are managed by:
+/// - [bool] [isLoadingDivision], [isLoadingDistrict], [isLoadingUpzila], [isLoadingUnion], [isLoadingNTTNProvider]: Track whether the respective data is being loaded.
+///
+/// Other important variables include:
+/// - [TextEditingController] [_linkcapcitycontroller]: Manages the input for link capacity when 'Others' is selected.
+/// - [String] [userName], [organizationName], [photoUrl]: Store user information retrieved from the API.
+/// - [bool] [_isButtonClicked]: Tracks if the submit button has been clicked.
+/// - [String] [providerValues]: Stores the selected NTTN provider's value.
+/// - [bool] [isSelected]: Tracks if a particular form field has been selected.
+///
+/// The [initializeApiService] method initializes the [RegionAPIService] with the user's authentication token.
+/// Various [fetch] methods (e.g., [fetchDivisions], [fetchDistricts], [fetchUpazilas], [fetchUnions], [fetchNTTNProviders]) are used to retrieve data from the API.
+///
+/// The [initState] method initializes the form with default values and sets up listeners for user input.
+/// The [dispose] method cleans up resources when the widget is removed from the widget tree.
+class ConnectionFormUI extends StatefulWidget {
+  const ConnectionFormUI({super.key});
 
   @override
-  State<ConnectionForm> createState() => _ConnectionFormState();
+  State<ConnectionFormUI> createState() => _ConnectionFormUIState();
 }
 
-class _ConnectionFormState extends State<ConnectionForm> {
+class _ConnectionFormUIState extends State<ConnectionFormUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? selectedLinkCapacity;
   late ConnectionRequestModel _connectionRequest;
@@ -52,12 +75,12 @@ class _ConnectionFormState extends State<ConnectionForm> {
 
   final Set<String> linkCapacityOptions = {'5 MB', '10 MB', '15 MB', 'Others'};
 
-  late APIServiceRegion apiService;
+  late RegionAPIService apiService;
 
-  Future<APIServiceRegion> initializeApiService() async {
+  Future<RegionAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
     final token = (authCubit.state as AuthAuthenticated).token;
-    apiService = await APIServiceRegion.create(token);
+    apiService = await RegionAPIService.create(token);
     return apiService;
   }
 
@@ -224,7 +247,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -771,7 +794,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
 
       // Perform any additional actions before sending the request
       // Send the connection request using API service
-      APIServiceConnection.create(token)
+      ConnectionAPIService.create(token)
           .postConnectionRequest(_connectionRequest)
           .then((response) {
         // Handle successful request
@@ -780,7 +803,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => ISPDashboard(
+                builder: (context) => ISPDashboardUI(
                       shouldRefresh: true,
                     )),
           );
@@ -800,7 +823,7 @@ class _ConnectionFormState extends State<ConnectionForm> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => ISPDashboard(
+                builder: (context) => ISPDashboardUI(
                       shouldRefresh: true,
                     )),
           );

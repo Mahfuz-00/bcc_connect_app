@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Service class for handling full NTTN connection-related operations.
+/// A service class for managing full NTTN connection-related API requests.
+///
+/// This class is responsible for fetching full connection data from a given URL.
+///
+/// **Actions:**
+/// - [fetchFullConnections]: Sends a GET request to retrieve full connection
+///   data from the specified [url] and returns the data as a map.
+///
+/// **Variables:**
+/// - [authToken]: The authentication token used for API requests.
 class NTTNFullConnectionAPIService {
   late final String authToken;
 
   NTTNFullConnectionAPIService.create(this.authToken);
 
-  /// Fetches full NTTN connection-related data from a given URL.
-  ///
-  /// - Parameters:
-  ///   - url: The endpoint from which to fetch the connection data.
-  /// - Returns: A `Future` that completes with a `Map<String, dynamic>` containing the JSON response.
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchFullConnections(String url) async {
     try {
       print('API Token :: $authToken');

@@ -1,18 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling API requests related to BCC connection dashboard.
+/// A service class for interacting with the BCC Connection API.
+///
+/// This class provides functionality to fetch dashboard items by sending a
+/// GET request to the API.
+///
+/// **Actions:**
+/// - [fetchDashboardItems]: Sends a GET request to retrieve dashboard items
+///   and returns the response data as a map.
+///
+/// **Variables:**
+/// - [baseUrl]: The base URL for the API endpoint.
+/// - [authToken]: The authentication token required for making API requests.
 class BCCConnectionAPIService {
   final String baseUrl = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   BCCConnectionAPIService.create(this.authToken);
 
-  /// Fetches dashboard items from the API.
-  ///
-  /// - Returns: A future that completes with a `Map<String, dynamic>` containing dashboard items.
-  ///
-  /// - Throws: An [Exception] if the token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchDashboardItems() async {
     try {
       print('API Token :: $authToken');

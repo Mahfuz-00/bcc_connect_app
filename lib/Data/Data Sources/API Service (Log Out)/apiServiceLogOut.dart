@@ -1,19 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling user sign-out operations.
+/// A service class responsible for handling the logout functionality.
+///
+/// This class provides methods to sign out a user by making an API request
+/// to the logout endpoint. It uses the stored authentication token to
+/// authenticate the request.
+///
+/// **Variables:**
+/// - [URL]: The base URL of the API endpoint.
+/// - [authToken]: The authentication token used for authorization in the API request.
+///
+/// **Actions:**
+/// - [create]: A factory method that initializes the [LogOutApiService] and loads the [authToken].
+/// - [_loadAuthToken]: A private method to load the [authToken] from [SharedPreferences].
+/// - [signOut]: Sends a GET request to the API to sign out the user. If the request is successful,
 class LogOutApiService {
   static const String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   LogOutApiService.create(this.authToken);
 
-
-  /// Signs out the user by making a GET request to the sign-out endpoint.
-  ///
-  /// - Returns: A future that completes with a boolean indicating success or failure.
-  ///
-  /// - Throws: An [Exception] if the token is empty or if the request fails.
   Future<bool> signOut() async {
     try {
       print('API Token :: $authToken');

@@ -26,16 +26,16 @@ import '../Search UI/searchUI.dart';
 /// with buttons that allow users to navigate to the full lists of each type.
 /// The active and pending connection counts are displayed prominently, with
 /// the ability to view all connections for both statuses.
-class NTTNDashboard extends StatefulWidget {
+class NTTNDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNDashboard({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const NTTNDashboardUI({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
-  State<NTTNDashboard> createState() => _NTTNDashboardState();
+  State<NTTNDashboardUI> createState() => _NTTNDashboardUIState();
 }
 
-class _NTTNDashboardState extends State<NTTNDashboard> {
+class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
   bool _pageLoading = true;
@@ -137,7 +137,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PendingConnectionDetailsPage(
+                builder: (context) => PendingConnectionDetails(
                   Name: request['name'],
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
@@ -171,7 +171,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ActiveConnectionDetailsPage(
+                builder: (context) => ActiveConnectionDetails(
                   Name: request['name'],
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
@@ -235,7 +235,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 final userProfile = state.userProfile;
-                return InternetChecker(
+                return InternetConnectionChecker(
                   child: PopScope(
                     canPop: false,
                     child: Scaffold(
@@ -360,7 +360,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => NTTNDashboard(
+                                        builder: (context) => NTTNDashboardUI(
                                               shouldRefresh: true,
                                             ))); // Close the drawer
                               },
@@ -380,7 +380,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNPendingConnectionList(
+                                            NTTNPendingConnectionListUI(
                                               shouldRefresh: true,
                                             )));
                               },
@@ -400,7 +400,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNActiveConnectionList(
+                                            NTTNActiveConnectionListUI(
                                               shouldRefresh: true,
                                             )));
                               },
@@ -418,7 +418,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                 Navigator.pop(context);
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return Information();
+                                    return InformationUI();
                                   },
                                 ));
                               },
@@ -483,7 +483,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              Login()));
+                                              LoginUI()));
                                 }
                               },
                             ),
@@ -642,7 +642,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       fetchData: fetchConnectionApplications(),
                                       showSeeAllButton: canFetchMorePending,
                                       seeAllButtonText: 'See All Request',
-                                      nextPage: NTTNPendingConnectionList(
+                                      nextPage: NTTNPendingConnectionListUI(
                                         shouldRefresh: true,
                                       )),
                                   Divider(),
@@ -668,7 +668,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                       showSeeAllButton: canFetchMoreAccepted,
                                       seeAllButtonText:
                                           'See All Reviewed Request',
-                                      nextPage: NTTNActiveConnectionList(
+                                      nextPage: NTTNActiveConnectionListUI(
                                         shouldRefresh: true,
                                       )),
                                 ],
@@ -690,7 +690,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => NTTNDashboard(
+                                          builder: (context) => NTTNDashboardUI(
                                               shouldRefresh: true)));
                                 });
                               },
@@ -726,7 +726,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return SearchUser();
+                                    return SearchUI();
                                   },
                                 ));
                               },
@@ -770,7 +770,7 @@ class _NTTNDashboardState extends State<NTTNDashboard> {
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return Information();
+                                    return InformationUI();
                                   },
                                 ));
                               },

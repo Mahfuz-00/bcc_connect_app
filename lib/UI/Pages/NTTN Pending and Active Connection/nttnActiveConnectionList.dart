@@ -19,7 +19,7 @@ import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 import 'nttnPendingConnectionList.dart';
 
-/// The [NTTNActiveConnectionList] widget displays a list of active
+/// The [NTTNActiveConnectionListUI] widget displays a list of active
 /// connection requests for the user. It allows users to view, tap on,
 /// and navigate to details about each connection request.
 ///
@@ -51,18 +51,19 @@ import 'nttnPendingConnectionList.dart';
 ///   to navigate to a detailed view of the selected connection request.
 /// - The app bar includes options for navigation and updates the UI
 ///   based on user interactions.
-class NTTNActiveConnectionList extends StatefulWidget {
+class NTTNActiveConnectionListUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNActiveConnectionList({Key? key, this.shouldRefresh = false})
+  const NTTNActiveConnectionListUI({Key? key, this.shouldRefresh = false})
       : super(key: key);
 
   @override
-  State<NTTNActiveConnectionList> createState() =>
-      _NTTNActiveConnectionListState();
+  State<NTTNActiveConnectionListUI> createState() =>
+      _NTTNActiveConnectionListUIState();
 }
 
-class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
+class _NTTNActiveConnectionListUIState
+    extends State<NTTNActiveConnectionListUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
   bool _pageLoading = true;
@@ -83,11 +84,9 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
       final token = (authCubit.state as AuthAuthenticated).token;
       final apiService = await NTTNConnectionAPIService.create(token);
 
-      // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
           await apiService.fetchConnections();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -97,10 +96,9 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
-          _isFetched= true;
+          _isFetched = true;
         });
         return;
       }
@@ -122,7 +120,6 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
       print('Accepted: $acceptedRequestsData');
 
-      // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionsTile(
           Name: request['name'],
@@ -139,7 +136,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ActiveConnectionDetailsPage(
+                builder: (context) => ActiveConnectionDetails(
                   Name: request['name'],
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
@@ -162,7 +159,6 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
-      // Handle error as needed
     }
   }
 
@@ -215,7 +211,6 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
               'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
         }
 
-        // Map accepted requests to widgets
         final List<Widget> acceptedWidgets =
             acceptedRequestsData.map((request) {
           return ConnectionsTile(
@@ -233,7 +228,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ActiveConnectionDetailsPage(
+                  builder: (context) => ActiveConnectionDetails(
                     Name: request['name'],
                     OrganizationName: request['organization'],
                     MobileNo: request['mobile'],
@@ -290,7 +285,6 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
       if (widget.shouldRefresh) {
         print('Page Loading Done!!');
       }
-      // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
         print('Page Loading');
         _pageLoading = false;
@@ -307,7 +301,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
       builder: (context, state) {
         if (state is AuthAuthenticated) {
           final userProfile = state.userProfile;
-          return InternetChecker(
+          return InternetConnectionChecker(
             child: Scaffold(
               key: _scaffoldKey,
               appBar: AppBar(
@@ -344,8 +338,8 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 60, // Adjust width as needed
-                            height: 60, // Adjust height as needed
+                            width: 60,
+                            height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
@@ -358,7 +352,6 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                           SizedBox(height: 10),
                           Text(
                             userProfile.name,
-                            /*userName,*/
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -391,7 +384,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NTTNDashboard(
+                                builder: (context) => NTTNDashboardUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -410,7 +403,8 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NTTNPendingConnectionList(
+                                builder: (context) =>
+                                    NTTNPendingConnectionListUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -428,7 +422,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         Navigator.pop(context);
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },
@@ -473,10 +467,8 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                         var logoutApiService =
                             await LogOutApiService.create(token);
 
-                        // Wait for authToken to be initialized
                         logoutApiService.authToken;
 
-                        // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
                             content: Text('Logged out'),
@@ -486,8 +478,10 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                           context.read<AuthCubit>().logout();
                           final emailCubit = EmailCubit();
                           emailCubit.clearEmail();
-                          Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => Login()));
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginUI()));
                         }
                       },
                     ),
@@ -611,7 +605,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      NTTNDashboard(shouldRefresh: true)));
+                                      NTTNDashboardUI(shouldRefresh: true)));
                         });
                       },
                       child: Container(
@@ -646,7 +640,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return SearchUser();
+                            return SearchUI();
                           },
                         ));
                       },
@@ -690,7 +684,7 @@ class _NTTNActiveConnectionListState extends State<NTTNActiveConnectionList> {
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },

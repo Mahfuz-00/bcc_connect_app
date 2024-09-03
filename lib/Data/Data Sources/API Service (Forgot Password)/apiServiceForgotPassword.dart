@@ -1,23 +1,28 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for sending OTP for forgot password requests.
-class APIServiceForgotPassword {
+/// A service class to handle the forgot password functionality.
+///
+/// This class provides the necessary methods to interact with the API endpoint
+/// for sending an OTP to reset a forgotten password. The [authToken] is loaded
+/// from shared preferences, and the service sends a POST request with the user's [email].
+///
+/// **Variables:**
+/// - [url]: The API endpoint for sending the forgot password OTP.
+/// - [authToken]: The authentication token required for the API request.
+///
+/// **Actions:**
+/// - [_loadAuthToken]: Loads the [authToken] from shared preferences.
+/// - [create]: Initializes the service and loads the [authToken].
+/// - [sendForgotPasswordOTP]: Sends a POST request to the API to send an OTP to the provided [email].
+class ForgotPasswordAPIService {
   final String url =
       'https://bcc.touchandsolve.com/api/send/forget/password/otp';
   late final String authToken;
 
-  APIServiceForgotPassword.create();
-  APIServiceForgotPassword();
+  ForgotPasswordAPIService.create();
+  ForgotPasswordAPIService();
 
-  /// Sends a request to generate an OTP for forgotten password.
-  ///
-  /// - Parameters:
-  ///   - [email]: The email associated with the account.
-  ///
-  /// - Returns: A future that completes with a message indicating success or failure.
-  ///
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<String> sendForgotPasswordOTP(String email) async {
     print(email);
     final Map<String, String> headers = {

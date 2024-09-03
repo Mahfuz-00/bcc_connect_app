@@ -50,7 +50,7 @@ Future<void> checkAndClearCache() async {
 /// The status bar color is set to a custom color.
 ///
 /// The [MaterialApp] is configured with a title, a custom theme, and a home widget,
-/// which is the [SplashScreen] widget.
+/// which is the [SplashScreenUI] widget.
 ///
 /// This widget is responsible for configuring the app's appearance and initializing its core functionality.
 class MyApp extends StatelessWidget {
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           // Color scheme with seed color
           useMaterial3: true, // Enable Material Design 3
         ),
-        home: const SplashScreen(), // Set the initial route to SplashScreen
+        home: const SplashScreenUI(), // Set the initial route to SplashScreen
       ),
     );
   }

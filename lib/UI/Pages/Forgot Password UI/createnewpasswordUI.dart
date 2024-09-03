@@ -5,7 +5,7 @@ import '../../../Data/Data Sources/API Service (Forgot Password)/apiServiceCreat
 import '../../Bloc/email_cubit.dart';
 import 'passwordchangedUI.dart';
 
-/// [CreateNewPassword] is a [StatefulWidget] that allows users to create a new password
+/// [CreateNewPasswordUI] is a [StatefulWidget] that allows users to create a new password
 /// as part of the password recovery process. It manages the input fields for the new
 /// password and confirmation, validates the input, and interacts with the API to update
 /// the password.
@@ -24,15 +24,15 @@ import 'passwordchangedUI.dart';
 /// - Error handling for API responses with snack bars for user feedback.
 ///
 /// Usage:
-/// - Upon successful password update, it navigates to the [PasswordChanged] screen.
-class CreateNewPassword extends StatefulWidget {
-  const CreateNewPassword({super.key});
+/// - Upon successful password update, it navigates to the [PasswordChangedUI] screen.
+class CreateNewPasswordUI extends StatefulWidget {
+  const CreateNewPasswordUI({super.key});
 
   @override
-  State<CreateNewPassword> createState() => _CreateNewPasswordState();
+  State<CreateNewPasswordUI> createState() => _CreateNewPasswordUIState();
 }
 
-class _CreateNewPasswordState extends State<CreateNewPassword> {
+class _CreateNewPasswordUIState extends State<CreateNewPasswordUI> {
   bool _isLoading = true; // Indicates whether data is loading
   late TextEditingController _newPasswordcontroller = TextEditingController();
   late TextEditingController _confirmPasswordcontroller =
@@ -68,7 +68,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     setState(() {
       _pageloading = true;
     });
-    final apiService = await APIServiceCreateNewPassword.create();
+    final apiService = await CreateNewPasswordAPIService.create();
     apiService.NewPassword(email, password, confirmPassword).then((response) {
       if (response == 'Password Update Successfully') {
         setState(() {
@@ -76,7 +76,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
         });
         // Navigate to the PasswordChanged screen if password update is successful
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => PasswordChanged()));
+            MaterialPageRoute(builder: (context) => PasswordChangedUI()));
       }
     }).catchError((error) {
       setState(() {
@@ -102,7 +102,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
               child: CircularProgressIndicator(),
             ),
           )
-        : InternetChecker(
+        : InternetConnectionChecker(
             child: Scaffold(
               resizeToAvoidBottomInset: false,
               body: SafeArea(

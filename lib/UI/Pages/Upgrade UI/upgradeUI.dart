@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Fetch Connections)/apiServiceFetchconnectionlist.dart';
 import '../../../Data/Data Sources/API Service (Log Out)/apiServiceLogOut.dart';
@@ -18,12 +17,27 @@ import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 
-/// `UpgradeUI` is a StatefulWidget that displays a list of connections, handles user profile, and manages navigation.
+/// A [StatefulWidget] representing the [UpgradeUI] for connection management.
 ///
-/// The widget shows a loading indicator while fetching data and provides options for navigation through the app's drawer.
+/// This widget fetches and displays a list of existing connection requests, allowing
+/// the user to manage their connections. It uses a [BlocBuilder] to listen to
+/// authentication state and checks internet connectivity.
 ///
-/// **Constructor Arguments:**
-/// - `shouldRefresh` (bool): Determines whether the page should refresh its content.
+/// It contains the following variables:
+/// - [shouldRefresh]: A boolean indicating whether to refresh the UI on initialization.
+/// - [_scaffoldKey]: A [GlobalKey] used for the Scaffold's state management.
+/// - [pendingConnectionRequests]: A list holding widgets for pending connection requests.
+/// - [acceptedConnectionRequests]: A list holding widgets for accepted connection requests.
+/// - [_isFetched]: A boolean indicating whether data has been fetched from the API.
+/// - [_isLoading]: A boolean indicating whether the data is currently being loaded.
+/// - [_pageLoading]: A boolean indicating whether the page is still loading data.
+/// - [userName]: A string to hold the user's name.
+/// - [organizationName]: A string to hold the user's organization name.
+/// - [photoUrl]: A string to hold the user's profile picture URL.
+/// - [Id]: A string to hold the user's ID.
+///
+/// It includes methods for fetching connection requests and initializing state:
+/// - [fetchConnectionRequests()]: Fetches the connection requests from the API and updates the state.
 class UpgradeUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -153,7 +167,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 final userProfile = state.userProfile;
-                return InternetChecker(
+                return InternetConnectionChecker(
                   child: Scaffold(
                     backgroundColor: Colors.grey[100],
                     key: _scaffoldKey,
@@ -239,7 +253,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          ISPDashboard(shouldRefresh: true)));
+                                          ISPDashboardUI(shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -257,7 +271,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          ConnectionForm())); // Navigate to ConnectionForm
+                                          ConnectionFormUI())); // Navigate to ConnectionForm
                             },
                           ),
                           Divider(),
@@ -275,7 +289,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          ISPRequestList(shouldRefresh: true)));
+                                          ISPRequestListUI(shouldRefresh: true)));
                             },
                           ),
                           Divider(),
@@ -292,7 +306,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ISPReviewedList(
+                                      builder: (context) => ISPReviewedListUI(
                                           shouldRefresh: true)));
                             },
                           ),
@@ -309,7 +323,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.pop(context);
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) {
-                                  return Information();
+                                  return InformationUI();
                                 },
                               ));
                             },
@@ -363,7 +377,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => Login()));
+                                        builder: (context) => LoginUI()));
                               }
                             },
                           ),
@@ -502,7 +516,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          ISPDashboard(shouldRefresh: true)));
+                                          ISPDashboardUI(shouldRefresh: true)));
                             },
                             child: Container(
                               width: screenWidth / 3,
@@ -537,7 +551,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ConnectionForm()));
+                                      builder: (context) => ConnectionFormUI()));
                             },
                             behavior: HitTestBehavior.translucent,
                             child: Container(

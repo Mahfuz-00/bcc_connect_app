@@ -17,7 +17,7 @@ import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 /// The actions that can be performed are:
 /// - Accepting the connection, which sets the [action] to 'accepted'.
 /// - Rejecting the connection, which sets the [action] to 'rejected'.
-class PendingConnectionDetailsPage extends StatelessWidget {
+class PendingConnectionDetails extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String
       OrganizationName; // The organization name linked to the connection.
@@ -33,7 +33,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
   final int
       ispConnectionId; // The connection ID parsed from ApplicationID for API operations.
 
-  PendingConnectionDetailsPage({
+  PendingConnectionDetails({
     Key? key,
     required this.Name,
     required this.OrganizationName,
@@ -161,7 +161,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => NTTNDashboard(
+                              builder: (context) => NTTNDashboardUI(
                                   shouldRefresh:
                                       true)), // Navigate to NTTN Dashboard.
                         );
@@ -204,7 +204,7 @@ class PendingConnectionDetailsPage extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => NTTNDashboard(
+                              builder: (context) => NTTNDashboardUI(
                                   shouldRefresh:
                                       true)), // Navigate to NTTN Dashboard.
                         );

@@ -1,17 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling notification read operations.
+/// A service class for marking notifications as read via an API request.
+///
+/// This class is responsible for sending a request to the server to mark a notification as read. It uses an
+/// [authToken] to authenticate the API request.
+///
+/// **Variables:**
+/// - [authToken]: The authentication token required for authorization.
+/// - [URL]: The base URL of the API endpoint.
+///
+/// **Actions:**
+/// - [create]: A constructor that initializes the [NotificationReadApiService] class with the [authToken].
+/// - [readNotification]: Sends a GET request to the API to mark the notification as read.
 class NotificationReadApiService {
   static const String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   NotificationReadApiService.create(this.authToken);
 
-  /// Marks notifications as read by sending a GET request to the notification read endpoint.
-  ///
-  /// - Returns: A `Future` that completes with a boolean value indicating success (`true`) or failure (`false`).
-  /// - Throws: An [Exception] if the request fails or if an error occurs during the process.
   Future<bool> readNotification() async {
     try {
       print('API Token :: $authToken');

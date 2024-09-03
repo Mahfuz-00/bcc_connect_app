@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 /// - [Status]: The current status of the connection (e.g., Pending, Accepted).
 /// - [LinkCapacity]: The link capacity (e.g., bandwidth) of the connection.
 /// - [Remark]: Any additional remarks about the connection.
-class ActiveConnectionDetailsPage extends StatelessWidget {
+class ActiveConnectionDetails extends StatelessWidget {
   final String
       Name; // The name of the individual associated with the connection.
   final String
@@ -28,7 +28,7 @@ class ActiveConnectionDetailsPage extends StatelessWidget {
       LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
   final String Remark; // Any additional remarks about the connection.
 
-  const ActiveConnectionDetailsPage({
+  const ActiveConnectionDetails({
     Key? key,
     required this.Name,
     required this.OrganizationName,

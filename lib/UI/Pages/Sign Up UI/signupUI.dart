@@ -12,20 +12,38 @@ import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfield.dart';
 import '../Login UI/loginUI.dart';
 
-/// A widget representing the signup user interface.
+/// [SignupUI] that represents the sign-up user interface.
+/// This widget allows users to register by entering their details such as
+/// full name, organization, designation, email, phone number, and password.
 ///
-/// This widget provides fields for user input necessary for the signup process,
-/// including username, email, password, and a confirm password field. It also includes
-/// a button to submit the signup form. Upon submission, it validates the input fields
-/// and displays error messages if the validation fails.
-class Signup extends StatefulWidget {
-  const Signup({super.key});
+/// Variables:
+/// - [_isObscuredPassword]: Controls the visibility of the password field.
+/// - [_isObscuredConfirmPassword]: Controls the visibility of the confirm password field.
+/// - [_registerRequest]: Holds the registration request data model.
+/// - [_fullNameController]: Controller for the full name input field.
+/// - [_organizationController]: Controller for the organization name input field.
+/// - [_designationController]: Controller for the designation input field.
+/// - [_emailController]: Controller for the email input field.
+/// - [_phoneController]: Controller for the phone number input field.
+/// - [_passwordController]: Controller for the password input field.
+/// - [_confirmPasswordController]: Controller for the confirm password input field.
+/// - [_selectedUserType]: Holds the selected user type from a dropdown.
+/// - [_licenseNumberController]: Controller for the license number input field.
+/// - [_imageFile]: Holds the selected image file.
+/// - [globalKey]: Global key for the scaffold.
+/// - [globalfromkey]: Global key for the form.
+/// - [_isLoading]: Indicates whether the form is loading.
+/// - [_isButtonLoading]: Indicates whether the button is in a loading state.
+/// - [_imageHeight]: Stores the height of the selected image.
+/// - [_imageWidth]: Stores the width of the selected image.
+class SignupUI extends StatefulWidget {
+  const SignupUI({super.key});
 
   @override
-  State<Signup> createState() => _SignupState();
+  State<SignupUI> createState() => _SignupUIState();
 }
 
-class _SignupState extends State<Signup> {
+class _SignupUIState extends State<SignupUI> {
   bool _isObscuredPassword = true;
   bool _isObscuredConfirmPassword = true;
   late RegisterRequestmodel _registerRequest;
@@ -118,7 +136,7 @@ class _SignupState extends State<Signup> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: PopScope(
         canPop: false,
         child: Scaffold(
@@ -491,7 +509,7 @@ class _SignupState extends State<Signup> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => Login()));
+                                            builder: (context) => LoginUI()));
                                   },
                                   child: const Text(
                                     'Login now',
@@ -541,7 +559,7 @@ class _SignupState extends State<Signup> {
         licenseNumber: _licenseNumberController.text,
       );
 
-      final apiService = APIServiceRegister();
+      final apiService = UserRegistrationAPIService();
       // Call register method passing registerRequestModel, _imageFile, and authToken
       apiService.register(registerRequest, _imageFile).then((response) {
         print("Submitted");
@@ -554,7 +572,7 @@ class _SignupState extends State<Signup> {
           clearForm();
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Login()),
+            MaterialPageRoute(builder: (context) => LoginUI()),
           );
           const snackBar = SnackBar(
             content: Text('Registration Submitted!'),

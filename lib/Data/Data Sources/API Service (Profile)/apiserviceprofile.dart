@@ -1,16 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// The `APIProfileService` class is responsible for handling requests related to user profile data.
-class APIProfileService {
+/// A service class for fetching user profile information from an API.
+///
+/// This class is responsible for retrieving the user's profile data by making an API request.
+///
+/// **Variables:**
+/// - [URL]: The base URL of the API endpoint.
+///
+/// **Actions:**
+/// - [fetchUserProfile]: Sends a GET request to the API to fetch
+/// the user profile data using the provided [authToken].
+class ProfileAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
 
-  /// Fetches the user profile from the server.
-  ///
-  /// - Parameters:
-  ///   - authToken: The authentication token required to authorize the request.
-  /// - Returns: A `Future` that completes with a `Map<String, dynamic>` containing the user's profile data.
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchUserProfile(String authToken) async {
     print('Authen: $authToken');
     try {

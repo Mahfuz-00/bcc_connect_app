@@ -5,16 +5,16 @@ import 'package:connectivity/connectivity.dart';
 ///
 /// This widget wraps its child and monitors the internet connection state.
 /// If no internet connection is found, it displays a message with a retry button.
-class InternetChecker extends StatefulWidget {
+class InternetConnectionChecker extends StatefulWidget {
   final Widget child;
 
-  const InternetChecker({Key? key, required this.child}) : super(key: key);
+  const InternetConnectionChecker({Key? key, required this.child}) : super(key: key);
 
   @override
-  _InternetCheckerState createState() => _InternetCheckerState();
+  _InternetConnectionCheckerState createState() => _InternetConnectionCheckerState();
 }
 
-class _InternetCheckerState extends State<InternetChecker> {
+class _InternetConnectionCheckerState extends State<InternetConnectionChecker> {
   late Connectivity _connectivity;
   late bool _isConnected;
 

@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../../Models/connectionmodel.dart';
 
-/// Service class for handling API requests related to connection Form.
-class APIServiceConnection {
+/// A service class for handling connection requests to the API.
+///
+/// This class is responsible for sending new connection requests to the ISP.
+///
+/// **Actions:**
+/// - [postConnectionRequest]: Sends a POST request with the [ConnectionRequestModel]
+///   to the API and returns a message indicating the success or failure of the request.
+///
+/// **Variables:**
+/// - [URL]: The base URL for the API.
+/// - [authToken]: The authentication token used for API requests.
+class ConnectionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  APIServiceConnection.create(this.authToken);
+  ConnectionAPIService.create(this.authToken);
 
-  /// Sends a new connection request to the API.
-  ///
-  /// - Parameters:
-  ///   - [request]: An instance of `ConnectionRequestModel` containing the request data.
-  ///
-  /// - Returns: A future that completes with a string message indicating success or failure.
-  ///
-  /// - Throws: An [Exception] if the token is empty or if the request fails.
   Future<String> postConnectionRequest(ConnectionRequestModel request) async {
     try {
       print('API Token :: $authToken');

@@ -12,21 +12,36 @@ import '../ISP Dashboard/ispDashboard.dart';
 import '../NTTN Dashboard/nttnDashboard.dart';
 import '../Sign Up UI/signupUI.dart';
 
-/// A StatefulWidget representing the Login screen.
+/// This [LoginUI] class represents the user interface for logging into the application.
 ///
-/// The Login screen allows users to input their email and password,
-/// authenticate against the backend, and navigate to different dashboards
-/// based on user type. It includes error handling for incorrect credentials,
-/// a password visibility toggle, and navigation options for forgotten passwords
-/// and account registration.
-class Login extends StatefulWidget {
-  const Login({super.key});
+/// Variables:
+/// * [bool _isObscured] - Controls the visibility of the password text field.
+/// * [TextEditingController _passwordController] - Manages the text input for the password.
+/// * [TextEditingController _emailController] - Manages the text input for the email.
+/// * [LoginRequestmodel _loginRequest] - Holds the email and password for the login request.
+/// * [GlobalKey<ScaffoldState> globalKey] - Key for the [Scaffold] widget, used for accessing the scaffold.
+/// * [GlobalKey<FormState> globalfromkey] - Key for the [Form] widget, used for validating the form.
+/// * [String userType] - Stores the type of user after a successful login.
+/// * [bool _isLoading] - Indicates whether a login request is in progress.
+/// * [bool _isButtonClicked] - Tracks if the login button has been clicked to display a loading indicator.
+/// * [AuthCubit authCubit] - Manages the authentication state of the application.
+///
+/// Actions:
+/// * [_getIcon()] - Returns the appropriate icon based on the [_isObscured] value.
+/// * [_checkLoginRequest()] - Verifies the [LoginRequestmodel] to ensure email and password are set.
+/// * [initState()] - Initializes the login request model, controllers, and checks the login request.
+/// * [dispose()] - Disposes of the controllers to free up resources.
+/// * [build()] - Builds the login UI, including form fields for email and password, and a login button.
+/// * [validateAndSave()] - Validates the form, sends the login request, handles the response, and manages the navigation based on the user type.
+/// * [showTopToast()] - Displays a toast message at the top of the screen with the provided [message].
+class LoginUI extends StatefulWidget {
+  const LoginUI({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginUI> createState() => _LoginUIState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginUIState extends State<LoginUI> {
   bool _isObscured = true;
   late TextEditingController _passwordController;
   late TextEditingController _emailController;
@@ -44,8 +59,8 @@ class _LoginState extends State<Login> {
 
   void _checkLoginRequest() {
     if (_loginRequest != null) {
-      _loginRequest.Email; // no error
-      _loginRequest.Password; // no error
+      _loginRequest.Email;
+      _loginRequest.Password;
     }
   }
 
@@ -225,7 +240,7 @@ class _LoginState extends State<Login> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                const ForgotPassword()));
+                                                const ForgotPasswordUI()));
                                   },
                                   child: const Text(
                                     'Forgot Password?',
@@ -248,7 +263,7 @@ class _LoginState extends State<Login> {
                               onPressed: () async {
                                 setState(() {
                                   _isButtonClicked =
-                                      true; // Button clicked, show circular progress indicator
+                                      true;
                                 });
                                 if (await validateAndSave(
                                     globalfromkey, context)) {
@@ -258,7 +273,7 @@ class _LoginState extends State<Login> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => ISPDashboard(
+                                            builder: (context) => ISPDashboardUI(
                                                 shouldRefresh: true)),
                                       );
                                     }
@@ -266,7 +281,7 @@ class _LoginState extends State<Login> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => BCCDashboard(
+                                            builder: (context) => BCCDashboardUI(
                                                 shouldRefresh: true)),
                                       );
                                     }
@@ -274,7 +289,7 @@ class _LoginState extends State<Login> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => NTTNDashboard(
+                                            builder: (context) => NTTNDashboardUI(
                                                 shouldRefresh: true)),
                                       );
                                     }
@@ -282,7 +297,7 @@ class _LoginState extends State<Login> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => NTTNDashboard(
+                                            builder: (context) => NTTNDashboardUI(
                                                 shouldRefresh: true)),
                                       );
                                     } else{
@@ -293,7 +308,7 @@ class _LoginState extends State<Login> {
                                 }
                                 setState(() {
                                   _isButtonClicked =
-                                      false; // Validation complete, hide circular progress indicator
+                                      false;
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -305,7 +320,7 @@ class _LoginState extends State<Login> {
                                 fixedSize: Size(screenWidth * 0.9, 70),
                               ),
                               child: _isButtonClicked
-                                  ? CircularProgressIndicator() // Show circular progress indicator when button is clicked
+                                  ? CircularProgressIndicator()
                                   : const Text('Login',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -345,7 +360,7 @@ class _LoginState extends State<Login> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const Signup()));
+                                      builder: (context) => const SignupUI()));
                             },
                             child: const Text(
                               'Register now',
@@ -376,7 +391,7 @@ class _LoginState extends State<Login> {
     final form = formKey.currentState;
     if (form != null && form.validate()) {
       form.save();
-      final apiService = APIService();
+      final apiService = LoginAPIService();
       final loginRequestModel = LoginRequestmodel(
         Email: _emailController.text,
         Password: _passwordController.text,
@@ -387,11 +402,9 @@ class _LoginState extends State<Login> {
           userType = response.userType;
           print('UserType :: $userType');
           _fetchUserProfile(response.token);
-
           return true;
         }
       } catch (e) {
-        // Handle login error
         String errorMessage = 'Incorrect Email and Password.';
         if (e.toString().contains('Invalid User')) {
           errorMessage = 'Invalid User!, Please enter a valid email address.';
@@ -436,7 +449,6 @@ class _LoginState extends State<Login> {
 
     overlayState?.insert(overlayEntry);
 
-    // Remove the overlay entry after some time (e.g., 3 seconds)
     Future.delayed(Duration(seconds: 3)).then((_) {
       overlayEntry.remove();
     });
@@ -449,24 +461,18 @@ class _LoginState extends State<Login> {
 
   Future<void> _fetchUserProfile(String token) async {
     try {
-      final apiService = await APIProfileService();
-
-      // Check if the widget is still mounted
+      final apiService = await ProfileAPIService();
       if (!mounted) return;
-
       print('Mounted');
 
       final profile = await apiService.fetchUserProfile(token);
       final userProfile = UserProfile.fromJson(profile);
-
       print('Mounted Again');
 
       authCubit.login(userProfile, token, userType);
-
       print('Cubit UserType:: $userType');
     } catch (e) {
       print('Error fetching user profile: $e');
-      // Handle error as needed
     }
   }
 }

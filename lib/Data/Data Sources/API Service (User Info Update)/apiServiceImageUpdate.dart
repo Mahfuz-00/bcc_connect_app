@@ -1,22 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-
 import '../../Models/imageUpdateModel.dart';
 
-/// Service class for handling profile picture updates.
-class APIProfilePictureUpdate {
+/// A service class for updating the user's profile picture via an API.
+///
+/// This class is responsible for uploading the user's profile photo to the server.
+///
+/// **Variables:**
+/// - [URL]: The API endpoint for updating the profile picture.
+/// - [authToken]: The authentication token used for API requests.
+///
+/// **Actions:**
+/// - [updateProfilePicture]: Sends a POST request to update
+/// the user's profile picture using the provided [image] file.
+class ProfilePictureUpdateAPIService {
   static const String URL =
       'https://bcc.touchandsolve.com/api/user/profile/photo/update';
   late final String authToken;
 
-  APIProfilePictureUpdate.create(this.authToken);
+  ProfilePictureUpdateAPIService.create(this.authToken);
 
-  /// Updates the profile picture with the provided image file.
-  ///
-  /// - Parameters:
-  ///   - `image`: The image file to upload.
-  /// - Returns: A `Future` that completes with a `ProfilePictureUpdateResponse` containing the server response.
   Future<ProfilePictureUpdateResponse> updateProfilePicture(
       {required File image}) async {
     try {

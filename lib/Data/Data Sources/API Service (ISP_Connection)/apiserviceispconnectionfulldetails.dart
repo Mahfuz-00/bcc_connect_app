@@ -1,19 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for managing full ISP connection-related API requests.
-class APIServiceISPConnectionFull {
+/// A service class for fetching full data related to ISP connections.
+///
+/// This class is responsible for retrieving detailed data for ISP connections
+/// from the API.
+///
+/// **Actions:**
+/// - [fetchFullData]: Sends a GET request to fetch full data from the provided
+///   [url] and returns the data as a map.
+///
+/// **Variables:**
+/// - [authToken]: The authentication token used for API requests.
+class ISPConnectionFullAPIService {
   late final String authToken;
 
-  APIServiceISPConnectionFull.create(this.authToken);
+  ISPConnectionFullAPIService.create(this.authToken);
 
-  /// Fetches full data from the specified URL.
-  ///
-  /// - Parameter url: The URL from which to fetch data.
-  ///
-  /// - Returns: A future that completes with a map of the full data.
-  ///
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchFullData(String url) async {
     try {
       print('API Token :: $authToken');

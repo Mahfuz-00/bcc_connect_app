@@ -1,22 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for OTP verification requests.
-class APIServiceOTPVerification {
+/// A service class to handle OTP verification functionality.
+///
+/// This class provides the necessary methods to interact with the API endpoint
+/// for verifying OTP sent to the user's [email]. The [authToken] is loaded
+/// from shared preferences, and the service sends a POST request with the user's [email] and [OTP].
+///
+/// **Variables:**
+/// - [url]: The API endpoint for OTP verification.
+/// - [authToken]: The authentication token required for the API request.
+///
+/// **Actions:**
+/// - [_loadAuthToken]: Loads the [authToken] from shared preferences.
+/// - [create]: Initializes the service and loads the [authToken].
+/// - [OTPVerification]: Sends a POST request to the API to verify the [OTP] for the provided [email].
+class OTPVerificationAPIService {
   final String url = 'https://bcc.touchandsolve.com/api/verify/otp';
   late final String authToken;
 
-  APIServiceOTPVerification.create();
+  OTPVerificationAPIService.create();
 
-  /// Verifies the OTP for a given email.
-  ///
-  /// - Parameters:
-  ///   - [email]: The email associated with the account.
-  ///   - [OTP]: The OTP to be verified.
-  ///
-  /// - Returns: A future that completes with a message indicating success or failure.
-  ///
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<String> OTPVerification(String email, String OTP) async {
     print(email);
     final Map<String, String> headers = {

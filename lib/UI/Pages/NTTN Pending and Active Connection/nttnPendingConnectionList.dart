@@ -19,7 +19,7 @@ import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 import 'nttnActiveConnectionList.dart';
 
-/// The [NTTNPendingConnectionList] widget displays a list of pending
+/// The [NTTNPendingConnectionListUI] widget displays a list of pending
 /// connection requests for the user. It allows users to view, tap on,
 /// and navigate to details about each connection request.
 ///
@@ -51,18 +51,19 @@ import 'nttnActiveConnectionList.dart';
 ///   to navigate to a detailed view of the selected connection request.
 /// - The app bar includes options for navigation and updates the UI
 ///   based on user interactions.
-class NTTNPendingConnectionList extends StatefulWidget {
+class NTTNPendingConnectionListUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNPendingConnectionList({Key? key, this.shouldRefresh = false})
+  const NTTNPendingConnectionListUI({Key? key, this.shouldRefresh = false})
       : super(key: key);
 
   @override
-  State<NTTNPendingConnectionList> createState() =>
-      _NTTNPendingConnectionListState();
+  State<NTTNPendingConnectionListUI> createState() =>
+      _NTTNPendingConnectionListUIState();
 }
 
-class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
+class _NTTNPendingConnectionListUIState
+    extends State<NTTNPendingConnectionListUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
   bool _pageLoading = true;
@@ -83,11 +84,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       final token = (authCubit.state as AuthAuthenticated).token;
       final apiService = await NTTNConnectionAPIService.create(token);
 
-      // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
           await apiService.fetchConnections();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -97,10 +96,9 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
-          _isFetched= true;
+          _isFetched = true;
         });
         return;
       }
@@ -122,7 +120,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
 
-      // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionsTile(
           Name: request['name'],
@@ -139,7 +136,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PendingConnectionDetailsPage(
+                builder: (context) => PendingConnectionDetails(
                   Name: request['name'],
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
@@ -162,7 +159,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
-      // Handle error as needed
     }
   }
 
@@ -190,7 +186,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
         if (records == null || records.isEmpty) {
           print('No records available');
           setState(() {
-            _isFetched= true;
+            _isFetched = true;
           });
           return;
         }
@@ -225,7 +221,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
 
         print('Current count: $currentCount');
 
-        // Map pending requests to widgets
         final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
           return ConnectionsTile(
             Name: request['name'],
@@ -242,7 +237,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PendingConnectionDetailsPage(
+                  builder: (context) => PendingConnectionDetails(
                     Name: request['name'],
                     OrganizationName: request['organization'],
                     MobileNo: request['mobile'],
@@ -299,7 +294,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       if (widget.shouldRefresh) {
         print('Page Loading Done!!');
       }
-      // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
         print('Page Loading');
         _pageLoading = false;
@@ -316,7 +310,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
       builder: (context, state) {
         if (state is AuthAuthenticated) {
           final userProfile = state.userProfile;
-          return InternetChecker(
+          return InternetConnectionChecker(
             child: Scaffold(
               key: _scaffoldKey,
               appBar: AppBar(
@@ -367,7 +361,6 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                           SizedBox(height: 10),
                           Text(
                             userProfile.name,
-                            /*userName,*/
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -400,7 +393,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NTTNDashboard(
+                                builder: (context) => NTTNDashboardUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -419,7 +412,8 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NTTNActiveConnectionList(
+                                builder: (context) =>
+                                    NTTNActiveConnectionListUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -437,7 +431,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         Navigator.pop(context);
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },
@@ -477,13 +471,13 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                         final authCubit = context.read<AuthCubit>();
-                        final token = (authCubit.state as AuthAuthenticated).token;
-                        var logoutApiService = await LogOutApiService.create(token);
+                        final token =
+                            (authCubit.state as AuthAuthenticated).token;
+                        var logoutApiService =
+                            await LogOutApiService.create(token);
 
-                        // Wait for authToken to be initialized
                         logoutApiService.authToken;
 
-                        // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
                             content: Text('Logged out'),
@@ -497,7 +491,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      Login())); // Close the drawer
+                                      LoginUI())); // Close the drawer
                         }
                       },
                     ),
@@ -620,7 +614,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      NTTNDashboard(shouldRefresh: true)));
+                                      NTTNDashboardUI(shouldRefresh: true)));
                         });
                       },
                       child: Container(
@@ -655,7 +649,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return SearchUser();
+                            return SearchUI();
                           },
                         ));
                       },
@@ -699,7 +693,7 @@ class _NTTNPendingConnectionListState extends State<NTTNPendingConnectionList> {
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },

@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling API requests related to full dashboard items from BCC connection.
+/// A service class for interacting with the BCC Full Connection API.
+///
+/// This class is responsible for fetching full dashboard items from a specified
+/// URL using a GET request.
+///
+/// **Actions:**
+/// - [fetchFullDashboardItems]: Sends a GET request to the specified [url]
+///   and returns the response data as a map.
+///
+/// **Variables:**
+/// - [authToken]: The authentication token used for API requests.
 class BCCFullConnectionAPIService {
   late final String authToken;
 
   BCCFullConnectionAPIService.create(this.authToken);
 
-  /// Fetches full dashboard items from the API using the provided URL.
-  ///
-  /// - Parameters:
-  ///   - [url]: The URL endpoint to fetch dashboard items from.
-  ///
-  /// - Returns: A future that completes with a `Map<String, dynamic>` containing the dashboard items.
-  ///
-  /// - Throws: An [Exception] if the token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchFullDashboardItems(String url) async {
     try {
       print('API Token :: $authToken');

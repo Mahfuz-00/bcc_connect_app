@@ -1,21 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for fetching connection data for a specific user.
+/// A service class for fetching connection data from the API.
+///
+/// This class is responsible for retrieving a list of connections for a specific user.
+///
+/// **Actions:**
+/// - [fetchConnectionData]: Sends a GET request to fetch connection data for the
+///   specified [userId] and returns the data as a map.
+///
+/// **Variables:**
+/// - [baseURL]: The base URL for the API.
+/// - [authToken]: The authentication token used for API requests.
 class FetchedConnectionListAPIService {
   final String baseURL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   FetchedConnectionListAPIService.create(this.authToken);
 
-  /// Fetches connection data for a specific user from the API.
-  ///
-  /// - Parameters:
-  ///   - [userId]: The ID of the user for whom to fetch connection data.
-  ///
-  /// - Returns: A future that completes with a [Map<String, dynamic>] containing the connection data.
-  ///
-  /// - Throws: An [Exception] if the token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchConnectionData(int userId) async {
     try {
       print('API Token :: $authToken');

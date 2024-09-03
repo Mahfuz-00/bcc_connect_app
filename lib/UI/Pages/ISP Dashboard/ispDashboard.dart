@@ -23,16 +23,16 @@ import '../Upgrade UI/upgradeUI.dart';
 ///
 /// This widget shows the number of active and pending connections, along
 /// with buttons that allow users to navigate to the full lists of each type.
-class ISPDashboard extends StatefulWidget {
+class ISPDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const ISPDashboard({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const ISPDashboardUI({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
-  State<ISPDashboard> createState() => _ISPDashboardState();
+  State<ISPDashboardUI> createState() => _ISPDashboardUIState();
 }
 
-class _ISPDashboardState extends State<ISPDashboard> {
+class _ISPDashboardUIState extends State<ISPDashboardUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<Widget> pendingConnectionRequests = [];
@@ -61,7 +61,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
     try {
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
-      final apiService = await APIServiceISPConnection.create(token);
+      final apiService = await ISPConnectionAPIService.create(token);
 
       // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
@@ -193,7 +193,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 final userProfile = state.userProfile;
-                return InternetChecker(
+                return InternetConnectionChecker(
                   child: PopScope(
                     canPop: false,
                     child: Scaffold(
@@ -323,7 +323,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ISPDashboard(
+                                        builder: (context) => ISPDashboardUI(
                                             shouldRefresh:
                                                 true))); // Close the drawer
                               },
@@ -343,7 +343,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            ConnectionForm()));
+                                            ConnectionFormUI()));
                               },
                             ),
                             Divider(),
@@ -378,7 +378,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ISPRequestList(
+                                        builder: (context) => ISPRequestListUI(
                                             shouldRefresh: true)));
                               },
                             ),
@@ -396,7 +396,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ISPReviewedList(
+                                        builder: (context) => ISPReviewedListUI(
                                             shouldRefresh: true)));
                               },
                             ),
@@ -413,7 +413,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                 Navigator.pop(context);
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return Information();
+                                    return InformationUI();
                                   },
                                 ));
                               },
@@ -477,7 +477,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              Login()));
+                                              LoginUI()));
                                 }
                               },
                             ),
@@ -534,7 +534,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                       showSeeAllButton: canFetchMorePending,
                                       seeAllButtonText: 'See All Request',
                                       nextPage:
-                                          ISPRequestList(shouldRefresh: true)),
+                                          ISPRequestListUI(shouldRefresh: true)),
                                   Divider(),
                                   const SizedBox(height: 25),
                                   Container(
@@ -560,7 +560,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                       seeAllButtonText:
                                           'See All Reviewed Request',
                                       nextPage:
-                                          ISPReviewedList(shouldRefresh: true)),
+                                          ISPReviewedListUI(shouldRefresh: true)),
                                   Divider(),
                                   const SizedBox(height: 30),
                                   Center(
@@ -590,7 +590,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      ConnectionForm()));
+                                                      ConnectionFormUI()));
                                         },
                                         child:
                                             const Text('New Connection Request',
@@ -622,7 +622,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            ISPDashboard(shouldRefresh: true)));
+                                            ISPDashboardUI(shouldRefresh: true)));
                               },
                               child: Container(
                                 width: screenWidth / 3,
@@ -658,7 +658,7 @@ class _ISPDashboardState extends State<ISPDashboard> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            ConnectionForm()));
+                                            ConnectionFormUI()));
                               },
                               behavior: HitTestBehavior.translucent,
                               child: Container(

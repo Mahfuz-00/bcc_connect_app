@@ -21,16 +21,16 @@ import '../Profile UI/profileUI.dart';
 ///
 /// This widget shows the number of active and pending connections,
 /// The active and pending connection counts are displayed prominently
-class BCCDashboard extends StatefulWidget {
+class BCCDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const BCCDashboard({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const BCCDashboardUI({Key? key, this.shouldRefresh = false}) : super(key: key);
 
   @override
-  State<BCCDashboard> createState() => _BCCDashboardState();
+  State<BCCDashboardUI> createState() => _BCCDashboardUIState();
 }
 
-class _BCCDashboardState extends State<BCCDashboard>
+class _BCCDashboardUIState extends State<BCCDashboardUI>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TabController _tabController;
@@ -64,7 +64,6 @@ class _BCCDashboardState extends State<BCCDashboard>
       final Map<String, dynamic> dashboardData =
           await apiService.fetchDashboardItems();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -91,7 +90,6 @@ class _BCCDashboardState extends State<BCCDashboard>
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
           _isFetched= true;
@@ -114,7 +112,6 @@ class _BCCDashboardState extends State<BCCDashboard>
         canFetchMorePending = false;
       }
 
-      // Extract notifications
       notifications = List<String>.from(records['notifications'] ?? []);
 
       print(records);
@@ -128,7 +125,6 @@ class _BCCDashboardState extends State<BCCDashboard>
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
       print('Accepted: $acceptedRequestsData');
 
-      // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return BCCConnectionsInfoCard(
           Name: request['name'],
@@ -141,7 +137,6 @@ class _BCCDashboardState extends State<BCCDashboard>
         );
       }).toList();
 
-      // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return BCCConnectionsInfoCard(
           Name: request['name'],
@@ -221,7 +216,6 @@ class _BCCDashboardState extends State<BCCDashboard>
 
         print('Current count: $currentCount');
 
-        // Map pending requests to widgets
         final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
           return BCCConnectionsInfoCard(
             Name: request['name'],
@@ -296,7 +290,6 @@ class _BCCDashboardState extends State<BCCDashboard>
         ? Scaffold(
             backgroundColor: Colors.white,
             body: Center(
-              // Show circular loading indicator while waiting
               child: CircularProgressIndicator(),
             ),
           )
@@ -304,7 +297,7 @@ class _BCCDashboardState extends State<BCCDashboard>
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 final userProfile = state.userProfile;
-                return InternetChecker(
+                return InternetConnectionChecker(
                   child: PopScope(
                     canPop: false,
                     child: Scaffold(
@@ -387,8 +380,8 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    width: 60, // Adjust width as needed
-                                    height: 60, // Adjust height as needed
+                                    width: 60,
+                                    height: 60,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
@@ -425,7 +418,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => BCCDashboard(
+                                        builder: (context) => BCCDashboardUI(
                                               shouldRefresh: true,
                                             )));
                               },
@@ -443,7 +436,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 Navigator.pop(context);
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return Information();
+                                    return InformationUI();
                                   },
                                 ));
                               },
@@ -488,10 +481,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 var logoutApiService =
                                     await LogOutApiService.create(token);
 
-                                // Wait for authToken to be initialized
                                 logoutApiService.authToken;
-
-                                // Call the signOut method on the instance
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
                                     content: Text('Logged out'),
@@ -506,7 +496,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              Login()));
+                                              LoginUI()));
                                 }
                               },
                             ),
@@ -617,9 +607,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                         EdgeInsets.symmetric(horizontal: 10),
                                     child: ListView.separated(
                                       physics: NeverScrollableScrollPhysics(),
-                                      // Prevent scrolling inside ListView
                                       shrinkWrap: true,
-                                      // Allow ListView to take only necessary height
                                       itemCount:
                                           pendingConnectionRequests.length + 1,
                                       itemBuilder: (context, index) {
@@ -664,7 +652,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => BCCDashboard(
+                                        builder: (context) => BCCDashboardUI(
                                               shouldRefresh: true,
                                             )));
                               },
@@ -700,7 +688,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return SearchUser();
+                                    return SearchUI();
                                   },
                                 ));
                               },
@@ -744,7 +732,7 @@ class _BCCDashboardState extends State<BCCDashboard>
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) {
-                                    return Information();
+                                    return InformationUI();
                                   },
                                 ));
                               },
@@ -1051,7 +1039,6 @@ class _BCCDashboardState extends State<BCCDashboard>
                             leading: Icon(Icons.info_outline),
                             title: Text(notifications[index]),
                             onTap: () {
-                              // Handle notification tap if necessary
                               overlayEntry.remove();
                             },
                           ),
@@ -1066,8 +1053,6 @@ class _BCCDashboardState extends State<BCCDashboard>
     );
 
     overlay?.insert(overlayEntry);
-
-    // Remove the overlay when tapping outside
     Future.delayed(Duration(seconds: 5), () {
       if (overlayEntry.mounted) {
         overlayEntry.remove();

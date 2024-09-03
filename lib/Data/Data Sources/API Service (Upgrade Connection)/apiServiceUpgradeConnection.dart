@@ -1,21 +1,25 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling connection upgrade operations.
+/// A service class for upgrading ISP connection requests through the API.
+///
+/// This class handles the process of updating an existing ISP connection
+/// by sending the necessary information to the server.
+///
+/// **Actions:**
+/// - [updateConnection]: Sends a POST request to update a connection with the
+///   specified [id], [requestType], [linkCapacity], and [remark]. It returns
+///   a [Map<String, dynamic>] containing the response data.
+///
+/// **Variables:**
+/// - [URL]: The base URL for the API.
+/// - [authToken]: The authorization token required for API access.
 class UpgradeConnectionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   UpgradeConnectionAPIService.create(this.authToken);
 
-  /// Updates the connection with the provided details.
-  ///
-  /// - Parameters:
-  ///   - `id`: The ID of the connection to be updated.
-  ///   - `requestType`: The type of request for the update.
-  ///   - `linkCapacity`: The new link capacity.
-  ///   - `remark`: Additional remarks about the update.
-  /// - Returns: A `Future` that completes with the JSON response from the server.
   Future<Map<String, dynamic>> updateConnection({
     required String id,
     required String requestType,

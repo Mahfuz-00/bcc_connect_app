@@ -5,13 +5,19 @@ import 'package:http/http.dart' as http;
 
 import '../../Models/loginmodels.dart';
 
-/// Service class for handling login operations.
-class APIService {
-  /// Logs in a user by sending a POST request to the login endpoint.
-  ///
-  /// - Parameter loginRequestModel: An instance of `LoginRequestmodel` containing login credentials.
-  /// - Returns: A `Future` that completes with an instance of `LoginResponseModel` on success, or `null` if the request fails.
-  /// - Throws: An [Exception] if the request fails or if an error occurs during the login process.
+/// A service class responsible for handling the login functionality.
+///
+/// This class provides methods to send login requests to the API and
+/// process the response. It uses the [LoginRequestmodel] for the request body
+/// and returns a [LoginResponseModel] on successful login.
+///
+/// **Variables:**
+/// - [url]: The API endpoint for the login request.
+///
+/// **Actions:**
+/// - [login]: Sends a POST request to the API with the user's login details.
+///   If the login is successful, it returns a [LoginResponseModel]. If not, it throws an [Exception].
+class LoginAPIService {
   Future<LoginResponseModel?> login(LoginRequestmodel loginRequestModel) async {
     try {
       String url = "https://bcc.touchandsolve.com/api/login";

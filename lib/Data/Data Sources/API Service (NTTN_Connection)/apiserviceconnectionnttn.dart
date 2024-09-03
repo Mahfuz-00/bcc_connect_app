@@ -1,17 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling NTTN connection-related operations.
+/// A service class for managing NTTN connection-related API requests.
+///
+/// This class is responsible for fetching connection data from the NTTN API.
+///
+/// **Actions:**
+/// - [fetchConnections]: Sends a GET request to retrieve connection data from
+///   the dashboard and returns the data as a map.
+///
+/// **Variables:**
+/// - [baseUrl]: The base URL for the NTTN API.
+/// - [authToken]: The authentication token used for API requests.
 class NTTNConnectionAPIService {
   final String baseUrl = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
   NTTNConnectionAPIService.create(this.authToken);
 
-  /// Fetches NTTN connection-related data from the server.
-  ///
-  /// - Returns: A `Future` that completes with a `Map<String, dynamic>` containing the JSON response.
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchConnections() async {
     try {
       print('API Token :: $authToken');

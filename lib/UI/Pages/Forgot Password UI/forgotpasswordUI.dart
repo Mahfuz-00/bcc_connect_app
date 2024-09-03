@@ -10,7 +10,7 @@ import 'otpverficationUI.dart';
 /// This StatefulWidget represents the Forgot Password screen of the application.
 /// It allows users to enter their email address to receive an OTP for password reset.
 ///
-/// It uses [APIServiceForgotPassword] to handle the API calls for sending the OTP.
+/// It uses [ForgotPasswordAPIService] to handle the API calls for sending the OTP.
 /// It utilizes the [EmailCubit] to manage the email state across the application.
 ///
 /// Key features include:
@@ -18,14 +18,14 @@ import 'otpverficationUI.dart';
 /// - Error handling for invalid email submissions
 /// - Loading indicator while the OTP is being sent
 /// - Navigation to OTP verification screen upon successful OTP request
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({Key? key}) : super(key: key);
+class ForgotPasswordUI extends StatefulWidget {
+  const ForgotPasswordUI({Key? key}) : super(key: key);
 
   @override
-  State<ForgotPassword> createState() => _ForgotPasswordState();
+  State<ForgotPasswordUI> createState() => _ForgotPasswordUIState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
+class _ForgotPasswordUIState extends State<ForgotPasswordUI> {
   late TextEditingController _emailController = TextEditingController();
   bool _isloading = false;
 
@@ -47,7 +47,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     setState(() {
       _isloading = true;
     });
-    final apiService = await APIServiceForgotPassword.create();
+    final apiService = await ForgotPasswordAPIService.create();
     apiService.sendForgotPasswordOTP(email).then((response) {
       if (response == 'Forget password otp send successfully') {
         // Navigate to OTP verification screen if OTP is sent successfully
@@ -56,7 +56,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         });
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => OPTVerfication()),
+          MaterialPageRoute(builder: (context) => OPTVerficationUI()),
         );
       } else if (response == 'validation error') {
         setState(() {
@@ -86,7 +86,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
@@ -244,7 +244,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => Login()));
+                                        builder: (context) => LoginUI()));
                               },
                               child: Text(
                                 'Login',

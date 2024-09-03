@@ -1,20 +1,37 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../Models/regionmodels.dart';
 
-/// Service class for handling region-related API operations.
-class APIServiceRegion {
+/// A service class for managing region-related API requests.
+///
+/// This class is responsible for fetching data related to divisions,
+/// districts, upazilas, unions, and NTTN providers from the API.
+///
+/// **Actions:**
+/// - [fetchDivisions]: Sends a GET request to retrieve a list of
+///   divisions and returns it as a list of [Division] objects.
+/// - [fetchDistricts]: Sends a GET request to retrieve a list of
+///   districts for a specific [divisionId] and returns it as a list of
+///   [District] objects.
+/// - [fetchUpazilas]: Sends a GET request to retrieve a list of
+///   upazilas for a specific [districtId] and returns it as a list of
+///   [Upazila] objects.
+/// - [fetchUnions]: Sends a GET request to retrieve a list of
+///   unions for a specific [upazilaId] and returns it as a list of
+///   [Union] objects.
+/// - [fetchNTTNProviders]: Sends a GET request to retrieve a list of
+///   NTTN providers for a specific [unionId] and returns it as a list of
+///   [NTTNProvider] objects.
+///
+/// **Variables:**
+/// - [URL]: The base URL for the API.
+/// - [authToken]: The authentication token used for API requests.
+class RegionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  APIServiceRegion.create(this.authToken);
+  RegionAPIService.create(this.authToken);
 
-  /// Fetches a list of divisions from the API.
-  ///
-  /// - Returns: A `Future` that completes with a list of `Division` objects.
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<List<Division>> fetchDivisions() async {
     try {
       print('API Token :: $authToken');

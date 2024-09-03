@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Search)/apiservicefilter.dart';
 import '../../../Data/Data Sources/API Service (Search)/apiservicesearchregion.dart';
@@ -11,26 +10,53 @@ import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/searchResultTile.dart';
 import '../../Widgets/templateerrorcontainer.dart';
 
-/// `SearchUser` is a StatefulWidget that provides a user interface for searching ISP connections
-/// based on various filters such as Division, District, Upazila, and Union.
+/// The [SearchUI] class provides a user interface for advanced searching
+/// of ISP connections based on geographic criteria. It allows users
+/// to select various filters such as divisions, districts, upazilas,
+/// and unions to refine their search.
 ///
-/// The widget interacts with the `APIServiceSearchRegion` to fetch location data and `SearchFilterAPIService`
-/// to filter ISP connections based on selected criteria. The user can select options from dropdowns to filter
-/// the search results, and the results are displayed in a list below the search button.
+/// It includes methods for fetching data from the API for each filter
+/// and manages the loading state and internet connection checks.
 ///
-/// Key functionalities:
-/// - Fetch and display divisions, districts, upazilas, and unions from the API service.
-/// - Allow the user to select a division, district, upazila, and union from dropdown menus.
-/// - Fetch and display NTTN provider information based on the selected filters.
-/// - Display the search results or an appropriate message if no results are found or an error occurs.
-class SearchUser extends StatefulWidget {
-  const SearchUser({super.key});
+/// Variables:
+/// - [selectedLinkCapacity]: Holds the capacity link selected by the user.
+/// - [_divisionID]: The ID of the selected division.
+/// - [_districtID]: The ID of the selected district.
+/// - [_upazilaID]: The ID of the selected upazila.
+/// - [_unionID]: The ID of the selected union.
+/// - [_NTTNID]: The NTTN ID associated with the connection.
+/// - [_NTTNPhoneNumber]: The phone number of the selected NTTN provider.
+/// - [_providerInfo]: Widget displaying provider information.
+///
+/// - [apiService]: Instance of [SearchRegionAPIService] for API interactions.
+///
+/// - [divisions]: List holding division search results.
+/// - [districts]: List holding district search results.
+/// - [upazilas]: List holding upazila search results.
+/// - [unions]: List holding union search results.
+/// - [nttnProviders]: List holding NTTN provider search results.
+/// - [selectedDivision]: The currently selected division.
+/// - [selectedDistrict]: The currently selected district.
+/// - [selectedUpazila]: The currently selected upazila.
+/// - [selectedUnion]: The currently selected union.
+/// - [selectedNTTNProvider]: The currently selected NTTN provider.
+/// - [_isLoading]: Indicates whether the overall loading state is active.
+/// - [_isInternetAvailable]: Indicates the internet connection status.
+/// - [isLoadingDivision]: Indicates whether divisions are being loaded.
+/// - [isLoadingDistrict]: Indicates whether districts are being loaded.
+/// - [isLoadingUpzila]: Indicates whether upazilas are being loaded.
+/// - [isLoadingUnion]: Indicates whether unions are being loaded.
+/// - [isLoadingNTTNProvider]: Indicates whether NTTN providers are being loaded.
+///
+/// - [filteredConnections]: List holding filtered connection results.
+class SearchUI extends StatefulWidget {
+  const SearchUI({super.key});
 
   @override
-  State<SearchUser> createState() => _SearchUserState();
+  State<SearchUI> createState() => _SearchUIState();
 }
 
-class _SearchUserState extends State<SearchUser> {
+class _SearchUIState extends State<SearchUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? selectedLinkCapacity;
   late String? _divisionID = '';
@@ -41,12 +67,12 @@ class _SearchUserState extends State<SearchUser> {
   late String _NTTNPhoneNumber;
   Widget? _providerInfo;
 
-  late APIServiceSearchRegion apiService;
+  late SearchRegionAPIService apiService;
 
-  Future<APIServiceSearchRegion> initializeApiService() async {
+  Future<SearchRegionAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
     final token = (authCubit.state as AuthAuthenticated).token;
-    apiService = await APIServiceSearchRegion.create(token);
+    apiService = await SearchRegionAPIService.create(token);
     return apiService;
   }
 
@@ -196,7 +222,7 @@ class _SearchUserState extends State<SearchUser> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(

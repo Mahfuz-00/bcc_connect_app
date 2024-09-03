@@ -1,20 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for handling password updates.
-class APIServicePasswordUpdate {
+/// A service class for updating the user's password via an API.
+///
+/// This class is responsible for handling the password update process,
+/// including validating the current password and sending the new password
+/// to the server.
+///
+/// **Variables:**
+/// - [baseURL]: The base API endpoint for the password update.
+/// - [authToken]: The authentication token used for API requests.
+///
+/// **Actions:**
+/// - [updatePassword]: Sends a POST request to update the user's password
+///   using the provided [currentPassword], [newPassword], and
+///   [passwordConfirmation].
+class PasswordUpdateAPIService {
   String baseURL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  APIServicePasswordUpdate.create(this.authToken);
+  PasswordUpdateAPIService.create(this.authToken);
 
-  /// Updates the user's password.
-  ///
-  /// - Parameters:
-  ///   - `currentPassword`: The current password of the user.
-  ///   - `newPassword`: The new password to set.
-  ///   - `passwordConfirmation`: Confirmation of the new password.
-  /// - Returns: A `Future` that completes with a message from the server.
   Future<String> updatePassword({
     required String currentPassword,
     required String newPassword,

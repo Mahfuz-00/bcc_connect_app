@@ -11,7 +11,7 @@
 ///
 /// **Actions:**
 /// - [toJson]: Converts the UserProfileUpdate object to a JSON map for API submission.
-class UserProfileUpdate {
+class UserProfileUpdateModel {
   /// Unique identifier for the user.
   final String userId;
 
@@ -38,7 +38,7 @@ class UserProfileUpdate {
   /// - [designation]: Job designation of the user.
   /// - [phone]: Contact phone number of the user.
   /// - [licenseNumber]: License number of the user.
-  UserProfileUpdate({
+  UserProfileUpdateModel({
     required this.userId,
     required this.name,
     required this.organization,

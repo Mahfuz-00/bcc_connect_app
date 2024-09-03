@@ -2,17 +2,33 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../Models/searchmodel.dart';
 
-/// Service class for handling search region operations.
-class APIServiceSearchRegion {
+/// A service class for managing API requests related to geographical regions.
+///
+/// This class is responsible for fetching data related to divisions, districts,
+/// upazilas, unions, and NTTN providers through GET requests to the API.
+///
+/// **Actions:**
+/// - [fetchDivisions]: Sends a GET request to retrieve a list of divisions
+///   and returns them as a [List<DivisionSearch>].
+/// - [fetchDistricts]: Sends a GET request to retrieve a list of districts
+///   for a given [divisionId] and returns them as a [List<DistrictSearch>].
+/// - [fetchUpazilas]: Sends a GET request to retrieve a list of upazilas
+///   for a given [districtId] and returns them as a [List<UpazilaSearch>].
+/// - [fetchUnions]: Sends a GET request to retrieve a list of unions for a
+///   given [upazilaId] and returns them as a [List<UnionSearch>].
+/// - [fetchNTTNProviders]: Sends a GET request to retrieve a list of NTTN
+///   providers for a given [unionId] and returns them as a
+///   [List<NTTNProviderResult>].
+///
+/// **Variables:**
+/// - [URL]: The base URL for the API.
+/// - [authToken]: The authentication token used for API requests.
+class SearchRegionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  APIServiceSearchRegion.create(this.authToken);
+  SearchRegionAPIService.create(this.authToken);
 
-  /// Fetches a list of divisions from the API.
-  ///
-  /// - Returns: A `Future` that completes with a list of `DivisionSearch` objects.
-  /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<DivisionSearch>> fetchDivisions() async {
     try {
       print('API Token :: $authToken');
@@ -51,12 +67,6 @@ class APIServiceSearchRegion {
     }
   }
 
-  /// Fetches a list of districts for a given division.
-  ///
-  /// - Parameters:
-  ///   - `divisionId` - The ID of the division.
-  /// - Returns: A `Future` that completes with a list of `DistrictSearch` objects.
-  /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<DistrictSearch>> fetchDistricts(String divisionId) async {
     print(divisionId);
     try {
@@ -92,12 +102,6 @@ class APIServiceSearchRegion {
     }
   }
 
-  /// Fetches a list of upazilas for a given district.
-  ///
-  /// - Parameters:
-  ///   - `districtId` - The ID of the district.
-  /// - Returns: A `Future` that completes with a list of `UpazilaSearch` objects.
-  /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<UpazilaSearch>> fetchUpazilas(String districtId) async {
     try {
       print('API Token :: $authToken');
@@ -132,12 +136,6 @@ class APIServiceSearchRegion {
     }
   }
 
-  /// Fetches a list of unions for a given upazila.
-  ///
-  /// - Parameters:
-  ///   - `upazilaId` - The ID of the upazila.
-  /// - Returns: A `Future` that completes with a list of `UnionSearch` objects.
-  /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<UnionSearch>> fetchUnions(String upazilaId) async {
     try {
       print('API Token :: $authToken');
@@ -174,12 +172,6 @@ class APIServiceSearchRegion {
     }
   }
 
-  /// Fetches a list of NTTN providers for a given union.
-  ///
-  /// - Parameters:
-  ///   - `unionId` - The ID of the union.
-  /// - Returns: A `Future` that completes with a list of `NTTNProviderResult` objects.
-  /// - Throws: An [Exception] if the request fails or if the response is invalid.
   Future<List<NTTNProviderResult>> fetchNTTNProviders(String unionId) async {
     try {
       print('API Token :: $authToken');

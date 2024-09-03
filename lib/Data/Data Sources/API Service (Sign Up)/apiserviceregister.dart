@@ -1,18 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
-
 import '../../Models/registermodels.dart';
 
-/// Service class for handling user registration operations.
-class APIServiceRegister {
-  /// Registers a new user with the given data and image file.
-  ///
-  /// - Parameters:
-  ///   - `registerRequestModel` - The user registration data.
-  ///   - `imageFile` - The profile image file to be uploaded.
-  /// - Returns: A `Future` that completes with a message indicating success or failure.
+/// A service class for handling user registration through API requests.
+///
+/// This class is responsible for sending a registration request, including
+/// user details and an optional profile image, to the server.
+///
+/// **Actions:**
+/// - [register]: Sends a POST request to register a new user with the provided
+///   [registerRequestModel] and an optional [imageFile]. It returns a
+///   [String] message indicating the result of the registration process.
+///
+/// **Variables:**
+/// - [url]: The endpoint URL for the registration API.
+class UserRegistrationAPIService {
   Future<String> register(
       RegisterRequestmodel registerRequestModel, File? imageFile) async {
     try {

@@ -1,24 +1,45 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 
-
-class Information extends StatefulWidget {
-  const Information({super.key});
+/// The [InformationUI] class represents the main UI screen that provides a comprehensive
+/// overview of the mobile application's functionalities, specifically designed for
+/// three types of users: ISPs, BCC administrators, and NTTN providers.
+///
+/// The UI includes the following components:
+///
+/// - [GlobalKey] _scaffoldKey: A key to uniquely identify the scaffold and allow for
+///   controlling the state of the scaffold widget.
+/// - [SingleTickerProviderStateMixin] is used for providing a single ticker for
+///   animations within this widget.
+/// - [MediaQuery] is used to retrieve the size of the screen, including
+///   [screenWidth] and [screenHeight].
+/// - [InternetConnectionChecker] wraps the entire scaffold to check and manage
+///   the internet connection status.
+/// - [AppBar] is set with a back button ([IconButton]) and a title 'Information'.
+/// - [SingleChildScrollView] ensures that the content is scrollable if the text
+///   exceeds the screen height.
+/// - [SafeArea] ensures that the content is displayed within the safe area, avoiding
+///   any overlap with system UI elements.
+/// - The UI content is structured using [Column], [Text], and [SizedBox] widgets,
+///   detailing the various functionalities for ISPs, BCC admins, and NTTN providers.
+/// - Each section provides detailed information regarding the operations available
+///   to each user type.
+class InformationUI extends StatefulWidget {
+  const InformationUI({super.key});
 
   @override
-  State<Information> createState() => _InformationState();
+  State<InformationUI> createState() => _InformationUIState();
 }
 
-class _InformationState extends State<Information> with SingleTickerProviderStateMixin{
+class _InformationUIState extends State<InformationUI> with SingleTickerProviderStateMixin{
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(

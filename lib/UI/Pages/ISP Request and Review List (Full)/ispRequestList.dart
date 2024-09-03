@@ -17,7 +17,7 @@ import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import 'ispReviewedList.dart';
 
-/// The [ISPRequestList] widget displays a list of active
+/// The [ISPRequestListUI] widget displays a list of active
 /// connection requests for the user. It allows users to view, tap on,
 /// and navigate to details about each connection request.
 ///
@@ -49,17 +49,17 @@ import 'ispReviewedList.dart';
 ///   to navigate to a detailed view of the selected connection request.
 /// - The app bar includes options for navigation and updates the UI
 ///   based on user interactions.
-class ISPRequestList extends StatefulWidget {
+class ISPRequestListUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const ISPRequestList({Key? key, this.shouldRefresh = false})
+  const ISPRequestListUI({Key? key, this.shouldRefresh = false})
       : super(key: key);
 
   @override
-  State<ISPRequestList> createState() => _ISPRequestListState();
+  State<ISPRequestListUI> createState() => _ISPRequestListUIState();
 }
 
-class _ISPRequestListState extends State<ISPRequestList> {
+class _ISPRequestListUIState extends State<ISPRequestListUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Widget> pendingConnectionRequests = [];
   bool _isFetched = false;
@@ -76,13 +76,11 @@ class _ISPRequestListState extends State<ISPRequestList> {
     try {
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
-      final apiService = await APIServiceISPConnection.create(token);
+      final apiService = await ISPConnectionAPIService.create(token);
 
-      // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
           await apiService.fetchDashboardData();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -90,10 +88,9 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
-          _isFetched= true;
+          _isFetched = true;
         });
         return;
       }
@@ -123,7 +120,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
       print('Current count: $initialLoadCount');
 
-      // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
@@ -142,7 +138,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
-      // Handle error as needed
     }
   }
 
@@ -156,7 +151,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
       if (url != '' && url.isNotEmpty) {
         final authCubit = context.read<AuthCubit>();
         final token = (authCubit.state as AuthAuthenticated).token;
-        final apiService = await APIServiceISPConnectionFull.create(token);
+        final apiService = await ISPConnectionFullAPIService.create(token);
         final Map<String, dynamic> dashboardData =
             await apiService.fetchFullData(url);
 
@@ -202,8 +197,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
 
         print('Current count: $currentCount');
 
-        final List<Widget> pendingWidgets = pendingRequestsData
-            .map((request) {
+        final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
           return ConnectionRequestInfoCard(
             ConnectionType: request['connection_type'],
             NTTNProvider: request['provider'],
@@ -258,7 +252,6 @@ class _ISPRequestListState extends State<ISPRequestList> {
       if (widget.shouldRefresh) {
         print('Page Loading Done!!');
       }
-      // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
         print('Page Loading');
         _pageLoading = false;
@@ -281,7 +274,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
       builder: (context, state) {
         if (state is AuthAuthenticated) {
           final userProfile = state.userProfile;
-          return InternetChecker(
+          return InternetConnectionChecker(
             child: Scaffold(
               backgroundColor: Colors.grey[100],
               key: _scaffoldKey,
@@ -365,7 +358,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPDashboard(
+                                builder: (context) => ISPDashboardUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -383,7 +376,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ConnectionForm()));
+                                builder: (context) => ConnectionFormUI()));
                       },
                     ),
                     Divider(),
@@ -400,7 +393,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPReviewedList(
+                                builder: (context) => ISPReviewedListUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -418,7 +411,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.pop(context);
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },
@@ -458,13 +451,13 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                         final authCubit = context.read<AuthCubit>();
-                        final token = (authCubit.state as AuthAuthenticated).token;
-                        var logoutApiService = await LogOutApiService.create(token);
+                        final token =
+                            (authCubit.state as AuthAuthenticated).token;
+                        var logoutApiService =
+                            await LogOutApiService.create(token);
 
-                        // Wait for authToken to be initialized
                         logoutApiService.authToken;
 
-                        // Call the signOut method on the instance
                         if (await logoutApiService.signOut()) {
                           const snackBar = SnackBar(
                             content: Text('Logged out'),
@@ -477,8 +470,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      Login()));
+                                  builder: (context) => LoginUI()));
                         }
                       },
                     ),
@@ -599,7 +591,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ISPDashboard(
+                                builder: (context) => ISPDashboardUI(
                                       shouldRefresh: true,
                                     )));
                       },
@@ -636,7 +628,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ConnectionForm()));
+                                builder: (context) => ConnectionFormUI()));
                       },
                       behavior: HitTestBehavior.translucent,
                       child: Container(
@@ -678,7 +670,7 @@ class _ISPRequestListState extends State<ISPRequestList> {
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) {
-                            return Information();
+                            return InformationUI();
                           },
                         ));
                       },

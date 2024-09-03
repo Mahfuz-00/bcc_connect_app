@@ -1,22 +1,33 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-
 import '../Login UI/loginUI.dart';
 import '../Sign Up UI/signupUI.dart';
 
-/// The splash screen widget for the application.
+/// [SplashScreenUI] is a StatefulWidget that represents the initial splash screen
+/// of the application. It displays the app logo, title, and buttons for login and registration.
+/// The screen incorporates animations for smooth transitions during the splash process.
 ///
-/// This screen is displayed when the app launches and shows a loading animation while checking for internet connectivity.
-/// It includes an animated logo, title text, and buttons to navigate to the login and sign-up screens.
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+/// Variables:
+/// - [animationController]: Controls the animation timing and state.
+/// - [FadeAnimation]: Animation for fading effects.
+/// - [SlideAnimation]: Animation for slide transitions.
+/// - [animatedpadding]: Animation for padding effects.
+/// - [_isLoading]: A boolean that indicates the loading state.
+///
+/// Actions:
+/// - [initState]: Initializes the animation controller and starts animations.
+/// - [_checkInternetConnection]: Checks the internet connectivity status.
+/// - [dispose]: Disposes of the animation controller to free resources.
+/// - [build]: Builds the widget tree, including animations and layout.
+class SplashScreenUI extends StatefulWidget {
+  const SplashScreenUI({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreenUI> createState() => _SplashScreenUIState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenUIState extends State<SplashScreenUI>
     with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   late Animation<double> FadeAnimation;
@@ -138,7 +149,7 @@ class _SplashScreenState extends State<SplashScreen>
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Login(),
+                                  builder: (context) => LoginUI(),
                                 ));
                           },
                           style: ElevatedButton.styleFrom(
@@ -166,7 +177,7 @@ class _SplashScreenState extends State<SplashScreen>
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Signup()));
+                                    builder: (context) => SignupUI()));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,

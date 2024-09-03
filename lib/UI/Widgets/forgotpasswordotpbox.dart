@@ -12,12 +12,12 @@ import 'package:flutter/services.dart';
 /// - [currentFocusNode]: A [FocusNode] for managing the focus state of this field.
 /// - [nextFocusNode]: An optional [FocusNode] to move the focus to the next field
 ///   when a digit is entered.
-class ForgotPasswordCustomTextFormField extends StatelessWidget {
+class CustomTextBox extends StatelessWidget {
   final TextEditingController textController;
   final FocusNode currentFocusNode;
   final FocusNode? nextFocusNode;
 
-  const ForgotPasswordCustomTextFormField({
+  const CustomTextBox({
     Key? key,
     required this.textController,
     required this.currentFocusNode,

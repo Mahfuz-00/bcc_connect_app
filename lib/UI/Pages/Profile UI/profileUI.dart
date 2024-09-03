@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,23 +16,43 @@ import '../../Bloc/auth_cubit.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 import 'passwordChange.dart';
 
-/// ProfileUI is a widget that displays the user's profile information,
-/// including their name, email, profile picture, and a brief bio.
+/// [ProfileUI] is a stateful widget that displays and manages the user's profile information.
+/// It allows for viewing and editing personal details like name, organization, designation,
+/// phone number, and profile picture. It also supports changing the user's password and
+/// navigating back to the home screen.
 ///
-/// The widget retrieves user data from a provided UserProfile model and
-/// displays it in a user-friendly layout. It allows users to update
-/// their profile picture and edit their personal information through
-/// navigation to an EditProfile screen. The layout is responsive and
-/// adapts to various screen sizes, ensuring an optimal user experience.
+/// *Variables*:
+/// - [shouldRefresh] (bool): Determines if the profile should be refreshed on initialization.
 ///
-/// Key Features:
-/// - Displays user's profile picture, name, email, and bio.
-/// - Allows users to tap on the profile picture to change it.
-/// - Includes an 'Edit' button to navigate to the profile editing screen.
+/// [ProfileUI] has an associated state [_ProfileUIState] that manages the following:
 ///
-/// Parameters:
-/// - [UserProfile userProfile]: The user profile data to be displayed.
-/// - [Function onEdit]: Callback function to be executed when the
+/// *Controllers*:
+/// - [_fullNameController], [_organizationController], [_designationController],
+///   [_phoneController], [_passwordController], [_licenseNumberController] (TextEditingController):
+///   Controllers to handle input fields for corresponding profile details.
+///
+/// *Profile Information*:
+/// - [userProfile] (UserProfileFull?): Stores the fetched profile data.
+/// - [name] (String): Stores the user's name.
+/// - [type] (String): Stores the type of user (e.g., ISP staff).
+/// - [isloaded] (bool): Flag to check if the profile has been loaded.
+/// - [_pageLoading] (bool): Flag to manage the page loading state.
+///
+/// *Keys*:
+/// - [globalKey] (GlobalKey<ScaffoldState>): Key for the scaffold to manage UI state.
+/// - [globalfromkey] (GlobalKey<FormState>): Key for the form state.
+///
+/// *Image Selection*:
+/// - [_imageFile] (File?): Stores the selected image file.
+///
+/// *Dropdown Items*:
+/// - [types] (List<DropdownMenuItem<String>>): List of options for the user type.
+///
+/// The [_fetchUserProfile] method is used to fetch and populate the user profile details, while
+/// the [_selectImage] method allows users to pick an image from their gallery.
+///
+/// The UI includes a profile overview with editable fields, a profile picture, and navigation
+/// options. A floating action button is provided to trigger the profile editing functionality.
 class ProfileUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -44,8 +63,6 @@ class ProfileUI extends StatefulWidget {
 }
 
 class _ProfileUIState extends State<ProfileUI> {
-  bool _isObscuredPassword = true;
-  bool _isObscuredConfirmPassword = true;
   late TextEditingController _fullNameController;
   late TextEditingController _organizationController;
   late TextEditingController _designationController;
@@ -72,7 +89,7 @@ class _ProfileUIState extends State<ProfileUI> {
   Future<void> _fetchUserProfile() async {
     final authCubit = context.read<AuthCubit>();
     final token = (authCubit.state as AuthAuthenticated).token;
-    final apiService = await APIProfileService();
+    final apiService = await ProfileAPIService();
     final profile = await apiService.fetchUserProfile(token);
     userProfile = UserProfileFull.fromJson(profile);
     name = userProfile!.name;
@@ -136,7 +153,7 @@ class _ProfileUIState extends State<ProfileUI> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return InternetChecker(
+    return InternetConnectionChecker(
       child: PopScope(
         canPop: true,
         child: Scaffold(
@@ -292,7 +309,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    PasswordChange(),
+                                                    PasswordChangeUI(),
                                               ));
                                         },
                                         child: Container(
@@ -358,7 +375,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ISPDashboard(
+                                          builder: (context) => ISPDashboardUI(
                                               shouldRefresh: true)),
                                     );
                                   },
@@ -603,7 +620,7 @@ class _ProfileUIState extends State<ProfileUI> {
                       print(userProfile!.phone);
                       print(userProfile!.license);
 
-                      final userProfileUpdate = UserProfileUpdate(
+                      final userProfileUpdate = UserProfileUpdateModel(
                         userId: userProfile!.id.toString(),
                         name: _fullNameController.text,
                         organization: _organizationController.text,
@@ -613,7 +630,7 @@ class _ProfileUIState extends State<ProfileUI> {
                       );
                       final authCubit = context.read<AuthCubit>();
                       final token = (authCubit.state as AuthAuthenticated).token;
-                      final apiService = await APIServiceUpdateUser.create(token);
+                      final apiService = await UpdateUserAPIService.create(token);
                       final result =
                           await apiService.updateUserProfile(userProfileUpdate);
                       Navigator.of(context).pop();
@@ -764,7 +781,7 @@ class _ProfileUIState extends State<ProfileUI> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
-      final apiService = await APIProfilePictureUpdate.create(token);
+      final apiService = await ProfilePictureUpdateAPIService.create(token);
       print(imageFile.path);
       print(imageFile);
       final response = await apiService.updateProfilePicture(image: imageFile);

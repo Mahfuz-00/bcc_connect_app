@@ -1,18 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service class for managing ISP connection-related API requests.
-class APIServiceISPConnection {
+/// A service class for fetching ISP dashboard data from the API.
+///
+/// This class is responsible for retrieving dashboard data for ISP connections.
+///
+/// **Actions:**
+/// - [fetchDashboardData]: Sends a GET request to fetch the dashboard data
+///   and returns the data as a map.
+///
+/// **Variables:**
+/// - [URL]: The base URL for the API.
+/// - [authToken]: The authentication token used for API requests.
+class ISPConnectionAPIService {
   final String URL = 'https://bcc.touchandsolve.com/api';
   late final String authToken;
 
-  APIServiceISPConnection.create(this.authToken);
+  ISPConnectionAPIService.create(this.authToken);
 
-  /// Fetches dashboard data from the API.
-  ///
-  /// - Returns: A future that completes with a map of the dashboard data.
-  ///
-  /// - Throws: An [Exception] if the authentication token is empty or if the request fails.
   Future<Map<String, dynamic>> fetchDashboardData() async {
     try {
       print('API Token :: $authToken');
