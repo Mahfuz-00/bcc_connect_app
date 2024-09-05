@@ -19,10 +19,35 @@ import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import '../Upgrade UI/upgradeUI.dart';
 
-/// A dashboard widget that displays active and pending ISP connections.
+/// ISPDashboardUI is a StatefulWidget that represents the ISP dashboard,
+/// providing an overview of connection requests and user profile information.
 ///
-/// This widget shows the number of active and pending connections, along
-/// with buttons that allow users to navigate to the full lists of each type.
+/// This widget serves as the main interface for ISPs, enabling them to:
+/// - View and manage pending and accepted connection requests.
+/// - Display user profile information, including name, organization, and photo.
+/// - Fetch connection request data asynchronously and handle loading states.
+///
+/// **Variables:**
+/// - [shouldRefresh]: Determines whether the dashboard needs to be refreshed.
+/// - [_scaffoldKey]: Manages the state of the Scaffold for UI updates.
+/// - [pendingConnectionRequests]: List of Widgets representing pending connection requests.
+/// - [acceptedConnectionRequests]: List of Widgets representing accepted connection requests.
+/// - [_isFetched]: Indicates if the connection request data has been successfully fetched.
+/// - [_isLoading]: Indicates if data is currently being loaded from the API.
+/// - [userName]: Holds the user's name retrieved from their profile.
+/// - [organizationName]: Holds the user's organization name.
+/// - [photoUrl]: Holds the URL of the user's profile photo.
+/// - [ID]: Contains the user's ID for identification purposes.
+/// - [Token]: Holds the user's authentication token for API calls.
+/// - [notifications]: A list of strings holding user notifications.
+/// - [pendingPagination]: Manages pagination for pending connection requests.
+/// - [acceptedPagination]: Manages pagination for accepted connection requests.
+/// - [canFetchMorePending]: Indicates if more pending requests can be loaded.
+/// - [canFetchMoreAccepted]: Indicates if more accepted requests can be loaded.
+///
+/// **Methods:**
+/// - [fetchConnectionRequests]: Asynchronously fetches connection requests from the API,
+///   updating the state of the dashboard accordingly.
 class ISPDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -34,13 +59,11 @@ class ISPDashboardUI extends StatefulWidget {
 
 class _ISPDashboardUIState extends State<ISPDashboardUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   List<Widget> pendingConnectionRequests = [];
   List<Widget> acceptedConnectionRequests = [];
   bool _isFetched = false;
   bool _isLoading = false;
   bool _pageLoading = true;
-
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
@@ -52,7 +75,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
   List<String> notifications = [];
   late Pagination pendingPagination;
   late Pagination acceptedPagination;
-
   bool canFetchMorePending = false;
   bool canFetchMoreAccepted = false;
 
@@ -62,12 +84,9 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
       final apiService = await ISPConnectionAPIService.create(token);
-
-      // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
           await apiService.fetchDashboardData();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -75,7 +94,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
           _isFetched= true;
@@ -85,24 +103,17 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
 
       final Map<String, dynamic> pagination = records['pagination'] ?? {};
       print(pagination);
-
       pendingPagination = Pagination.fromJson(pagination['pending']);
       acceptedPagination = Pagination.fromJson(pagination['accepted']);
       print(pendingPagination.nextPage);
       print(acceptedPagination.nextPage);
-
       canFetchMorePending = pendingPagination.canFetchNext;
       canFetchMoreAccepted = acceptedPagination.canFetchNext;
-
-      // Set isLoading to true while fetching data
       setState(() {
         _isLoading = true;
       });
 
-      // Extract notifications
       notifications = List<String>.from(records['notifications'] ?? []);
-
-      // Simulate fetching data for 5 seconds
       await Future.delayed(Duration(seconds: 1));
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
@@ -116,7 +127,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
             'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
       }
 
-      // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
@@ -129,7 +139,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
         );
       }).toList();
 
-      // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
@@ -150,7 +159,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
     } catch (e) {
       print('Error fetching connection requests: $e');
       _isFetched = true;
-      // Handle error as needed
     }
   }
 
@@ -163,13 +171,10 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
         fetchConnectionRequests();
       }
     });
-
     Future.delayed(Duration(seconds: 3), () {
       if (widget.shouldRefresh && !_isFetched) {
         print('Page Loading Done!!');
-        // connectionRequests = [];
       }
-      // After 5 seconds, set isLoading to false to stop showing the loading indicator
       setState(() {
         print('Page Loading');
         _pageLoading = false;
@@ -325,7 +330,7 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                                     MaterialPageRoute(
                                         builder: (context) => ISPDashboardUI(
                                             shouldRefresh:
-                                                true))); // Close the drawer
+                                                true)));
                               },
                             ),
                             Divider(),
@@ -458,18 +463,13 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                                 final token = (authCubit.state as AuthAuthenticated).token;
                                 var logoutApiService =
                                     await LogOutApiService.create(token);
-
-                                // Wait for authToken to be initialized
                                 logoutApiService.authToken;
-
-                                // Call the signOut method on the instance
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
                                     content: Text('Logged out'),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-
                                   context.read<AuthCubit>().logout();
                                   final emailCubit = EmailCubit();
                                   emailCubit.clearEmail();
@@ -513,7 +513,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                                   ),
                                   Container(
                                     child: const Text('Request List',
-                                        //key: requestTextKey,
                                         textAlign: TextAlign.left,
                                         style: TextStyle(
                                           color: Colors.black,
@@ -823,8 +822,6 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
     );
 
     overlay?.insert(overlayEntry);
-
-    // Remove the overlay when tapping outside
     Future.delayed(Duration(seconds: 5), () {
       if (overlayEntry.mounted) {
         overlayEntry.remove();

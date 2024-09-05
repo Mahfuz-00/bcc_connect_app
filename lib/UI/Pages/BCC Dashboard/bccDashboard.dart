@@ -17,10 +17,51 @@ import '../Search UI/searchUI.dart';
 import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 
-/// A dashboard widget that displays pending NTTN connections.
+/// The [BCCDashboardUI] class represents the dashboard interface for the BCC Admin application.
+/// It manages the display of user connection requests, including pending and accepted requests,
+/// and handles data fetching and loading states. The UI is built using Flutter widgets and is
+/// integrated with Bloc for state management.
 ///
-/// This widget shows the number of active and pending connections,
-/// The active and pending connection counts are displayed prominently
+/// **Main Variables:**
+/// - [shouldRefresh]: A boolean indicating if the dashboard should refresh.
+/// - [scaffoldKey]: A GlobalKey for the scaffold, used to control the drawer.
+/// - [tabController]: A TabController for managing tabs in the dashboard.
+/// - [isLoading]: A boolean indicating if data is currently being loaded.
+/// - [userName]: A string holding the user's name.
+/// - [organizationName]: A string holding the user's organization name.
+/// - [photoUrl]: A string holding the user's photo URL.
+/// - [pendingConnectionRequests]: A list of widgets representing pending connection requests.
+/// - [acceptedConnectionRequests]: A list of widgets representing accepted connection requests.
+/// - [isFetched]: A boolean indicating if the data has been fetched.
+/// - [pageLoading]: A boolean indicating if the page is loading.
+/// - [adslCountPending]: An integer holding the count of pending ADSL requests.
+/// - [adslCountActive]: An integer holding the count of active ADSL requests.
+/// - [sblCountPending]: An integer holding the count of pending SBL requests.
+/// - [sblCountActive]: An integer holding the count of active SBL requests.
+/// - [notifications]: A list of strings holding notification messages.
+/// - [scrollController]: A ScrollController for managing scroll events.
+/// - [tabScrollController]: A ScrollController for managing tab scroll events.
+/// - [pendingPagination]: A Pagination object for handling pagination of requests.
+/// - [canFetchMorePending]: A boolean indicating if more pending requests can be fetched.
+/// - [url]: A string holding the URL for fetching more connection requests.
+///
+/// **Key Methods:**
+/// - [fetchConnections]: Fetches connection requests from the API.
+/// - [fetchMoreConnectionRequests]: Fetches additional connection requests when scrolling to the bottom.
+/// - [buildSegmentedButton] creates a segmented control with two options
+///   ([SecureNetBangladeshLimited] and [AdvancedDigitalSolutionLimited]). Parameters:
+///   - [selectedIndex]: The index of the currently selected segment.
+///   - [onValueChanged]: Callback function triggered when the segment changes.
+///
+/// - [buildContentForSecureNetBangladeshLimited] displays the total active and
+///   pending connections for 'SecureNet Bangladesh Limited'. Parameters:
+///   - [sblCountActive]: The count of active connections (can be null).
+///   - [sblCountPending]: The count of pending connections (can be null).
+///
+/// - [buildContentForAdvancedDigitalSolutionLimited] displays the total active
+///   and pending connections for 'Advanced Digital Solution Limited'. Parameters:
+///   - [adslCountActive]: The count of active connections (can be null).
+///   - [adslCountPending]: The count of pending connections (can be null).
 class BCCDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -35,7 +76,6 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TabController _tabController;
   bool _isLoading = false;
-
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
@@ -475,12 +515,10 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                 );
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
-
                                 final authCubit = context.read<AuthCubit>();
                                 final token = (authCubit.state as AuthAuthenticated).token;
                                 var logoutApiService =
                                     await LogOutApiService.create(token);
-
                                 logoutApiService.authToken;
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
@@ -488,7 +526,6 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-
                                   context.read<AuthCubit>().logout();
                                   final emailCubit = EmailCubit();
                                   emailCubit.clearEmail();

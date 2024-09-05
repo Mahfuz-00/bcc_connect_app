@@ -20,12 +20,34 @@ import '../Login UI/loginUI.dart';
 import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 
-/// A dashboard widget that displays active and pending NTTN connections.
+/// This class represents the user interface for the NTTN Dashboard.
+/// It handles the display of user information, connection status,
+/// and notifications. It uses a [SingleChildScrollView] for scrollable content
+/// and a [Container] to manage padding and background color.
+/// The main elements include:
 ///
-/// This widget shows the number of active and pending connections, along
-/// with buttons that allow users to navigate to the full lists of each type.
-/// The active and pending connection counts are displayed prominently, with
-/// the ability to view all connections for both statuses.
+/// - [userProfile]: An object that holds user information, particularly the user's name.
+/// - [CountActive]: An integer representing the total number of active connections.
+/// - [CountPending]: An integer representing the total number of new pending connections.
+/// - [screenWidth]: A double representing the width of the device screen, used for responsive design.
+/// - [screenHeight]: A double representing the height of the device screen, used for responsive design.
+/// - [_isLoading]: A boolean indicating whether data is currently being loaded.
+/// - [_isFetched]: A boolean indicating whether data has been successfully fetched.
+/// - [pendingConnectionRequests]: A list of requests for pending connections.
+/// - [acceptedConnectionRequests]: A list of requests for active connections.
+/// - [canFetchMorePending]: A boolean indicating whether more pending requests can be fetched.
+/// - [canFetchMoreAccepted]: A boolean indicating whether more accepted requests can be fetched.
+/// - [fetchConnectionApplications]: A method that fetches connection application data.
+/// - [NTTNPendingConnectionListUI]: A widget representing the UI for pending connections.
+/// - [NTTNActiveConnectionListUI]: A widget representing the UI for active connections.
+/// - [notifications]: A list of notification messages displayed in the overlay.
+/// - [_showNotificationsOverlay]: A method that displays a notification overlay.
+///
+/// The UI includes:
+/// - A welcome message displaying the user's name.
+/// - A section showing connection status with counts for active and pending connections.
+/// - Two [RequestsWidget] components displaying pending and active connection requests.
+/// - A bottom navigation bar with options to navigate to Home, Search, and Information screens.
 class NTTNDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
@@ -61,12 +83,9 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
       final apiService = await NTTNConnectionAPIService.create(token);
-
-      // Fetch dashboard data
       final Map<String, dynamic> dashboardData =
           await apiService.fetchConnections();
       if (dashboardData == null || dashboardData.isEmpty) {
-        // No data available or an error occurred
         print(
             'No data available or error occurred while fetching dashboard data');
         return;
@@ -85,7 +104,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
-        // No records available
         print('No records available');
         setState(() {
           _isFetched = true;
@@ -104,7 +122,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       canFetchMorePending = pendingPagination.canFetchNext;
       canFetchMoreAccepted = acceptedPagination.canFetchNext;
 
-      // Extract notifications
       notifications = List<String>.from(records['notifications'] ?? []);
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
@@ -120,7 +137,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
             'Pending Request at index $index: ${acceptedRequestsData[index]}\n');
       }
 
-      // Map pending requests to widgets
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionsTile(
           Name: request['name'],
@@ -154,7 +170,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
         );
       }).toList();
 
-      // Map accepted requests to widgets
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionsTile(
           Name: request['name'],
@@ -197,7 +212,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
     } catch (e) {
       print('Error fetching connection requests: $e');
       _isFetched = true;
-      // Handle error as needed
     }
   }
 
@@ -206,7 +220,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
     super.initState();
     if (widget.shouldRefresh) {
       Future.delayed(Duration(seconds: 5), () {
-        // After 5 seconds, set isLoading to false to stop showing the loading indicator
         setState(() {
           _pageLoading = false;
         });
@@ -321,8 +334,8 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    width: 60, // Adjust width as needed
-                                    height: 60, // Adjust height as needed
+                                    width: 60,
+                                    height: 60,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
@@ -362,7 +375,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                     MaterialPageRoute(
                                         builder: (context) => NTTNDashboardUI(
                                               shouldRefresh: true,
-                                            ))); // Close the drawer
+                                            )));
                               },
                             ),
                             Divider(),
@@ -457,25 +470,19 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                 );
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
-
                                 final authCubit = context.read<AuthCubit>();
                                 final token =
                                     (authCubit.state as AuthAuthenticated)
                                         .token;
                                 var logoutApiService =
                                     await LogOutApiService.create(token);
-
-                                // Wait for authToken to be initialized
                                 logoutApiService.authToken;
-
-                                // Call the signOut method on the instance
                                 if (await logoutApiService.signOut()) {
                                   const snackBar = SnackBar(
                                     content: Text('Logged out'),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-
                                   context.read<AuthCubit>().logout();
                                   final emailCubit = EmailCubit();
                                   emailCubit.clearEmail();
@@ -874,7 +881,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                             leading: Icon(Icons.info_outline),
                             title: Text(notifications[index]),
                             onTap: () {
-                              // Handle notification tap if necessary
                               overlayEntry.remove();
                             },
                           ),
@@ -889,8 +895,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
     );
 
     overlay?.insert(overlayEntry);
-
-    // Remove the overlay when tapping outside
     Future.delayed(Duration(seconds: 5), () {
       if (overlayEntry.mounted) {
         overlayEntry.remove();
