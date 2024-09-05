@@ -109,16 +109,6 @@ class PendingConnectionDetails extends StatelessWidget {
               const SizedBox(
                 height: 40,
               ),
-              Center(
-                child: CircleAvatar(
-                  child: Icon(
-                    Icons.person,
-                    size: 65,
-                  ),
-                  radius: 50,
-                ),
-              ),
-              SizedBox(height: 20),
               _buildRow('Name', Name),
               Divider(),
               _buildRow('Organiztion Name', OrganizationName),

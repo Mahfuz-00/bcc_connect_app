@@ -102,17 +102,6 @@ class ActiveConnectionDetails extends StatelessWidget {
               const SizedBox(
                 height: 40, // Adds spacing between the title and avatar.
               ),
-              Center(
-                child: CircleAvatar(
-                  child: Icon(
-                    Icons.person, // Icon displayed in the center of the avatar.
-                    size: 65,
-                  ),
-                  radius: 50, // Sets the size of the avatar.
-                ),
-              ),
-              SizedBox(height: 20),
-              // Adds spacing between the avatar and the details.
               _buildRow('Name', Name),
               Divider(),
               // Divider line between rows.

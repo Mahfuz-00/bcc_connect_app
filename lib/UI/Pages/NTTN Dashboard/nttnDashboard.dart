@@ -105,9 +105,9 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
-        setState(() {
+     /*   setState(() {
           _isFetched = true;
-        });
+        });*/
         return;
       }
 

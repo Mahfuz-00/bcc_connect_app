@@ -93,9 +93,9 @@ class _ISPReviewedListUIState extends State<ISPReviewedListUI> {
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
-        setState(() {
+       /* setState(() {
           _isFetched = true;
-        });
+        });*/
         return;
       }
 

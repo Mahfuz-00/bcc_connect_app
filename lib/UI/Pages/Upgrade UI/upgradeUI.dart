@@ -591,7 +591,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                           GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(
                                 builder: (context) {
                                   return UpgradeUI(shouldRefresh: true);
                                 },
