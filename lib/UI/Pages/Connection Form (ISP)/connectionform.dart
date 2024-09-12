@@ -820,12 +820,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
         if (response != null && response == "Connection Request Submitted") {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
                 builder: (context) => ISPDashboardUI(
                       shouldRefresh: true,
                     )),
+                  (route) => false
           );
           const snackBar = SnackBar(
             content: Text('Request Submitted!'),

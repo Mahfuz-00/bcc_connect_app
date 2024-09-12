@@ -200,7 +200,7 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                 final userProfile = state.userProfile;
                 return InternetConnectionChecker(
                   child: PopScope(
-                    canPop: false,
+               /*     canPop: false,*/
                     child: Scaffold(
                       backgroundColor: Colors.grey[100],
                       key: _scaffoldKey,

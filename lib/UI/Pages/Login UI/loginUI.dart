@@ -270,35 +270,39 @@ class _LoginUIState extends State<LoginUI> {
                                   print('Checking $userType');
                                   if (userType != null) {
                                     if (userType == 'isp_staff') {
-                                      Navigator.pushReplacement(
+                                      Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => ISPDashboardUI(
                                                 shouldRefresh: true)),
+                                              (route) => false
                                       );
                                     }
                                     else if (userType == 'bcc_staff') {
-                                      Navigator.pushReplacement(
+                                      Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => BCCDashboardUI(
                                                 shouldRefresh: true)),
+                                              (route) => false
                                       );
                                     }
                                     else if (userType == 'nttn_sbl_staff') {
-                                      Navigator.pushReplacement(
+                                      Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => NTTNDashboardUI(
                                                 shouldRefresh: true)),
+                                              (route) => false
                                       );
                                     }
                                     else if (userType == 'nttn_adsl_staff') {
-                                      Navigator.pushReplacement(
+                                      Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => NTTNDashboardUI(
                                                 shouldRefresh: true)),
+                                              (route) => false
                                       );
                                     } else{
                                       String errorMessage = 'Invalid User!, Please enter a valid email address.';

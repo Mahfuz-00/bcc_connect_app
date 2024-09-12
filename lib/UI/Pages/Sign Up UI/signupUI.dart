@@ -138,7 +138,7 @@ class _SignupUIState extends State<SignupUI> {
     final screenHeight = MediaQuery.of(context).size.height;
     return InternetConnectionChecker(
       child: PopScope(
-        canPop: false,
+      /*  canPop: false,*/
         child: Scaffold(
           backgroundColor: Colors.grey[100],
           body: SingleChildScrollView(
