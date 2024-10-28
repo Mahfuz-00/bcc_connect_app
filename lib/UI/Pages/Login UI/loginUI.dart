@@ -410,7 +410,7 @@ class _LoginUIState extends State<LoginUI> {
         }
       } catch (e) {
         String errorMessage = 'Incorrect Email and Password.';
-        if (e.toString().contains('Invalid User')) {
+        if (e.toString().contains('The selected email is invalid.')) {
           errorMessage = 'Invalid User!, Please enter a valid email address.';
         } else if (e.toString().contains('Invalid Credentials')) {
           errorMessage = 'Incorrect Password. Try again.';
