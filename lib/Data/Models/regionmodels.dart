@@ -10,7 +10,7 @@
 /// - [url]: URL associated with the division.
 class Division {
   /// Unique identifier for the division.
-  final String id;
+  final int id;
 
   /// Name of the division in English.
   final String name;
@@ -64,7 +64,7 @@ class Division {
 /// - [name]: Name of the district.
 class District {
   /// Unique identifier for the district.
-  final String id;
+  final int id;
 
   /// Name of the district.
   final String name;
@@ -96,7 +96,7 @@ class District {
 /// - [name]: Name of the upazila.
 class Upazila {
   /// Unique identifier for the upazila.
-  final String id;
+  final int id;
 
   /// Name of the upazila.
   final String name;
@@ -128,7 +128,7 @@ class Upazila {
 /// - [name]: Name of the union.
 class Union {
   /// Unique identifier for the union.
-  final String id;
+  final int id;
 
   /// Name of the union.
   final String name;

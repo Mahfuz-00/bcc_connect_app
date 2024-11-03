@@ -39,6 +39,7 @@ class SearchRegionAPIService {
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
+        print(data['records']);
         if (data != null && data.containsKey('records')) {
           final List<dynamic> records = data['records'] ?? [];
           //print('Record:: $records');
@@ -105,6 +106,7 @@ class SearchRegionAPIService {
   Future<List<UpazilaSearch>> fetchUpazilas(String districtId) async {
     try {
       print('API Token :: $authToken');
+      print(districtId);
       final response = await http.get(Uri.parse('$URL/upazila/$districtId'),
           headers: {'Authorization': 'Bearer $authToken'});
       if (response.statusCode == 200) {

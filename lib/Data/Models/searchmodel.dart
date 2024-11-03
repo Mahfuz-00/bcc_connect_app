@@ -10,7 +10,7 @@
 /// - [url]: URL associated with the division.
 class DivisionSearch {
   /// Unique identifier for the division.
-  final String id;
+  final int id;
 
   /// Name of the division.
   final String name;
@@ -58,7 +58,7 @@ class DivisionSearch {
 /// - [name]: Name of the district.
 class DistrictSearch {
   /// Unique identifier for the district.
-  final String id;
+  final int id;
 
   /// Name of the district.
   final String name;
@@ -90,7 +90,7 @@ class DistrictSearch {
 /// - [name]: Name of the upazila.
 class UpazilaSearch {
   /// Unique identifier for the upazila.
-  final String id;
+  final int id;
 
   /// Name of the upazila.
   final String name;
@@ -122,7 +122,7 @@ class UpazilaSearch {
 /// - [name]: Name of the union.
 class UnionSearch {
   /// Unique identifier for the union.
-  final String id;
+  final int id;
 
   /// Name of the union.
   final String name;
@@ -156,7 +156,7 @@ class UnionSearch {
 /// - [phonenumber]: Phone number of the NTTN provider.
 class NTTNProviderResult {
   /// Unique identifier for the NTTN provider.
-  final String id;
+  final int id;
 
   /// Name of the NTTN provider.
   final String name;

@@ -359,8 +359,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                       (division) => division.name == newValue,
                                     );
                                     if (selectedDivisionObject != null) {
-                                      _divisionID = selectedDivisionObject.id;
-                                      fetchDistricts(selectedDivisionObject.id);
+                                      _divisionID = selectedDivisionObject.id.toString();
+                                      fetchDistricts(selectedDivisionObject.id.toString());
                                     }
                                   }
                                 },
@@ -414,9 +414,9 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                       (district) => district.name == newValue,
                                     );
                                     if (selectedDistrictObject != null) {
-                                      _districtID = selectedDistrictObject.id;
+                                      _districtID = selectedDistrictObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchUpazilas(selectedDistrictObject.id);
+                                      fetchUpazilas(selectedDistrictObject.id.toString());
                                     }
                                   }
                                 },
@@ -468,9 +468,9 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                       (upazila) => upazila.name == newValue,
                                     );
                                     if (selectedUpazilaObject != null) {
-                                      _upazilaID = selectedUpazilaObject.id;
+                                      _upazilaID = selectedUpazilaObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchUnions(selectedUpazilaObject.id);
+                                      fetchUnions(selectedUpazilaObject.id.toString());
                                     }
                                   }
                                 },
@@ -522,10 +522,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                       (union) => union.name == newValue,
                                     );
                                     if (selectedUnionObject != null) {
-                                      _unionID = selectedUnionObject.id;
+                                      _unionID = selectedUnionObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
                                       fetchNTTNProviders(
-                                          selectedUnionObject.id);
+                                          selectedUnionObject.id.toString());
                                     }
                                   }
                                 },

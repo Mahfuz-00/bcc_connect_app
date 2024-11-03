@@ -315,9 +315,9 @@ class _SearchUIState extends State<SearchUI> {
                                       (division) => division.name == newValue,
                                     );
                                     if (selectedDivisionObject != null) {
-                                      _divisionID = selectedDivisionObject.id;
+                                      _divisionID = selectedDivisionObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchDistricts(selectedDivisionObject.id);
+                                      fetchDistricts(selectedDivisionObject.id.toString());
                                     }
                                   }
                                 },
@@ -374,8 +374,8 @@ class _SearchUIState extends State<SearchUI> {
                                       (district) => district.name == newValue,
                                     );
                                     if (selectedDistrictObject != null) {
-                                      _districtID = selectedDistrictObject.id;
-                                      fetchUpazilas(selectedDistrictObject.id);
+                                      _districtID = selectedDistrictObject.id.toString();
+                                      fetchUpazilas(selectedDistrictObject.id.toString());
                                     }
                                   }
                                 },
@@ -431,9 +431,9 @@ class _SearchUIState extends State<SearchUI> {
                                       (upazila) => upazila.name == newValue,
                                     );
                                     if (selectedUpazilaObject != null) {
-                                      _upazilaID = selectedUpazilaObject.id;
+                                      _upazilaID = selectedUpazilaObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchUnions(selectedUpazilaObject.id);
+                                      fetchUnions(selectedUpazilaObject.id.toString());
                                     }
                                   }
                                 },
@@ -487,7 +487,7 @@ class _SearchUIState extends State<SearchUI> {
                                       (union) => union.name == newValue,
                                     );
                                     if (selectedUnionObject != null) {
-                                      _unionID = selectedUnionObject.id;
+                                      _unionID = selectedUnionObject.id.toString();
                                     }
                                   }
                                 },
