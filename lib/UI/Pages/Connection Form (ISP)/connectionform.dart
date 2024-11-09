@@ -6,7 +6,9 @@ import '../../../Data/Data Sources/API Service (Regions)/apiserviceregions.dart'
 import '../../../Data/Models/connectionmodel.dart';
 import '../../../Data/Models/regionmodels.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
+import '../../Widgets/dropdownservice.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
 /// [ConnectionFormUI] is a [StatefulWidget] that represents a form for users to fill out
@@ -62,12 +64,17 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? selectedLinkCapacity;
   late ConnectionRequestModel _connectionRequest;
+  late TextEditingController _fullNameController = TextEditingController();
+  late TextEditingController _addressController = TextEditingController();
+  late TextEditingController _latitudeLongtitudeController =
+      TextEditingController();
   late String _requestType = '';
   late String _divisionID;
   late String _districtID;
   late String _upazilaID;
   late String _unionID;
   late int _NTTNID = 0;
+  String _selectedService = '';
   late String _NTTNPhoneNumber;
   late String _linkCapacityID = '';
   late TextEditingController _remark = TextEditingController();
@@ -76,6 +83,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   final Set<String> linkCapacityOptions = {'5 MB', '10 MB', '15 MB', 'Others'};
 
   late RegionAPIService apiService;
+
+  List<String> dropdownItems = [
+    "Data" , "Core" , "Co Location"
+  ];
 
   Future<RegionAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
@@ -277,413 +288,481 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
             child: Container(
               color: Colors.grey[100],
               padding: EdgeInsets.symmetric(vertical: 30),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text('Connection Request',
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default')),
-                    SizedBox(height: 5),
-                    Text('Please fill up the form',
-                        style: TextStyle(
-                            color: Color.fromRGBO(143, 150, 158, 1),
-                            fontSize: 18,
-                            fontFamily: 'default')),
-                    SizedBox(height: 40),
-                    /*     Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text('Request Type',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default')),
-                        ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Connection Request',
+                      style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'default')),
+                  SizedBox(height: 5),
+                  Text('Please fill up the form',
+                      style: TextStyle(
+                          color: Color.fromRGBO(143, 150, 158, 1),
+                          fontSize: 18,
+                          fontFamily: 'default')),
+                  SizedBox(height: 40),
+                  /*     Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('Request Type',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default')),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
+                    child: RadioListTileGroup(
+                      options: ['New Connection', 'Upgrade', 'Others'],
+                      selectedOption: _requestType,
+                      onChanged: (String value) {
+                        setState(() {
+                          _requestType = value ?? '';
+                          print('Selected option: $_requestType');
+                        });
+                        // You can perform any other actions here based on the selected option
+                      },
+                    ),
+                  ),
+                  */
+                  CustomTextInput(
+                    controller: _fullNameController,
+                    label: 'Full Name',
+                    validator: (input) {
+                      if (input == null || input.isEmpty) {
+                        return 'Please enter your full name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 5),
+                  CustomTextInput(
+                    controller: _addressController,
+                    label: 'Organization Address',
+                    validator: (input) {
+                      if (input == null || input.isEmpty) {
+                        return 'Please enter your organization name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 5),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 100,
+                    child: TextFormField(
+                      controller: _latitudeLongtitudeController,
+                      decoration: InputDecoration(
+                        labelText: 'Latitude and Longitude',
+                        hintText: 'e.g., 12.3456, 65.4321',
+                        helperText: 'Enter in format: latitude, longitude',
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelStyle: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontFamily: 'default',
+                        ),
+                        border: const OutlineInputBorder(
+                            borderRadius:
+                            const BorderRadius.all(Radius.circular(10))),
                       ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
-                      child: RadioListTileGroup(
-                        options: ['New Connection', 'Upgrade', 'Others'],
-                        selectedOption: _requestType,
-                        onChanged: (String value) {
-                          setState(() {
-                            _requestType = value ?? '';
-                            print('Selected option: $_requestType');
-                          });
-                          // You can perform any other actions here based on the selected option
-                        },
+                      style: const TextStyle(
+                        color: Color.fromRGBO(143, 150, 158, 1),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
                       ),
+                      validator: (input) {
+                        if (input == null || input.isEmpty) {
+                          return 'Please enter latitude and longitude';
+                        }
+
+                        // Regular expression to validate latitude, longitude format
+                        final latLongRegExp = RegExp(
+                            r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
+
+                        if (!latLongRegExp.hasMatch(input)) {
+                          return 'Invalid format. Use "latitude, longitude"';
+                        }
+
+                        return null;
+                      },
                     ),
-                    */
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(left: 10, top: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Stack(
-                            children: [
-                              DropdownFormField(
-                                hintText: 'Select Division',
-                                dropdownItems: divisions
-                                    .map((division) => division.name)
-                                    .toList(),
-                                initialValue: selectedDivision,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    selectedDistrict = null;
-                                    selectedUpazila = null;
-                                    selectedUnion = null;
-                                    selectedNTTNProvider = null;
-                                    selectedDivision = newValue;
-                                  });
-                                  if (newValue != null) {
-                                    // Find the selected division object
-                                    Division selectedDivisionObject =
-                                        divisions.firstWhere(
-                                      (division) => division.name == newValue,
-                                    );
-                                    if (selectedDivisionObject != null) {
-                                      _divisionID = selectedDivisionObject.id.toString();
-                                      fetchDistricts(selectedDivisionObject.id.toString());
-                                    }
-                                  }
-                                },
-                              ),
-                              if (isLoadingDivision)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        const Color.fromRGBO(25, 192, 122, 1),
-                                  ),
-                                ),
-                            ],
-                          )),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(left: 10, top: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Stack(
-                            children: [
-                              DropdownFormField(
-                                hintText: 'Select District',
-                                dropdownItems: districts
-                                    .map((district) => district.name)
-                                    .toList(),
-                                initialValue: selectedDistrict,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    print(selectedDistrict);
-                                    selectedUpazila = null;
-                                    selectedUnion = null;
-                                    selectedNTTNProvider = null;
-                                    selectedDistrict = newValue;
-                                  });
-                                  if (newValue != null) {
-                                    // Find the selected division object
-                                    District selectedDistrictObject =
-                                        districts.firstWhere(
-                                      (district) => district.name == newValue,
-                                    );
-                                    if (selectedDistrictObject != null) {
-                                      _districtID = selectedDistrictObject.id.toString();
-                                      // Pass the ID of the selected division to fetchDistricts
-                                      fetchUpazilas(selectedDistrictObject.id.toString());
-                                    }
-                                  }
-                                },
-                              ),
-                              if (isLoadingDistrict)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        const Color.fromRGBO(25, 192, 122, 1),
-                                  ),
-                                ),
-                            ],
-                          )),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(left: 10, top: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Stack(
-                            children: [
-                              DropdownFormField(
-                                hintText: 'Select Upazila',
-                                dropdownItems: upazilas
-                                    .map((upazila) => upazila.name)
-                                    .toList(),
-                                initialValue: selectedUpazila,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    selectedUnion = null; // Reset
-                                    selectedNTTNProvider = null; // Reset
-                                    selectedUpazila = newValue;
-                                  });
-                                  if (newValue != null) {
-                                    // Find the selected division object
-                                    Upazila selectedUpazilaObject =
-                                        upazilas.firstWhere(
-                                      (upazila) => upazila.name == newValue,
-                                    );
-                                    if (selectedUpazilaObject != null) {
-                                      _upazilaID = selectedUpazilaObject.id.toString();
-                                      // Pass the ID of the selected division to fetchDistricts
-                                      fetchUnions(selectedUpazilaObject.id.toString());
-                                    }
-                                  }
-                                },
-                              ),
-                              if (isLoadingUpzila)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        const Color.fromRGBO(25, 192, 122, 1),
-                                  ),
-                                ),
-                            ],
-                          )),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(left: 10, top: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Stack(
-                            children: [
-                              DropdownFormField(
-                                hintText: 'Select Union',
-                                dropdownItems:
-                                    unions.map((union) => union.name).toList(),
-                                initialValue: selectedUnion,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    selectedNTTNProvider = null; // Reset
-                                    selectedUnion = newValue;
-                                    isSelected = true;
-                                    print(isSelected);
-                                  });
-                                  if (newValue != null) {
-                                    // Find the selected division object
-                                    Union selectedUnionObject =
-                                        unions.firstWhere(
-                                      (union) => union.name == newValue,
-                                    );
-                                    if (selectedUnionObject != null) {
-                                      _unionID = selectedUnionObject.id.toString();
-                                      // Pass the ID of the selected division to fetchDistricts
-                                      fetchNTTNProviders(
-                                          selectedUnionObject.id.toString());
-                                    }
-                                  }
-                                },
-                              ),
-                              if (isLoadingUnion)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        const Color.fromRGBO(25, 192, 122, 1),
-                                  ),
-                                ),
-                            ],
-                          )),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    if (isSelected == true) ...[
-                      if (providerValues.isNotEmpty) ...[
-                        if (providerValues == 'zero') ...[
-                          Builder(
-                            builder: (context) {
-                              Future.delayed(Duration.zero, () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'There are no NTTN Providers in this area'),
-                                  ),
-                                );
-                              });
-                              return SizedBox
-                                  .shrink(); // Returning an empty SizedBox as a placeholder
-                            },
-                          ),
-                        ] else if (providerValues != 'zero') ...[
-                          Material(
-                            elevation: 5,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: screenWidth * 0.9,
-                              height: screenHeight * 0.075,
-                              child: Stack(
-                                children: [
-                                  TextFormField(
-                                    initialValue: providerValues,
-                                    readOnly: true,
-                                    style: const TextStyle(
-                                      color: Color.fromRGBO(143, 150, 158, 1),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'default',
-                                    ),
-                                    decoration: InputDecoration(
-                                      labelText: '    NTTN Provider',
-                                      labelStyle: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        fontFamily: 'default',
-                                      ),
-                                      alignLabelWithHint: true,
-                                      //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
-                                      border: const OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(10)),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ]
-                      ]
-                    ],
-                    SizedBox(
-                      height: 10,
-                    ),
-                    if (selectedNTTNProvider != null)
-                      Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                            width: screenWidth * 0.9,
-                            height: screenHeight * 0.075,
-                            padding: EdgeInsets.only(left: 10, top: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: DropdownFormField(
-                              hintText: 'Select Link Capacity',
-                              dropdownItems: linkCapacityOptions.toList(),
-                              initialValue: selectedLinkCapacity,
+                  ),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: DropdownFormField(
+                          hintText: 'Select Service Type',
+                          dropdownItems: dropdownItems.toList(),
+                          initialValue: selectedLinkCapacity,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedLinkCapacity = newValue;
+                              _linkCapacityID = newValue ?? '';
+                              print(_linkCapacityID);
+                            });
+                          },
+                        )),
+                  ),
+                  const SizedBox(height: 5),
+                  Text('Select Location:',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                          color: Color.fromRGBO(143, 150, 158, 1),
+                          fontSize: 18,
+                          fontFamily: 'default')),
+                  SizedBox(height: 10),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Stack(
+                          children: [
+                            DropdownFormField(
+                              hintText: 'Select Division',
+                              dropdownItems: divisions
+                                  .map((division) => division.name)
+                                  .toList(),
+                              initialValue: selectedDivision,
                               onChanged: (newValue) {
                                 setState(() {
-                                  selectedLinkCapacity = newValue;
-                                  _linkCapacityID = newValue ?? '';
-                                  print(_linkCapacityID);
+                                  selectedDistrict = null;
+                                  selectedUpazila = null;
+                                  selectedUnion = null;
+                                  selectedNTTNProvider = null;
+                                  selectedDivision = newValue;
                                 });
+                                if (newValue != null) {
+                                  // Find the selected division object
+                                  Division selectedDivisionObject =
+                                      divisions.firstWhere(
+                                    (division) => division.name == newValue,
+                                  );
+                                  if (selectedDivisionObject != null) {
+                                    _divisionID =
+                                        selectedDivisionObject.id.toString();
+                                    fetchDistricts(
+                                        selectedDivisionObject.id.toString());
+                                  }
+                                }
                               },
-                            )),
-                      ),
-                    if (_linkCapacityID == 'Others') ...[
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Container(
-                        width: screenWidth * 0.9,
-                        height: screenWidth * 0.2,
-                        child: TextFormField(
-                          controller: _linkcapcitycontroller,
-                          validator: (input) {
-                            if (input == null || input.isEmpty) {
-                              return 'Please enter your required link capacity';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: Color.fromRGBO(143, 150, 158, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            labelText: 'Enter your required Link Capacity',
-                            labelStyle: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'default',
                             ),
-                            alignLabelWithHint: true,
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 80),
-                            border: const OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10))),
+                            if (isLoadingDivision)
+                              Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                ),
+                              ),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Stack(
+                          children: [
+                            DropdownFormField(
+                              hintText: 'Select District',
+                              dropdownItems: districts
+                                  .map((district) => district.name)
+                                  .toList(),
+                              initialValue: selectedDistrict,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  print(selectedDistrict);
+                                  selectedUpazila = null;
+                                  selectedUnion = null;
+                                  selectedNTTNProvider = null;
+                                  selectedDistrict = newValue;
+                                });
+                                if (newValue != null) {
+                                  // Find the selected division object
+                                  District selectedDistrictObject =
+                                      districts.firstWhere(
+                                    (district) => district.name == newValue,
+                                  );
+                                  if (selectedDistrictObject != null) {
+                                    _districtID =
+                                        selectedDistrictObject.id.toString();
+                                    // Pass the ID of the selected division to fetchDistricts
+                                    fetchUpazilas(
+                                        selectedDistrictObject.id.toString());
+                                  }
+                                }
+                              },
+                            ),
+                            if (isLoadingDistrict)
+                              Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                ),
+                              ),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Stack(
+                          children: [
+                            DropdownFormField(
+                              hintText: 'Select Upazila',
+                              dropdownItems: upazilas
+                                  .map((upazila) => upazila.name)
+                                  .toList(),
+                              initialValue: selectedUpazila,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedUnion = null; // Reset
+                                  selectedNTTNProvider = null; // Reset
+                                  selectedUpazila = newValue;
+                                });
+                                if (newValue != null) {
+                                  // Find the selected division object
+                                  Upazila selectedUpazilaObject =
+                                      upazilas.firstWhere(
+                                    (upazila) => upazila.name == newValue,
+                                  );
+                                  if (selectedUpazilaObject != null) {
+                                    _upazilaID =
+                                        selectedUpazilaObject.id.toString();
+                                    // Pass the ID of the selected division to fetchDistricts
+                                    fetchUnions(
+                                        selectedUpazilaObject.id.toString());
+                                  }
+                                }
+                              },
+                            ),
+                            if (isLoadingUpzila)
+                              Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                ),
+                              ),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Stack(
+                          children: [
+                            DropdownFormField(
+                              hintText: 'Select Union',
+                              dropdownItems:
+                                  unions.map((union) => union.name).toList(),
+                              initialValue: selectedUnion,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedNTTNProvider = null; // Reset
+                                  selectedUnion = newValue;
+                                  isSelected = true;
+                                  print(isSelected);
+                                });
+                                if (newValue != null) {
+                                  // Find the selected division object
+                                  Union selectedUnionObject =
+                                      unions.firstWhere(
+                                    (union) => union.name == newValue,
+                                  );
+                                  if (selectedUnionObject != null) {
+                                    _unionID =
+                                        selectedUnionObject.id.toString();
+                                    // Pass the ID of the selected division to fetchDistricts
+                                    fetchNTTNProviders(
+                                        selectedUnionObject.id.toString());
+                                  }
+                                }
+                              },
+                            ),
+                            if (isLoadingUnion)
+                              Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                ),
+                              ),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  if (isSelected == true) ...[
+                    if (providerValues.isNotEmpty) ...[
+                      if (providerValues == 'zero') ...[
+                        Builder(
+                          builder: (context) {
+                            Future.delayed(Duration.zero, () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'There are no NTTN Providers in this area'),
+                                ),
+                              );
+                            });
+                            return SizedBox
+                                .shrink(); // Returning an empty SizedBox as a placeholder
+                          },
+                        ),
+                      ] else if (providerValues != 'zero') ...[
+                        Material(
+                          elevation: 5,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: screenWidth * 0.9,
+                            height: screenHeight * 0.075,
+                            decoration: BoxDecoration(
+                              color: Colors.white, // Background color
+                              borderRadius: BorderRadius.circular(5.0), // Rounded corners
+                            ),
+                            child: Stack(
+                              children: [
+                                TextFormField(
+                                  initialValue: providerValues,
+                                  readOnly: true,
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(143, 150, 158, 1),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: '    NTTN Provider',
+                                    labelStyle: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'default',
+                                    ),
+                                    alignLabelWithHint: true,
+                                    //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
+                                    border: const OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ]
+                    ]
+                  ],
+                  if (selectedNTTNProvider != null)
                     SizedBox(
-                      height: 25,
+                      height: 10,
+                    ),
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'Select Link Capacity',
+                            dropdownItems: linkCapacityOptions.toList(),
+                            initialValue: selectedLinkCapacity,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedLinkCapacity = newValue;
+                                _linkCapacityID = newValue ?? '';
+                                print(_linkCapacityID);
+                              });
+                            },
+                          )),
+                    ),
+                  if (_linkCapacityID == 'Others') ...[
+                    SizedBox(
+                      height: 15,
                     ),
                     Container(
                       width: screenWidth * 0.9,
-                      height: 120,
+                      height: screenWidth * 0.2,
                       child: TextFormField(
-                        controller: _remark,
-                        enabled: selectedLinkCapacity != null,
+                        controller: _linkcapcitycontroller,
                         validator: (input) {
                           if (input == null || input.isEmpty) {
-                            return 'Please enter some remarks';
+                            return 'Please enter your required link capacity';
                           }
                           return null;
                         },
@@ -696,7 +775,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
-                          labelText: 'Remarks',
+                          labelText: 'Enter your required Link Capacity',
                           labelStyle: TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
@@ -705,51 +784,91 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           ),
                           alignLabelWithHint: true,
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 145),
+                              horizontal: 10, vertical: 80),
                           border: const OutlineInputBorder(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10))),
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Center(
-                      child: Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(10),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(25, 192, 122, 1),
-                            fixedSize: Size(
-                                MediaQuery.of(context).size.width * 0.9,
-                                MediaQuery.of(context).size.height * 0.08),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: _isButtonEnabled
-                              ? () {
-                                  _connectionRequestForm();
-                                }
-                              : null,
-                          child: const Text('Submit',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default',
-                              )),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    )
                   ],
-                ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    width: screenWidth * 0.9,
+                    height: 120,
+                    child: TextFormField(
+                      controller: _remark,
+                      enabled: selectedLinkCapacity != null,
+                      validator: (input) {
+                        if (input == null || input.isEmpty) {
+                          return 'Please enter some remarks';
+                        }
+                        return null;
+                      },
+                      style: const TextStyle(
+                        color: Color.fromRGBO(143, 150, 158, 1),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                      ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Remarks',
+                        labelStyle: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontFamily: 'default',
+                        ),
+                        alignLabelWithHint: true,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 145),
+                        border: const OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10))),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Center(
+                    child: Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromRGBO(25, 192, 122, 1),
+                          fixedSize: Size(
+                              MediaQuery.of(context).size.width * 0.9,
+                              MediaQuery.of(context).size.height * 0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: _isButtonEnabled
+                            ? () {
+                                _connectionRequestForm();
+                              }
+                            : null,
+                        child: const Text('Submit',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default',
+                            )),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  )
+                ],
               ),
             ),
           ),
@@ -821,13 +940,12 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         }
         if (response != null && response == "Connection Request Submitted") {
           Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ISPDashboardUI(
-                      shouldRefresh: true,
-                    )),
-                  (route) => false
-          );
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ISPDashboardUI(
+                        shouldRefresh: true,
+                      )),
+              (route) => false);
           const snackBar = SnackBar(
             content: Text('Request Submitted!'),
           );
@@ -852,14 +970,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     print(linkCapacityIsValid);
 
     // Check if all fields are valid
-    final allFieldsAreValid =
-        divisionIdIsValid &&
-            districtIdIsValid &&
-            upazilaIdIsValid &&
-            unionIdIsValid &&
-            nttNIdIsValid &&
-            linkCapacityIsValid &&
-            remarkIsValid;
+    final allFieldsAreValid = divisionIdIsValid &&
+        districtIdIsValid &&
+        upazilaIdIsValid &&
+        unionIdIsValid &&
+        nttNIdIsValid &&
+        linkCapacityIsValid &&
+        remarkIsValid;
 
     return allFieldsAreValid;
   }

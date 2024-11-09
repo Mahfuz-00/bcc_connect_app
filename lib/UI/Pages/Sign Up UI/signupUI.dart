@@ -50,6 +50,8 @@ class _SignupUIState extends State<SignupUI> {
   late RegisterRequestmodel _registerRequest;
   late TextEditingController _fullNameController;
   late TextEditingController _organizationController;
+  late TextEditingController _organizationTypeController;
+  late TextEditingController _addressController;
   late TextEditingController _designationController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
@@ -116,6 +118,8 @@ class _SignupUIState extends State<SignupUI> {
       confirmPassword: '',
       userType: '',
       licenseNumber: '',
+      organiazationType: '',
+      organiazationAddress: '',
     );
     _fullNameController = TextEditingController();
     _organizationController = TextEditingController();
@@ -125,6 +129,8 @@ class _SignupUIState extends State<SignupUI> {
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
     _licenseNumberController = TextEditingController();
+    _organizationTypeController = TextEditingController();
+    _addressController = TextEditingController();
   }
 
   @override
@@ -193,6 +199,28 @@ class _SignupUIState extends State<SignupUI> {
                               CustomTextInput(
                                 controller: _organizationController,
                                 label: 'Organization Name',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your organization name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 5),
+                              CustomTextInput(
+                                controller: _organizationTypeController,
+                                label: 'Organization Type',
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your organization name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 5),
+                              CustomTextInput(
+                                controller: _addressController,
+                                label: 'Organization Address',
                                 validator: (input) {
                                   if (input == null || input.isEmpty) {
                                     return 'Please enter your organization name';
@@ -302,7 +330,8 @@ class _SignupUIState extends State<SignupUI> {
                                   //onSaved: (input) => _registerRequest.password = input!,
                                   validator: (input) {
                                     if (input!.length < 8) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         SnackBar(
                                           content: Text(
                                               "Password should be more than 7 characters"),
@@ -313,7 +342,8 @@ class _SignupUIState extends State<SignupUI> {
                                     } else if (!RegExp(
                                             r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]')
                                         .hasMatch(input)) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         SnackBar(
                                           content: Text(
                                               "Password must include an uppercase letter, a lowercase letter, a number, and a special character."),
@@ -594,6 +624,8 @@ class _SignupUIState extends State<SignupUI> {
         confirmPassword: _confirmPasswordController.text,
         userType: _selectedUserType,
         licenseNumber: _licenseNumberController.text,
+        organiazationAddress: _addressController.text,
+        organiazationType: _organizationTypeController.text,
       );
 
       final apiService = UserRegistrationAPIService();
@@ -820,6 +852,8 @@ class _SignupUIState extends State<SignupUI> {
     _passwordController.clear();
     _confirmPasswordController.clear();
     _licenseNumberController.clear();
+    _addressController.clear();
+    _organizationTypeController.clear();
     setState(() {
       _selectedUserType = '';
       _imageFile = null;

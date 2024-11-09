@@ -71,6 +71,9 @@ class RegisterRequestmodel {
   /// License number of the user.
   late String licenseNumber;
 
+  late String organiazationType;
+  late String organiazationAddress;
+
   /// Constructor for `RegisterRequestModel`.
   ///
   /// - [fullName]: Full name of the user registering.
@@ -92,6 +95,8 @@ class RegisterRequestmodel {
     required this.confirmPassword,
     required this.userType,
     required this.licenseNumber,
+    required this.organiazationType,
+    required this.organiazationAddress,
   });
 
   /// Converts the `RegisterRequestModel` instance to a JSON map.
@@ -108,6 +113,8 @@ class RegisterRequestmodel {
       'password_confirmation': confirmPassword,
       'isp_user_type': userType,
       'license_number': licenseNumber,
+      'type_of_organization': organiazationType,
+      'address': organiazationAddress,
     };
 
     return map;

@@ -52,44 +52,54 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        border: InputBorder.none, // No border for the dropdown field.
-        hintText: widget.hintText, // Placeholder text when no item is selected.
-        hintStyle: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'default',
-        ),
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: 16, vertical: 12), // Padding for the dropdown field.
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white, // Background color
+        borderRadius: BorderRadius.circular(0.0), // Rounded corners
+        /*border: Border.all(
+          color: Colors.grey, // Border color
+          width: 1.0,         // Border width
+        ),*/
       ),
-      value: _selectedValue, // The currently selected value in the dropdown.
-      items: widget.dropdownItems.map((item) {
-        return DropdownMenuItem(
-          value: item, // The value associated with this dropdown item.
-          child: Text(
-            item, // Display text for the dropdown item.
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              fontFamily: 'default',
-            ),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          border: InputBorder.none, // No border for the dropdown field.
+          hintText: widget.hintText, // Placeholder text when no item is selected.
+          hintStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'default',
           ),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedValue =
-              value; // Update the selected value when the user changes the selection.
-        });
-        // Call the onChanged callback provided by the parent widget
-        if (widget.onChanged != null) {
-          widget.onChanged!(value);
-        }
-      },
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: 16, vertical: 12), // Padding for the dropdown field.
+        ),
+        value: _selectedValue, // The currently selected value in the dropdown.
+        items: widget.dropdownItems.map((item) {
+          return DropdownMenuItem(
+            value: item, // The value associated with this dropdown item.
+            child: Text(
+              item, // Display text for the dropdown item.
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: 'default',
+              ),
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedValue =
+                value; // Update the selected value when the user changes the selection.
+          });
+          // Call the onChanged callback provided by the parent widget
+          if (widget.onChanged != null) {
+            widget.onChanged!(value);
+          }
+        },
+      ),
     );
   }
 }

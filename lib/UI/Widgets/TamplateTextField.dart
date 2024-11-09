@@ -46,7 +46,9 @@ class CustomTextInput extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(
+              borderRadius:
+              const BorderRadius.all(Radius.circular(10))),
           labelText: label,
           labelStyle: const TextStyle(
             color: Colors.black87,
