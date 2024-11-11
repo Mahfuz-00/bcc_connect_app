@@ -1,4 +1,3 @@
-import 'package:bcc_connect_app/UI/Pages/Work%20Order/workOrder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
@@ -12,7 +11,7 @@ import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/dropdownservice.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
-/// [ConnectionFormUI] is a [StatefulWidget] that represents a form for users to fill out
+/// [WorkOrderUI] is a [StatefulWidget] that represents a form for users to fill out
 /// connection requests in a user interface.
 ///
 /// This class manages the state of various form elements such as divisions, districts,
@@ -54,21 +53,23 @@ import '../ISP Dashboard/ispDashboard.dart';
 ///
 /// The [initState] method initializes the form with default values and sets up listeners for user input.
 /// The [dispose] method cleans up resources when the widget is removed from the widget tree.
-class ConnectionFormUI extends StatefulWidget {
-  const ConnectionFormUI({super.key});
+class WorkOrderUI extends StatefulWidget {
+  const WorkOrderUI({super.key});
 
   @override
-  State<ConnectionFormUI> createState() => _ConnectionFormUIState();
+  State<WorkOrderUI> createState() => _WorkOrderUIState();
 }
 
-class _ConnectionFormUIState extends State<ConnectionFormUI> {
+class _WorkOrderUIState extends State<WorkOrderUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? selectedLinkCapacity;
   late ConnectionRequestModel _connectionRequest;
-  late TextEditingController _fullNameController = TextEditingController();
-  late TextEditingController _addressController = TextEditingController();
-  late TextEditingController _latitudeLongtitudeController =
+  late TextEditingController _contractDurationController =
       TextEditingController();
+  late TextEditingController _capacityController = TextEditingController();
+  late TextEditingController _durationController = TextEditingController();
+  late TextEditingController _paymentController = TextEditingController();
+  late TextEditingController _remarkController = TextEditingController();
   late String _requestType = '';
   late String _divisionID;
   late String _districtID;
@@ -78,7 +79,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   String _selectedService = '';
   late String _NTTNPhoneNumber;
   late String _linkCapacityID = '';
-  late String _selectedServiceType = '';
   late TextEditingController _remark = TextEditingController();
   bool _isButtonEnabled = false;
 
@@ -291,7 +291,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Connection Request',
+                  Text('Work Order',
                       style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
@@ -334,39 +334,35 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     ),
                   ),
                   */
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Select Service Type',
-                          dropdownItems: dropdownItems.toList(),
-                          initialValue: selectedLinkCapacity,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedLinkCapacity = newValue;
-                              _selectedServiceType = newValue ?? '';
-                              print(_selectedServiceType);
-                            });
-                          },
-                        )),
+                  CustomTextInput(
+                    controller: _contractDurationController,
+                    label: 'Full Name',
+                    validator: (input) {
+                      if (input == null || input.isEmpty) {
+                        return 'Please enter your full name';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 5),
+                  CustomTextInput(
+                    controller: _capacityController,
+                    label: 'Organization Address',
+                    validator: (input) {
+                      if (input == null || input.isEmpty) {
+                        return 'Please enter your organization name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 5),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 100,
                     child: TextFormField(
-                      controller: _latitudeLongtitudeController,
+                      controller: _durationController,
                       decoration: InputDecoration(
-                        labelText: 'Latitude and Longitude of The connection',
+                        labelText: 'Latitude and Longitude',
                         hintText: 'e.g., 12.3456, 65.4321',
                         helperText: 'Enter in format: latitude, longitude',
                         filled: true,
@@ -403,6 +399,31 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                         return null;
                       },
                     ),
+                  ),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: DropdownFormField(
+                          hintText: 'Select Service Type',
+                          dropdownItems: dropdownItems.toList(),
+                          initialValue: selectedLinkCapacity,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedLinkCapacity = newValue;
+                              _linkCapacityID = newValue ?? '';
+                              print(_linkCapacityID);
+                            });
+                          },
+                        )),
                   ),
                   const SizedBox(height: 5),
                   Text('Select Location:',
@@ -830,7 +851,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                 _connectionRequestForm();
                               }
                             : null,
-                        child: const Text('Next',
+                        child: const Text('Submit',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -896,7 +917,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         if (response == 'Connection Request Already Exist') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => WorkOrderUI()),
+            MaterialPageRoute(
+                builder: (context) => ISPDashboardUI(
+                      shouldRefresh: true,
+                    )),
           );
           const snackBar = SnackBar(
             content: Text(
@@ -911,8 +935,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
         if (response != null && response == "Connection Request Submitted") {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => WorkOrderUI()));
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ISPDashboardUI(
+                        shouldRefresh: true,
+                      )),
+              (route) => false);
           const snackBar = SnackBar(
             content: Text('Request Submitted!'),
           );
@@ -922,11 +951,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         // Handle error
         print('Error sending connection request: $error');
       });
-    } else {
-      const snackBar = SnackBar(
-        content: Text('Please fill up all fields'),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -938,7 +962,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     final nttNIdIsValid = _NTTNID != 0;
     final linkCapacityIsValid = _linkCapacityID.isNotEmpty;
     final remarkIsValid = _remark.text.isNotEmpty;
-    final serviceTypeisValid = _selectedServiceType.isNotEmpty;
 
     print(linkCapacityIsValid);
 
@@ -949,7 +972,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         unionIdIsValid &&
         nttNIdIsValid &&
         linkCapacityIsValid &&
-        serviceTypeisValid &&
         remarkIsValid;
 
     return allFieldsAreValid;
