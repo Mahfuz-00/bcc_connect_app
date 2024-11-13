@@ -1,3 +1,4 @@
+import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => AuthCubit()),
         BlocProvider(create: (context) => EmailCubit()), // Provide EmailCubit
+        BlocProvider(create: (context) => FormDataCubit())
       ],
       // Provide the AuthCubit for managing authentication state
       child: MaterialApp(

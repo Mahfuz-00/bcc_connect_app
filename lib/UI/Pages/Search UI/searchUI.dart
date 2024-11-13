@@ -76,10 +76,10 @@ class _SearchUIState extends State<SearchUI> {
     return apiService;
   }
 
-  List<DivisionSearch> divisions = [];
-  List<DistrictSearch> districts = [];
-  List<UpazilaSearch> upazilas = [];
-  List<UnionSearch> unions = [];
+  List<DivisionSearch>? divisions = [];
+  List<DistrictSearch>? districts = [];
+  List<UpazilaSearch>? upazilas = [];
+  List<UnionSearch>? unions = [];
   List<NTTNProviderResult> nttnProviders = [];
   String? selectedDivision;
   String? selectedDistrict;
@@ -109,6 +109,18 @@ class _SearchUIState extends State<SearchUI> {
     setState(() {
       isLoadingDivision = true;
       _isLoading = true;
+      selectedDistrict = null;
+      selectedUpazila = null;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      districts = null;
+      upazilas = null;
+      unions = null;
+      nttnProviders = [];
+      _divisionID = null;
+      _districtID = null;
+      _upazilaID = null;
+      _unionID = null;
     });
     try {
       await initializeApiService();
@@ -122,6 +134,18 @@ class _SearchUIState extends State<SearchUI> {
           print('Division Name: ${division.id}');
         }
         isLoadingDivision = false;
+        selectedDistrict = null;
+        selectedUpazila = null;
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        districts = null;
+        upazilas = null;
+        unions = null;
+        nttnProviders = [];
+        _divisionID = null;
+        _districtID = null;
+        _upazilaID = null;
+        _unionID = null;
       });
     } catch (e) {
       print('Error fetching divisions: $e');
@@ -133,6 +157,15 @@ class _SearchUIState extends State<SearchUI> {
     setState(() {
       isLoadingDistrict = true;
       _isLoading = true;
+      selectedUpazila = null;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      upazilas = null;
+      unions = null;
+      nttnProviders = [];
+      _districtID = null;
+      _upazilaID = null;
+      _unionID = null;
     });
     try {
       final List<DistrictSearch> fetchedDistricts =
@@ -143,7 +176,16 @@ class _SearchUIState extends State<SearchUI> {
         for (DistrictSearch district in fetchedDistricts) {
           print('District Name: ${district.name}');
         }
+        selectedUpazila = null;
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        upazilas = null;
+        unions = null;
+        nttnProviders = [];
         isLoadingDistrict = false;
+        _districtID = null;
+        _upazilaID = null;
+        _unionID = null;
       });
     } catch (e) {
       print('Error fetching districts: $e');
@@ -155,6 +197,12 @@ class _SearchUIState extends State<SearchUI> {
     setState(() {
       isLoadingUpzila = true;
       _isLoading = true;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      unions = null;
+      nttnProviders = [];
+      _upazilaID = null;
+      _unionID = null;
     });
     try {
       final List<UpazilaSearch> fetchedUpazilas =
@@ -165,7 +213,13 @@ class _SearchUIState extends State<SearchUI> {
         for (UpazilaSearch upazila in fetchedUpazilas) {
           print('Upzila Name: ${upazila.name}');
         }
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        unions = null;
+        nttnProviders = [];
         isLoadingUpzila = false;
+        _upazilaID = null;
+        _unionID = null;
       });
     } catch (e) {
       print('Error fetching upazilas: $e');
@@ -177,6 +231,9 @@ class _SearchUIState extends State<SearchUI> {
     setState(() {
       isLoadingUnion = true;
       _isLoading = true;
+      selectedNTTNProvider = null;
+      nttnProviders = [];
+      _unionID = null;
     });
     try {
       final List<UnionSearch> fetchedUnions =
@@ -187,7 +244,10 @@ class _SearchUIState extends State<SearchUI> {
         for (UnionSearch union in fetchedUnions) {
           print('Union Name: ${union.name}');
         }
+        selectedNTTNProvider = null;
+        nttnProviders = [];
         isLoadingUnion = false;
+        _unionID = null;
       });
     } catch (e) {
       print('Error fetching unions: $e');
@@ -198,6 +258,8 @@ class _SearchUIState extends State<SearchUI> {
   Future<void> fetchNTTNProviders(String unionId) async {
     setState(() {
       _isLoading = true;
+      selectedNTTNProvider = null;
+      nttnProviders = [];
     });
     try {
       final List<NTTNProviderResult> fetchedNTTNProviders =
@@ -290,9 +352,11 @@ class _SearchUIState extends State<SearchUI> {
                             children: [
                               DropdownFormField(
                                 hintText: 'Division',
-                                dropdownItems: divisions
-                                    .map((division) => division.name)
-                                    .toList(),
+                                dropdownItems: divisions != null
+                                    ? divisions!
+                                        .map((division) => division.name)
+                                        .toList()
+                                    : null,
                                 initialValue: selectedDivision,
                                 onChanged: (newValue) {
                                   setState(() {
@@ -301,6 +365,13 @@ class _SearchUIState extends State<SearchUI> {
                                     selectedUpazila = null;
                                     selectedUnion = null;
                                     selectedNTTNProvider = null;
+                                    districts = null;
+                                    upazilas = null;
+                                    unions = null;
+                                    nttnProviders = [];
+                                    _districtID = null;
+                                    _upazilaID = null;
+                                    _unionID = null;
                                     print(
                                         'Selected District: ${selectedDistrict}');
                                     selectedDivision = newValue;
@@ -311,13 +382,15 @@ class _SearchUIState extends State<SearchUI> {
                                   if (newValue != null) {
                                     // Find the selected division object
                                     DivisionSearch selectedDivisionObject =
-                                        divisions.firstWhere(
+                                        divisions!.firstWhere(
                                       (division) => division.name == newValue,
                                     );
                                     if (selectedDivisionObject != null) {
-                                      _divisionID = selectedDivisionObject.id.toString();
+                                      _divisionID =
+                                          selectedDivisionObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchDistricts(selectedDivisionObject.id.toString());
+                                      fetchDistricts(
+                                          selectedDivisionObject.id.toString());
                                     }
                                   }
                                 },
@@ -353,15 +426,22 @@ class _SearchUIState extends State<SearchUI> {
                             children: [
                               DropdownFormField(
                                 hintText: 'District',
-                                dropdownItems: districts
-                                    .map((district) => district.name)
-                                    .toList(),
+                                dropdownItems: districts != null
+                                    ? districts!
+                                        .map((district) => district.name)
+                                        .toList()
+                                    : null,
                                 initialValue: selectedDistrict,
                                 onChanged: (newValue) {
                                   setState(() {
                                     selectedUpazila = null;
                                     selectedUnion = null;
                                     selectedNTTNProvider = null;
+                                    upazilas = null;
+                                    unions = null;
+                                    nttnProviders = [];
+                                    _upazilaID = null;
+                                    _unionID = null;
                                     selectedDistrict = newValue;
                                     if (_isLoading) {
                                       CircularProgressIndicator();
@@ -370,12 +450,14 @@ class _SearchUIState extends State<SearchUI> {
                                   if (newValue != null) {
                                     // Find the selected division object
                                     DistrictSearch selectedDistrictObject =
-                                        districts.firstWhere(
+                                        districts!.firstWhere(
                                       (district) => district.name == newValue,
                                     );
                                     if (selectedDistrictObject != null) {
-                                      _districtID = selectedDistrictObject.id.toString();
-                                      fetchUpazilas(selectedDistrictObject.id.toString());
+                                      _districtID =
+                                          selectedDistrictObject.id.toString();
+                                      fetchUpazilas(
+                                          selectedDistrictObject.id.toString());
                                     }
                                   }
                                 },
@@ -411,14 +493,19 @@ class _SearchUIState extends State<SearchUI> {
                             children: [
                               DropdownFormField(
                                 hintText: 'Upazila',
-                                dropdownItems: upazilas
-                                    .map((upazila) => upazila.name)
-                                    .toList(),
+                                dropdownItems: upazilas != null
+                                    ? upazilas!
+                                        .map((upazila) => upazila.name)
+                                        .toList()
+                                    : null,
                                 initialValue: selectedUpazila,
                                 onChanged: (newValue) {
                                   setState(() {
                                     selectedUnion = null;
                                     selectedNTTNProvider = null;
+                                    unions = null;
+                                    nttnProviders = [];
+                                    _unionID = null;
                                     selectedUpazila = newValue;
                                     if (_isLoading) {
                                       CircularProgressIndicator();
@@ -427,13 +514,15 @@ class _SearchUIState extends State<SearchUI> {
                                   if (newValue != null) {
                                     // Find the selected division object
                                     UpazilaSearch selectedUpazilaObject =
-                                        upazilas.firstWhere(
+                                        upazilas!.firstWhere(
                                       (upazila) => upazila.name == newValue,
                                     );
                                     if (selectedUpazilaObject != null) {
-                                      _upazilaID = selectedUpazilaObject.id.toString();
+                                      _upazilaID =
+                                          selectedUpazilaObject.id.toString();
                                       // Pass the ID of the selected division to fetchDistricts
-                                      fetchUnions(selectedUpazilaObject.id.toString());
+                                      fetchUnions(
+                                          selectedUpazilaObject.id.toString());
                                     }
                                   }
                                 },
@@ -469,8 +558,11 @@ class _SearchUIState extends State<SearchUI> {
                             children: [
                               DropdownFormField(
                                 hintText: 'Union',
-                                dropdownItems:
-                                    unions.map((union) => union.name).toList(),
+                                dropdownItems: unions != null
+                                    ? unions!
+                                        .map((union) => union.name)
+                                        .toList()
+                                    : null,
                                 initialValue: selectedUnion,
                                 onChanged: (newValue) {
                                   setState(() {
@@ -483,11 +575,12 @@ class _SearchUIState extends State<SearchUI> {
                                   if (newValue != null) {
                                     // Find the selected division object
                                     UnionSearch selectedUnionObject =
-                                        unions.firstWhere(
+                                        unions!.firstWhere(
                                       (union) => union.name == newValue,
                                     );
                                     if (selectedUnionObject != null) {
-                                      _unionID = selectedUnionObject.id.toString();
+                                      _unionID =
+                                          selectedUnionObject.id.toString();
                                     }
                                   }
                                 },
@@ -687,6 +780,9 @@ class _SearchUIState extends State<SearchUI> {
             ConnectionType: request['connection_type'],
             Provider: request['provider'],
             Status: request['status'],
+            ContactName: request['contract_name'],
+            ContactMobileNo: request['contract_phone'],
+            ContactEmail: request['contract_email'],
           );
         }).toList();
         setState(() {

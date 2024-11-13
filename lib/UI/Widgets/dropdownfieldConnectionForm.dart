@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 /// [onChanged] callback if provided.
 class DropdownFormField extends StatefulWidget {
   final String hintText; // The placeholder text when no value is selected.
-  final List<String>
+  final List<String>?
       dropdownItems; // List of items that will populate the dropdown menu.
   final String?
       initialValue; // The initial value selected when the widget is created.
@@ -75,7 +75,7 @@ class _DropdownFormFieldState extends State<DropdownFormField> {
               horizontal: 16, vertical: 12), // Padding for the dropdown field.
         ),
         value: _selectedValue, // The currently selected value in the dropdown.
-        items: widget.dropdownItems.map((item) {
+        items: widget.dropdownItems?.map((item) {
           return DropdownMenuItem(
             value: item, // The value associated with this dropdown item.
             child: Text(

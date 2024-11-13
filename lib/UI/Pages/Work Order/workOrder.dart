@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'package:bcc_connect_app/Data/Models/package.dart';
+import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
 import '../../../Data/Data Sources/API Service (Connection From)/apiserviceconnection.dart';
+import '../../../Data/Data Sources/API Service (Packages)/apiservicepackages.dart';
 import '../../../Data/Data Sources/API Service (Regions)/apiserviceregions.dart';
 import '../../../Data/Models/connectionmodel.dart';
 import '../../../Data/Models/regionmodels.dart';
@@ -24,7 +29,7 @@ import '../ISP Dashboard/ispDashboard.dart';
 /// - [String?] [selectedLinkCapacity]: Holds the selected link capacity option.
 /// - [ConnectionRequestModel] [_connectionRequest]: Stores the connection request data.
 /// - [String] [_requestType]: Holds the type of request (e.g., new connection, upgrade).
-/// - [String] [_divisionID], [_districtID], [_upazilaID], [_unionID]: Hold the IDs of selected division, district, upazila, and union.
+/// - [String] [_packageID], [_districtID], [_upazilaID], [_unionID]: Hold the IDs of selected division, district, upazila, and union.
 /// - [int] [_NTTNID]: Stores the ID of the selected NTTN provider.
 /// - [TextEditingController] [_remark]: Manages the input of remarks by the user.
 /// - [bool] [_isButtonEnabled]: Tracks whether the submit button should be enabled based on user input.
@@ -39,7 +44,7 @@ import '../ISP Dashboard/ispDashboard.dart';
 /// - [String?] [selectedDivision], [selectedDistrict], [selectedUpazila], [selectedUnion], [selectedNTTNProvider]: Store selected values for each dropdown.
 ///
 /// Loading states are managed by:
-/// - [bool] [isLoadingDivision], [isLoadingDistrict], [isLoadingUpzila], [isLoadingUnion], [isLoadingNTTNProvider]: Track whether the respective data is being loaded.
+/// - [bool] [isLoading], [isLoadingDistrict], [isLoadingUpzila], [isLoadingUnion], [isLoadingNTTNProvider]: Track whether the respective data is being loaded.
 ///
 /// Other important variables include:
 /// - [TextEditingController] [_linkcapcitycontroller]: Manages the input for link capacity when 'Others' is selected.
@@ -49,7 +54,7 @@ import '../ISP Dashboard/ispDashboard.dart';
 /// - [bool] [isSelected]: Tracks if a particular form field has been selected.
 ///
 /// The [initializeApiService] method initializes the [RegionAPIService] with the user's authentication token.
-/// Various [fetch] methods (e.g., [fetchDivisions], [fetchDistricts], [fetchUpazilas], [fetchUnions], [fetchNTTNProviders]) are used to retrieve data from the API.
+/// Various [fetch] methods (e.g., [fetchPackages], [fetchDistricts], [fetchUpazilas], [fetchUnions], [fetchNTTNProviders]) are used to retrieve data from the API.
 ///
 /// The [initState] method initializes the form with default values and sets up listeners for user input.
 /// The [dispose] method cleans up resources when the widget is removed from the widget tree.
@@ -62,65 +67,101 @@ class WorkOrderUI extends StatefulWidget {
 
 class _WorkOrderUIState extends State<WorkOrderUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String? selectedLinkCapacity;
+  String? selectedPaymentMode;
   late ConnectionRequestModel _connectionRequest;
   late TextEditingController _contractDurationController =
       TextEditingController();
   late TextEditingController _capacityController = TextEditingController();
+  late TextEditingController _discountController = TextEditingController();
+  late TextEditingController _priceController = TextEditingController();
+  late TextEditingController _netPaymentController = TextEditingController();
   late TextEditingController _durationController = TextEditingController();
-  late TextEditingController _paymentController = TextEditingController();
-  late TextEditingController _remarkController = TextEditingController();
-  late String _requestType = '';
-  late String _divisionID;
-  late String _districtID;
-  late String _upazilaID;
-  late String _unionID;
-  late int _NTTNID = 0;
-  String _selectedService = '';
-  late String _NTTNPhoneNumber;
-  late String _linkCapacityID = '';
-  late TextEditingController _remark = TextEditingController();
-  bool _isButtonEnabled = false;
+  late TextEditingController _linkcapcitycontroller = TextEditingController();
+  late TextEditingController _workOrderRemarkController = TextEditingController();
+  late String _packageID;
+  late String _PaymentMode = '';
+  bool _isPicked = false;
+  File? _file;
 
-  final Set<String> linkCapacityOptions = {'5 MB', '10 MB', '15 MB', 'Others'};
+  final Set<String> paymentMethodOptions = {};
 
-  late RegionAPIService apiService;
+  late PackageAPIService apiService;
 
-  List<String> dropdownItems = ["Data", "Core", "Co Location"];
+  List<String> PaymentOptions = ['Cash', 'Online'];
 
-  Future<RegionAPIService> initializeApiService() async {
+  Future<PackageAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
     final token = (authCubit.state as AuthAuthenticated).token;
-    apiService = await RegionAPIService.create(token);
+    apiService = await PackageAPIService.create(token);
     return apiService;
   }
 
-  List<Division> divisions = [];
-  List<District> districts = [];
-  List<Upazila> upazilas = [];
-  List<Union> unions = [];
-  List<NTTNProvider> nttnProviders = [];
-  String? selectedDivision;
-  String? selectedDistrict;
-  String? selectedUpazila;
-  String? selectedUnion;
-  String? selectedNTTNProvider;
-  bool isLoadingDivision = false;
-  bool isLoadingDistrict = false;
-  bool isLoadingUpzila = false;
-  bool isLoadingUnion = false;
-  bool isLoadingNTTNProvider = false;
+  List<Package> packages = [];
+  String? selectedPackage;
+  bool isLoading = false;
+  bool isLoadingPackage = false;
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
-  bool _isButtonClicked = false;
   late String providerValues = '';
   bool isSelected = false;
-  late TextEditingController _linkcapcitycontroller = TextEditingController();
+
+  // Variables for calculations
+  double packageRate = 0;
+  double discount = 0;
+
+  // Method to calculate Net Payment
+  void _calculateNetPayment() {
+    setState(() {
+      // Parse the package rate and discount to double, if valid
+      packageRate = double.tryParse(_priceController.text) ?? 0;
+      discount = _parseDiscount(_discountController.text);
+
+      print('Package Rate: $packageRate');
+      print('Discount: $discount');
+
+      // Apply the discount based on its type (percentage or absolute)
+      double netPayment = discount == null
+          ? packageRate  // If no discount, the net payment is the full price
+          : (discount > 1 ? packageRate - discount : packageRate - (packageRate * discount));  // If absolute or percentage
+
+      print('Net Payment: $netPayment');
+
+      // Update the net payment controller
+      _netPaymentController.text = netPayment.toStringAsFixed(2); // Round to 2 decimal places
+    });
+  }
+
+  // Helper function to parse the discount and figure out its type (absolute or percentage)
+  double _parseDiscount(String discountText) {
+    print('Parsing discount: $discountText');
+
+    if (discountText.contains('%')) {
+      // If discount contains a %, treat it as a percentage
+      String percentageText = discountText.replaceAll('%', '').trim();
+      double percentage = double.tryParse(percentageText) ?? 0;
+      print('Parsed percentage: $percentage');
+      return percentage / 100; // Convert to decimal (20% => 0.2)
+    } else {
+      // Otherwise, treat it as an absolute currency discount
+      double absoluteDiscount = double.tryParse(discountText) ?? 0;
+      print('Parsed absolute discount: $absoluteDiscount');
+      return absoluteDiscount;
+    }
+  }
 
   @override
   void initState() {
+    // Using WidgetsBinding to safely access context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final datafromfirstpageCubit = context.read<FormDataCubit>();
+      String? capacity = datafromfirstpageCubit.state.linkCapacity;
+      _capacityController.text = capacity!;
+    });
     super.initState();
+    // Add listeners to update the calculation automatically
+    _priceController.addListener(_calculateNetPayment);
+    _discountController.addListener(_calculateNetPayment);
     _connectionRequest = ConnectionRequestModel(
       divisionId: "",
       districtId: "",
@@ -129,127 +170,38 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       nttnProvider: 0,
       linkCapacity: "",
       remark: "",
+      serviceType: '',
+      latlong: '',
     );
-    _remark = TextEditingController();
-    _remark.addListener(() {
-      setState(() {
-        _isButtonEnabled = _remark.text.isNotEmpty;
-      });
-    });
-    fetchDivisions();
+    fetchPackages();
   }
 
   @override
   void dispose() {
-    _remark.dispose();
+    _workOrderRemarkController.dispose();
     super.dispose();
   }
 
-  Future<void> fetchDivisions() async {
+  Future<void> fetchPackages() async {
     setState(() {
-      isLoadingDivision = true;
+      isLoading = true;
     });
     try {
       await initializeApiService();
-      final List<Division> fetchedDivisions = await apiService.fetchDivisions();
+      final List<Package> fetchedPackages = await apiService.fetchPackages();
       setState(() {
-        divisions = fetchedDivisions;
-        for (Division division in fetchedDivisions) {
-          print('Division Name: ${division.name}');
-          print('Division ID: ${division.id}');
+        packages = fetchedPackages;
+        for (Package package in fetchedPackages) {
+          print('Service Name: ${package.name}');
+          print('Package ID: ${package.id}');
+          print('Package Name: ${package.packageName}');
+          print('Package Description: ${package.packageDescription}');
+          print('Package Price: ${package.charge}');
         }
-        isLoadingDivision = false;
+        isLoading = false;
       });
     } catch (e) {
       print('Error fetching divisions: $e');
-    }
-  }
-
-  Future<void> fetchDistricts(String divisionId) async {
-    setState(() {
-      isLoadingDistrict = true;
-    });
-    try {
-      final List<District> fetchedDistricts =
-          await apiService.fetchDistricts(divisionId);
-      setState(() {
-        districts = fetchedDistricts;
-        for (District district in fetchedDistricts) {
-          print('District Name: ${district.name}');
-        }
-        print(districts);
-        isLoadingDistrict = false;
-      });
-    } catch (e) {
-      print('Error fetching districts: $e');
-    }
-  }
-
-  Future<void> fetchUpazilas(String districtId) async {
-    setState(() {
-      isLoadingUpzila = true;
-    });
-    try {
-      final List<Upazila> fetchedUpazilas =
-          await apiService.fetchUpazilas(districtId);
-      setState(() {
-        upazilas = fetchedUpazilas;
-        for (Upazila upazila in fetchedUpazilas) {
-          print('Upzila Name: ${upazila.name}');
-        }
-        isLoadingUpzila = false;
-      });
-    } catch (e) {
-      print('Error fetching upazilas: $e');
-    }
-  }
-
-  Future<void> fetchUnions(String upazilaId) async {
-    setState(() {
-      isLoadingUnion = true;
-    });
-    try {
-      final List<Union> fetchedUnions = await apiService.fetchUnions(upazilaId);
-      setState(() {
-        unions = fetchedUnions;
-        for (Union union in fetchedUnions) {
-          print('Union Name: ${union.name}');
-          print('Union ID: ${union.id}');
-        }
-        isLoadingUnion = false;
-      });
-    } catch (e) {
-      print('Error fetching unions: $e');
-    }
-  }
-
-  Future<void> fetchNTTNProviders(String unionId) async {
-    setState(() {
-      isLoadingNTTNProvider = true;
-    });
-    try {
-      final List<NTTNProvider> fetchedNTTNProviders =
-          await apiService.fetchNTTNProviders(unionId);
-      print(fetchedNTTNProviders);
-      setState(() {
-        nttnProviders = fetchedNTTNProviders;
-        if (fetchedNTTNProviders.isNotEmpty) {
-          providerValues = fetchedNTTNProviders.first.provider;
-          _NTTNID = fetchedNTTNProviders.first.id;
-        } else {
-          providerValues = 'zero';
-        }
-
-        for (NTTNProvider NTTN in fetchedNTTNProviders) {
-          print('NTTN Providers Name: ${NTTN.provider}');
-          print('NTTN ID: ${NTTN.id}');
-          selectedNTTNProvider = providerValues;
-          print(selectedNTTNProvider);
-          isLoadingNTTNProvider = false;
-        }
-      });
-    } catch (e) {
-      print('Error fetching NTTN providers: $e');
     }
   }
 
@@ -297,49 +249,125 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                           fontWeight: FontWeight.bold,
                           fontFamily: 'default')),
                   SizedBox(height: 5),
-                  Text('Please fill up the form',
-                      style: TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 18,
-                          fontFamily: 'default')),
-                  SizedBox(height: 40),
-                  /*     Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text('Request Type',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'default')),
-                      ],
-                    ),
-                  ),
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
-                    child: RadioListTileGroup(
-                      options: ['New Connection', 'Upgrade', 'Others'],
-                      selectedOption: _requestType,
-                      onChanged: (String value) {
-                        setState(() {
-                          _requestType = value ?? '';
-                          print('Selected option: $_requestType');
-                        });
-                        // You can perform any other actions here based on the selected option
-                      },
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Text(
+                        'Please fill up the form. \n If you do not have a work order, please submit the form without it.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 18,
+                            fontFamily: 'default')),
                   ),
-                  */
+                  SizedBox(height: 40),
                   CustomTextInput(
                     controller: _contractDurationController,
-                    label: 'Full Name',
+                    label: 'Contact Duration (Month)',
                     validator: (input) {
                       if (input == null || input.isEmpty) {
-                        return 'Please enter your full name';
+                        return 'Please enter your contact duration (month)';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 5),
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        padding: EdgeInsets.only(left: 10, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Stack(
+                          children: [
+                            DropdownFormField(
+                                hintText: 'Select Package',
+                                dropdownItems: packages
+                                    .map((package) => package.packageName)
+                                    .where((packageName) =>
+                                        packageName !=
+                                        null) // Filter out null values
+                                    .cast<String>() // Cast to List<String>
+                                    .toList(),
+                                initialValue: selectedPackage,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedPackage = newValue;
+                                  });
+                                  if (newValue != null) {
+                                    // Find the selected division object
+                                    Package selectedPackageObject =
+                                        packages.firstWhere(
+                                      (package) =>
+                                          package.packageName == newValue,
+                                    );
+                                    if (selectedPackageObject != null) {
+                                      _packageID =
+                                          selectedPackageObject.id.toString();
+                                      _priceController.text =
+                                          selectedPackageObject.charge
+                                              .toString();
+                                    }
+                                  }
+                                }),
+                            if (isLoading)
+                              Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(
+                                  color: const Color.fromRGBO(25, 192, 122, 1),
+                                ),
+                              ),
+                          ],
+                        )),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 70,
+                    child: TextFormField(
+                      controller: _priceController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: const OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10))),
+                        labelText: 'Package Rate',
+                        labelStyle: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontFamily: 'default',
+                        ),
+                        prefixText: 'TK ',
+                      ),
+                      style: const TextStyle(
+                        color: Color.fromRGBO(143, 150, 158, 1),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                      ),
+                      validator: (input) {
+                        if (input == null || input.isEmpty) {
+                          return 'Please enter your contact duration (month)';
+                        }
+                        return null;
+                      },
+                      readOnly: true,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  CustomTextInput(
+                    controller: _discountController,
+                    label: 'Discount',
+                    validator: (input) {
+                      if (input == null || input.isEmpty) {
+                        return 'Please enter your organization name';
                       }
                       return null;
                     },
@@ -347,7 +375,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                   const SizedBox(height: 5),
                   CustomTextInput(
                     controller: _capacityController,
-                    label: 'Organization Address',
+                    label: 'Capacity',
                     validator: (input) {
                       if (input == null || input.isEmpty) {
                         return 'Please enter your organization name';
@@ -358,370 +386,34 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                   const SizedBox(height: 5),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    height: 100,
+                    height: 70,
                     child: TextFormField(
-                      controller: _durationController,
+                      controller: _netPaymentController,
                       decoration: InputDecoration(
-                        labelText: 'Latitude and Longitude',
-                        hintText: 'e.g., 12.3456, 65.4321',
-                        helperText: 'Enter in format: latitude, longitude',
                         filled: true,
                         fillColor: Colors.white,
-                        labelStyle: const TextStyle(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        labelText: 'Net Payment',
+                        labelStyle: TextStyle(
                           color: Colors.black87,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           fontFamily: 'default',
                         ),
-                        border: const OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
+                        prefixText: 'TK ',
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color.fromRGBO(143, 150, 158, 1),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                       ),
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter latitude and longitude';
-                        }
-
-                        // Regular expression to validate latitude, longitude format
-                        final latLongRegExp = RegExp(
-                            r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
-
-                        if (!latLongRegExp.hasMatch(input)) {
-                          return 'Invalid format. Use "latitude, longitude"';
-                        }
-
-                        return null;
-                      },
+                      readOnly: true,
                     ),
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Select Service Type',
-                          dropdownItems: dropdownItems.toList(),
-                          initialValue: selectedLinkCapacity,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedLinkCapacity = newValue;
-                              _linkCapacityID = newValue ?? '';
-                              print(_linkCapacityID);
-                            });
-                          },
-                        )),
                   ),
                   const SizedBox(height: 5),
-                  Text('Select Location:',
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 18,
-                          fontFamily: 'default')),
-                  SizedBox(height: 10),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Stack(
-                          children: [
-                            DropdownFormField(
-                              hintText: 'Select Division',
-                              dropdownItems: divisions
-                                  .map((division) => division.name)
-                                  .toList(),
-                              initialValue: selectedDivision,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedDistrict = null;
-                                  selectedUpazila = null;
-                                  selectedUnion = null;
-                                  selectedNTTNProvider = null;
-                                  selectedDivision = newValue;
-                                });
-                                if (newValue != null) {
-                                  // Find the selected division object
-                                  Division selectedDivisionObject =
-                                      divisions.firstWhere(
-                                    (division) => division.name == newValue,
-                                  );
-                                  if (selectedDivisionObject != null) {
-                                    _divisionID =
-                                        selectedDivisionObject.id.toString();
-                                    fetchDistricts(
-                                        selectedDivisionObject.id.toString());
-                                  }
-                                }
-                              },
-                            ),
-                            if (isLoadingDivision)
-                              Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: const Color.fromRGBO(25, 192, 122, 1),
-                                ),
-                              ),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Stack(
-                          children: [
-                            DropdownFormField(
-                              hintText: 'Select District',
-                              dropdownItems: districts
-                                  .map((district) => district.name)
-                                  .toList(),
-                              initialValue: selectedDistrict,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  print(selectedDistrict);
-                                  selectedUpazila = null;
-                                  selectedUnion = null;
-                                  selectedNTTNProvider = null;
-                                  selectedDistrict = newValue;
-                                });
-                                if (newValue != null) {
-                                  // Find the selected division object
-                                  District selectedDistrictObject =
-                                      districts.firstWhere(
-                                    (district) => district.name == newValue,
-                                  );
-                                  if (selectedDistrictObject != null) {
-                                    _districtID =
-                                        selectedDistrictObject.id.toString();
-                                    // Pass the ID of the selected division to fetchDistricts
-                                    fetchUpazilas(
-                                        selectedDistrictObject.id.toString());
-                                  }
-                                }
-                              },
-                            ),
-                            if (isLoadingDistrict)
-                              Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: const Color.fromRGBO(25, 192, 122, 1),
-                                ),
-                              ),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Stack(
-                          children: [
-                            DropdownFormField(
-                              hintText: 'Select Upazila',
-                              dropdownItems: upazilas
-                                  .map((upazila) => upazila.name)
-                                  .toList(),
-                              initialValue: selectedUpazila,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedUnion = null; // Reset
-                                  selectedNTTNProvider = null; // Reset
-                                  selectedUpazila = newValue;
-                                });
-                                if (newValue != null) {
-                                  // Find the selected division object
-                                  Upazila selectedUpazilaObject =
-                                      upazilas.firstWhere(
-                                    (upazila) => upazila.name == newValue,
-                                  );
-                                  if (selectedUpazilaObject != null) {
-                                    _upazilaID =
-                                        selectedUpazilaObject.id.toString();
-                                    // Pass the ID of the selected division to fetchDistricts
-                                    fetchUnions(
-                                        selectedUpazilaObject.id.toString());
-                                  }
-                                }
-                              },
-                            ),
-                            if (isLoadingUpzila)
-                              Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: const Color.fromRGBO(25, 192, 122, 1),
-                                ),
-                              ),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Stack(
-                          children: [
-                            DropdownFormField(
-                              hintText: 'Select Union',
-                              dropdownItems:
-                                  unions.map((union) => union.name).toList(),
-                              initialValue: selectedUnion,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedNTTNProvider = null; // Reset
-                                  selectedUnion = newValue;
-                                  isSelected = true;
-                                  print(isSelected);
-                                });
-                                if (newValue != null) {
-                                  // Find the selected division object
-                                  Union selectedUnionObject = unions.firstWhere(
-                                    (union) => union.name == newValue,
-                                  );
-                                  if (selectedUnionObject != null) {
-                                    _unionID =
-                                        selectedUnionObject.id.toString();
-                                    // Pass the ID of the selected division to fetchDistricts
-                                    fetchNTTNProviders(
-                                        selectedUnionObject.id.toString());
-                                  }
-                                }
-                              },
-                            ),
-                            if (isLoadingUnion)
-                              Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: const Color.fromRGBO(25, 192, 122, 1),
-                                ),
-                              ),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  if (isSelected == true) ...[
-                    if (providerValues.isNotEmpty) ...[
-                      if (providerValues == 'zero') ...[
-                        Builder(
-                          builder: (context) {
-                            Future.delayed(Duration.zero, () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'There are no NTTN Providers in this area'),
-                                ),
-                              );
-                            });
-                            return SizedBox
-                                .shrink(); // Returning an empty SizedBox as a placeholder
-                          },
-                        ),
-                      ] else if (providerValues != 'zero') ...[
-                        Material(
-                          elevation: 5,
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            width: screenWidth * 0.9,
-                            height: screenHeight * 0.075,
-                            decoration: BoxDecoration(
-                              color: Colors.white, // Background color
-                              borderRadius:
-                                  BorderRadius.circular(5.0), // Rounded corners
-                            ),
-                            child: Stack(
-                              children: [
-                                TextFormField(
-                                  initialValue: providerValues,
-                                  readOnly: true,
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(143, 150, 158, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: '    NTTN Provider',
-                                    labelStyle: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'default',
-                                    ),
-                                    alignLabelWithHint: true,
-                                    //contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: screenHeight * 0.15),
-                                    border: const OutlineInputBorder(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(10)),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ]
-                    ]
-                  ],
-                  if (selectedNTTNProvider != null)
-                    SizedBox(
-                      height: 10,
-                    ),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -735,59 +427,18 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                           border: Border.all(color: Colors.grey),
                         ),
                         child: DropdownFormField(
-                          hintText: 'Select Link Capacity',
-                          dropdownItems: linkCapacityOptions.toList(),
-                          initialValue: selectedLinkCapacity,
+                          hintText: 'Select Payment Method',
+                          dropdownItems: PaymentOptions.toList(),
+                          initialValue: selectedPaymentMode,
                           onChanged: (newValue) {
                             setState(() {
-                              selectedLinkCapacity = newValue;
-                              _linkCapacityID = newValue ?? '';
-                              print(_linkCapacityID);
+                              selectedPaymentMode = newValue;
+                              _PaymentMode = newValue ?? '';
+                              print(_PaymentMode);
                             });
                           },
                         )),
                   ),
-                  if (_linkCapacityID == 'Others') ...[
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Container(
-                      width: screenWidth * 0.9,
-                      height: screenWidth * 0.2,
-                      child: TextFormField(
-                        controller: _linkcapcitycontroller,
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter your required link capacity';
-                          }
-                          return null;
-                        },
-                        style: const TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          labelText: 'Enter your required Link Capacity',
-                          labelStyle: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'default',
-                          ),
-                          alignLabelWithHint: true,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 80),
-                          border: const OutlineInputBorder(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
-                        ),
-                      ),
-                    ),
-                  ],
                   SizedBox(
                     height: 15,
                   ),
@@ -795,8 +446,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                     width: screenWidth * 0.9,
                     height: 120,
                     child: TextFormField(
-                      controller: _remark,
-                      enabled: selectedLinkCapacity != null,
+                      controller: _workOrderRemarkController,
+                      enabled: selectedPaymentMode != null,
                       validator: (input) {
                         if (input == null || input.isEmpty) {
                           return 'Please enter some remarks';
@@ -832,6 +483,62 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                     height: 30,
                   ),
                   Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                              const Color.fromRGBO(25, 192, 122, 1),
+                              fixedSize: Size(
+                                  MediaQuery.of(context).size.width * 0.9,
+                                  MediaQuery.of(context).size.height * 0.075),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            onPressed: _isPicked ? null : _pickFile,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_isPicked) ...[
+                                  CircularProgressIndicator(
+                                    color: Color.fromRGBO(25, 192, 122, 1),
+                                  ),
+                                ] else if (_file == null) ...[
+                                  Icon(
+                                    Icons.document_scanner,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text('Pick File',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      )),
+                                ],
+                                if (_file != null) ...[
+                                  Text('File Picked',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      )),
+                                ]
+                              ],
+                            )),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  Center(
                     child: Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -846,11 +553,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: _isButtonEnabled
-                            ? () {
-                                _connectionRequestForm();
-                              }
-                            : null,
+                        onPressed: _connectionRequestForm,
                         child: const Text('Submit',
                             style: TextStyle(
                               color: Colors.white,
@@ -874,18 +577,13 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   }
 
   void _connectionRequestForm() {
-    print('Division: $_divisionID');
-    print('District: $_districtID');
-    print('Upazila: $_upazilaID');
-    print('Union: $_unionID');
-    print('NTTN: $_NTTNID');
-    print('Remark: ${_remark.text}');
+    print('Remark: ${_workOrderRemarkController.text}');
 
-    if (_linkCapacityID == 'Others') {
-      _linkCapacityID = _linkcapcitycontroller.text;
+    if (_PaymentMode == 'Others') {
+      _PaymentMode = _linkcapcitycontroller.text;
     }
 
-    print('Capacity: $_linkCapacityID');
+    print('Capacity: $_PaymentMode');
 
     // Validate and save form data
     if (_validateAndSave()) {
@@ -895,7 +593,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print('triggered Validation');
       // Initialize connection request model
-      _connectionRequest = ConnectionRequestModel(
+      /* _connectionRequest = ConnectionRequestModel(
         divisionId: _divisionID,
         districtId: _districtID,
         upazilaId: _upazilaID,
@@ -903,7 +601,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         nttnProvider: _NTTNID,
         linkCapacity: _linkCapacityID,
         remark: _remark.text,
-      );
+      );*/
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
 
@@ -955,25 +653,94 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   }
 
   bool _validateAndSave() {
-    final divisionIdIsValid = _divisionID.isNotEmpty;
-    final districtIdIsValid = _districtID.isNotEmpty;
-    final upazilaIdIsValid = _upazilaID.isNotEmpty;
-    final unionIdIsValid = _unionID.isNotEmpty;
-    final nttNIdIsValid = _NTTNID != 0;
-    final linkCapacityIsValid = _linkCapacityID.isNotEmpty;
-    final remarkIsValid = _remark.text.isNotEmpty;
+    final contactDurationIsValid = _contractDurationController.text.isNotEmpty;
+    final packageNameIsValid = selectedPackage?.isNotEmpty;
+    final discountIsValid = _discountController.text.isNotEmpty;
+    final netPaymentIsValid = _netPaymentController.text.isNotEmpty;
+    final paymentmodeIsValid = _PaymentMode.isNotEmpty;
+    final packageIdIsValid = _packageID.isNotEmpty;
+    final linkCapacityIsValid = _PaymentMode.isNotEmpty;
+    final remarkIsValid = _workOrderRemarkController.text.isNotEmpty;
 
     print(linkCapacityIsValid);
 
     // Check if all fields are valid
-    final allFieldsAreValid = divisionIdIsValid &&
-        districtIdIsValid &&
-        upazilaIdIsValid &&
-        unionIdIsValid &&
-        nttNIdIsValid &&
-        linkCapacityIsValid &&
-        remarkIsValid;
+    final allFieldsAreValid =
+    contactDurationIsValid && packageNameIsValid! && discountIsValid &&
+        netPaymentIsValid && paymentmodeIsValid && packageIdIsValid &&
+        linkCapacityIsValid && remarkIsValid;
 
     return allFieldsAreValid;
+  }
+
+  Future<void> _pickFile() async {
+    setState(() {
+      _isPicked = true;
+    });
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'pdf',
+          'doc',
+          'docx',
+          'ppt',
+          'pptx',
+          'xls',
+          'xlsx',
+          'bmg'
+        ],
+      );
+
+      if (result != null) {
+        String? fileExtension = result.files.single.extension;
+
+        List<String> allowedExtensions = [
+          'pdf',
+          'doc',
+          'docx',
+          'ppt',
+          'pptx',
+          'xls',
+          'xlsx',
+          'bmg'
+        ];
+
+        if (fileExtension != null &&
+            allowedExtensions.contains(fileExtension.toLowerCase())) {
+          if (result.files.single.size <= 21000 * 1024) {
+            setState(() {
+              _file = File(result.files.single.path!);
+              _isPicked = false;
+            });
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                Text("File exceeds the maximum allowed size of 21 MB."),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  "Invalid file extension. Allowed types: pdf, doc, docx, ppt, pptx, xls, xlsx."),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("No file selected."),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    }
   }
 }

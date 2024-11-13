@@ -1,3 +1,4 @@
+import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
 import 'package:bcc_connect_app/UI/Pages/Work%20Order/workOrder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import '../../../Data/Data Sources/API Service (Regions)/apiserviceregions.dart'
 import '../../../Data/Models/connectionmodel.dart';
 import '../../../Data/Models/regionmodels.dart';
 import '../../Bloc/auth_cubit.dart';
+import '../../Bloc/form_data_cubit.dart';
 import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/dropdownservice.dart';
@@ -40,7 +42,7 @@ import '../ISP Dashboard/ispDashboard.dart';
 /// - [String?] [selectedDivision], [selectedDistrict], [selectedUpazila], [selectedUnion], [selectedNTTNProvider]: Store selected values for each dropdown.
 ///
 /// Loading states are managed by:
-/// - [bool] [isLoadingDivision], [isLoadingDistrict], [isLoadingUpzila], [isLoadingUnion], [isLoadingNTTNProvider]: Track whether the respective data is being loaded.
+/// - [bool] [isLoading], [isLoadingDistrict], [isLoadingUpzila], [isLoadingUnion], [isLoadingNTTNProvider]: Track whether the respective data is being loaded.
 ///
 /// Other important variables include:
 /// - [TextEditingController] [_linkcapcitycontroller]: Manages the input for link capacity when 'Others' is selected.
@@ -50,7 +52,7 @@ import '../ISP Dashboard/ispDashboard.dart';
 /// - [bool] [isSelected]: Tracks if a particular form field has been selected.
 ///
 /// The [initializeApiService] method initializes the [RegionAPIService] with the user's authentication token.
-/// Various [fetch] methods (e.g., [fetchDivisions], [fetchDistricts], [fetchUpazilas], [fetchUnions], [fetchNTTNProviders]) are used to retrieve data from the API.
+/// Various [fetch] methods (e.g., [fetchPackages], [fetchDistricts], [fetchUpazilas], [fetchUnions], [fetchNTTNProviders]) are used to retrieve data from the API.
 ///
 /// The [initState] method initializes the form with default values and sets up listeners for user input.
 /// The [dispose] method cleans up resources when the widget is removed from the widget tree.
@@ -70,15 +72,16 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   late TextEditingController _latitudeLongtitudeController =
       TextEditingController();
   late String _requestType = '';
-  late String _divisionID;
-  late String _districtID;
-  late String _upazilaID;
-  late String _unionID;
+  late String _divisionID = '';
+  late String _districtID = '';
+  late String _upazilaID = '';
+  late String _unionID = '';
   late int _NTTNID = 0;
   String _selectedService = '';
   late String _NTTNPhoneNumber;
   late String _linkCapacityID = '';
   late String _selectedServiceType = '';
+  late String _errormsg;
   late TextEditingController _remark = TextEditingController();
   bool _isButtonEnabled = false;
 
@@ -95,16 +98,17 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     return apiService;
   }
 
-  List<Division> divisions = [];
-  List<District> districts = [];
-  List<Upazila> upazilas = [];
-  List<Union> unions = [];
+  List<Division>? divisions = [];
+  List<District>? districts = [];
+  List<Upazila>? upazilas = [];
+  List<Union>? unions = [];
   List<NTTNProvider> nttnProviders = [];
   String? selectedDivision;
   String? selectedDistrict;
   String? selectedUpazila;
   String? selectedUnion;
   String? selectedNTTNProvider;
+  String? selectedServiceType;
   bool isLoadingDivision = false;
   bool isLoadingDistrict = false;
   bool isLoadingUpzila = false;
@@ -117,19 +121,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   late String providerValues = '';
   bool isSelected = false;
   late TextEditingController _linkcapcitycontroller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _connectionRequest = ConnectionRequestModel(
-      divisionId: "",
-      districtId: "",
-      upazilaId: "",
-      unionId: "",
-      nttnProvider: 0,
-      linkCapacity: "",
-      remark: "",
-    );
     _remark = TextEditingController();
     _remark.addListener(() {
       setState(() {
@@ -148,6 +144,19 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   Future<void> fetchDivisions() async {
     setState(() {
       isLoadingDivision = true;
+      selectedDistrict = null;
+      selectedUpazila = null;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      districts = null;
+      upazilas = null;
+      unions = null;
+      nttnProviders = [];
+      _divisionID = '';
+      _districtID = '';
+      _upazilaID = '';
+      _unionID = '';
+      _NTTNID = 0;
     });
     try {
       await initializeApiService();
@@ -158,6 +167,19 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           print('Division Name: ${division.name}');
           print('Division ID: ${division.id}');
         }
+        selectedDistrict = null;
+        selectedUpazila = null;
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        districts = null;
+        upazilas = null;
+        unions = null;
+        nttnProviders = [];
+        _divisionID = '';
+        _districtID = '';
+        _upazilaID = '';
+        _unionID = '';
+        _NTTNID = 0;
         isLoadingDivision = false;
       });
     } catch (e) {
@@ -168,6 +190,16 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   Future<void> fetchDistricts(String divisionId) async {
     setState(() {
       isLoadingDistrict = true;
+      selectedUpazila = null;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      upazilas = null;
+      unions = null;
+      nttnProviders = [];
+      _districtID = '';
+      _upazilaID = '';
+      _unionID = '';
+      _NTTNID = 0;
     });
     try {
       final List<District> fetchedDistricts =
@@ -178,6 +210,16 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           print('District Name: ${district.name}');
         }
         print(districts);
+        selectedUpazila = null;
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        upazilas = null;
+        unions = null;
+        nttnProviders = [];
+        _districtID = '';
+        _upazilaID = '';
+        _unionID = '';
+        _NTTNID = 0;
         isLoadingDistrict = false;
       });
     } catch (e) {
@@ -188,6 +230,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   Future<void> fetchUpazilas(String districtId) async {
     setState(() {
       isLoadingUpzila = true;
+      selectedUnion = null;
+      selectedNTTNProvider = null;
+      unions = null;
+      nttnProviders = [];
+      _upazilaID = '';
+      _unionID = '';
+      _NTTNID = 0;
     });
     try {
       final List<Upazila> fetchedUpazilas =
@@ -197,6 +246,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         for (Upazila upazila in fetchedUpazilas) {
           print('Upzila Name: ${upazila.name}');
         }
+        selectedUnion = null;
+        selectedNTTNProvider = null;
+        unions = null;
+        nttnProviders = [];
+        _upazilaID = '';
+        _unionID = '';
+        _NTTNID = 0;
         isLoadingUpzila = false;
       });
     } catch (e) {
@@ -207,6 +263,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   Future<void> fetchUnions(String upazilaId) async {
     setState(() {
       isLoadingUnion = true;
+      selectedNTTNProvider = null;
+      nttnProviders = [];
+      _unionID = '';
+      _NTTNID = 0;
     });
     try {
       final List<Union> fetchedUnions = await apiService.fetchUnions(upazilaId);
@@ -216,6 +276,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           print('Union Name: ${union.name}');
           print('Union ID: ${union.id}');
         }
+        selectedNTTNProvider = null;
+        nttnProviders = [];
+        _unionID = '';
+        _NTTNID = 0;
         isLoadingUnion = false;
       });
     } catch (e) {
@@ -226,6 +290,9 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
   Future<void> fetchNTTNProviders(String unionId) async {
     setState(() {
       isLoadingNTTNProvider = true;
+      selectedNTTNProvider = null;
+      nttnProviders = [];
+      _NTTNID = 0;
     });
     try {
       final List<NTTNProvider> fetchedNTTNProviders =
@@ -291,7 +358,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Connection Request',
+                  Text('FR/Link Request Form',
                       style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
@@ -349,10 +416,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                         child: DropdownFormField(
                           hintText: 'Select Service Type',
                           dropdownItems: dropdownItems.toList(),
-                          initialValue: selectedLinkCapacity,
+                          initialValue: selectedServiceType,
                           onChanged: (newValue) {
                             setState(() {
-                              selectedLinkCapacity = newValue;
+                              selectedServiceType = newValue;
                               _selectedServiceType = newValue ?? '';
                               print(_selectedServiceType);
                             });
@@ -363,45 +430,53 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 100,
-                    child: TextFormField(
-                      controller: _latitudeLongtitudeController,
-                      decoration: InputDecoration(
-                        labelText: 'Latitude and Longitude of The connection',
-                        hintText: 'e.g., 12.3456, 65.4321',
-                        helperText: 'Enter in format: latitude, longitude',
-                        filled: true,
-                        fillColor: Colors.white,
-                        labelStyle: const TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
+                    child: Form( // Wrap the TextFormField with a Form widget
+                      key: _formKey,  // Assign the form key to the form widget
+                      child: TextFormField(
+                        controller: _latitudeLongtitudeController,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true), // Ensure proper input
+                        decoration: InputDecoration(
+                          labelText: 'Latitude and Longitude of The connection',
+                          hintText: 'e.g., 12.3456, 65.4321',
+                          helperText: 'Enter in format: latitude, longitude',
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelStyle: const TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ),
+                          border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10))
+                          ),
+                        ),
+                        style: const TextStyle(
+                          color: Color.fromRGBO(143, 150, 158, 1),
                           fontSize: 16,
+                          fontWeight: FontWeight.bold,
                           fontFamily: 'default',
                         ),
-                        border: const OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter latitude and longitude'; // Form-level error message
+                          }
+
+                          // Regular expression to validate latitude, longitude format
+                          final latLongRegExp = RegExp(
+                              r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
+
+                          if (!input.contains(',')) {
+                            return 'Please use a comma to separate latitude and longitude'; // Error if comma is missing
+                          }
+
+                          if (!latLongRegExp.hasMatch(input)) {
+                            return 'Invalid format. Use "latitude, longitude"'; // Error if format doesn't match
+                          }
+
+                          return null; // If all validations pass, return null
+                        },
                       ),
-                      style: const TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter latitude and longitude';
-                        }
-
-                        // Regular expression to validate latitude, longitude format
-                        final latLongRegExp = RegExp(
-                            r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
-
-                        if (!latLongRegExp.hasMatch(input)) {
-                          return 'Invalid format. Use "latitude, longitude"';
-                        }
-
-                        return null;
-                      },
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -428,9 +503,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           children: [
                             DropdownFormField(
                               hintText: 'Select Division',
-                              dropdownItems: divisions
-                                  .map((division) => division.name)
-                                  .toList(),
+                              dropdownItems: divisions != null
+                                  ? divisions!
+                                      .map((division) => division.name)
+                                      .toList()
+                                  : null,
                               initialValue: selectedDivision,
                               onChanged: (newValue) {
                                 setState(() {
@@ -438,12 +515,20 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                   selectedUpazila = null;
                                   selectedUnion = null;
                                   selectedNTTNProvider = null;
+                                  districts = null;
+                                  upazilas = null;
+                                  unions = null;
+                                  nttnProviders = [];
+                                  _districtID = '';
+                                  _upazilaID = '';
+                                  _unionID = '';
+                                  _NTTNID = 0;
                                   selectedDivision = newValue;
                                 });
                                 if (newValue != null) {
                                   // Find the selected division object
                                   Division selectedDivisionObject =
-                                      divisions.firstWhere(
+                                      divisions!.firstWhere(
                                     (division) => division.name == newValue,
                                   );
                                   if (selectedDivisionObject != null) {
@@ -484,9 +569,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           children: [
                             DropdownFormField(
                               hintText: 'Select District',
-                              dropdownItems: districts
-                                  .map((district) => district.name)
-                                  .toList(),
+                              dropdownItems: districts != null
+                                  ? districts!
+                                      .map((district) => district.name)
+                                      .toList()
+                                  : null,
                               initialValue: selectedDistrict,
                               onChanged: (newValue) {
                                 setState(() {
@@ -494,12 +581,18 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                   selectedUpazila = null;
                                   selectedUnion = null;
                                   selectedNTTNProvider = null;
+                                  upazilas = null;
+                                  unions = null;
+                                  nttnProviders = [];
+                                  _upazilaID = '';
+                                  _unionID = '';
+                                  _NTTNID = 0;
                                   selectedDistrict = newValue;
                                 });
                                 if (newValue != null) {
                                   // Find the selected division object
                                   District selectedDistrictObject =
-                                      districts.firstWhere(
+                                      districts!.firstWhere(
                                     (district) => district.name == newValue,
                                   );
                                   if (selectedDistrictObject != null) {
@@ -541,20 +634,26 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           children: [
                             DropdownFormField(
                               hintText: 'Select Upazila',
-                              dropdownItems: upazilas
-                                  .map((upazila) => upazila.name)
-                                  .toList(),
+                              dropdownItems: upazilas != null
+                                  ? upazilas!
+                                      .map((upazila) => upazila.name)
+                                      .toList()
+                                  : null,
                               initialValue: selectedUpazila,
                               onChanged: (newValue) {
                                 setState(() {
-                                  selectedUnion = null; // Reset
-                                  selectedNTTNProvider = null; // Reset
+                                  selectedUnion = null;
+                                  selectedNTTNProvider = null;
+                                  unions = null;
+                                  nttnProviders = [];
+                                  _unionID = '';
+                                  _NTTNID = 0;
                                   selectedUpazila = newValue;
                                 });
                                 if (newValue != null) {
                                   // Find the selected division object
                                   Upazila selectedUpazilaObject =
-                                      upazilas.firstWhere(
+                                      upazilas!.firstWhere(
                                     (upazila) => upazila.name == newValue,
                                   );
                                   if (selectedUpazilaObject != null) {
@@ -596,19 +695,23 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           children: [
                             DropdownFormField(
                               hintText: 'Select Union',
-                              dropdownItems:
-                                  unions.map((union) => union.name).toList(),
+                              dropdownItems: unions != null
+                                  ? unions!.map((union) => union.name).toList()
+                                  : null,
                               initialValue: selectedUnion,
                               onChanged: (newValue) {
                                 setState(() {
-                                  selectedNTTNProvider = null; // Reset
+                                  selectedNTTNProvider = null;
+                                  nttnProviders = [];
+                                  _NTTNID = 0;
                                   selectedUnion = newValue;
                                   isSelected = true;
                                   print(isSelected);
                                 });
                                 if (newValue != null) {
                                   // Find the selected division object
-                                  Union selectedUnionObject = unions.firstWhere(
+                                  Union selectedUnionObject =
+                                      unions!.firstWhere(
                                     (union) => union.name == newValue,
                                   );
                                   if (selectedUnionObject != null) {
@@ -697,75 +800,76 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                       ]
                     ]
                   ],
-                  if (selectedNTTNProvider != null)
+                  if (selectedNTTNProvider != null) ...[
                     SizedBox(
                       height: 10,
                     ),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Select Link Capacity',
-                          dropdownItems: linkCapacityOptions.toList(),
-                          initialValue: selectedLinkCapacity,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedLinkCapacity = newValue;
-                              _linkCapacityID = newValue ?? '';
-                              print(_linkCapacityID);
-                            });
-                          },
-                        )),
-                  ),
-                  if (_linkCapacityID == 'Others') ...[
-                    SizedBox(
-                      height: 15,
+                    Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'Select Link Capacity',
+                            dropdownItems: linkCapacityOptions.toList(),
+                            initialValue: selectedLinkCapacity,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedLinkCapacity = newValue;
+                                _linkCapacityID = newValue ?? '';
+                                print(_linkCapacityID);
+                              });
+                            },
+                          )),
                     ),
-                    Container(
-                      width: screenWidth * 0.9,
-                      height: screenWidth * 0.2,
-                      child: TextFormField(
-                        controller: _linkcapcitycontroller,
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter your required link capacity';
-                          }
-                          return null;
-                        },
-                        style: const TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default',
-                        ),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          labelText: 'Enter your required Link Capacity',
-                          labelStyle: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
+                    if (_linkCapacityID == 'Others') ...[
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: screenWidth * 0.9,
+                        height: screenWidth * 0.2,
+                        child: TextFormField(
+                          controller: _linkcapcitycontroller,
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter your required link capacity';
+                            }
+                            return null;
+                          },
+                          style: const TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
                             fontSize: 16,
+                            fontWeight: FontWeight.bold,
                             fontFamily: 'default',
                           ),
-                          alignLabelWithHint: true,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 80),
-                          border: const OutlineInputBorder(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: 'Enter your required Link Capacity',
+                            labelStyle: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            alignLabelWithHint: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 80),
+                            border: const OutlineInputBorder(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10))),
+                          ),
                         ),
                       ),
-                    ),
+                    ]
                   ],
                   SizedBox(
                     height: 15,
@@ -869,59 +973,31 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     // Validate and save form data
     if (_validateAndSave()) {
       const snackBar = SnackBar(
-        content: Text('Processing'),
+        content: Text('Proceeding to next page'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print('triggered Validation');
-      // Initialize connection request model
-      _connectionRequest = ConnectionRequestModel(
+      final authCubit = context.read<AuthCubit>();
+      final token = (authCubit.state as AuthAuthenticated).token;
+
+      final pageOneCubit = context.read<FormDataCubit>();
+
+      pageOneCubit.updatePageOneData(
         divisionId: _divisionID,
         districtId: _districtID,
         upazilaId: _upazilaID,
         unionId: _unionID,
+        serviceType: _selectedServiceType,
+        latlong: _latitudeLongtitudeController.text,
         nttnProvider: _NTTNID,
         linkCapacity: _linkCapacityID,
         remark: _remark.text,
       );
-      final authCubit = context.read<AuthCubit>();
-      final token = (authCubit.state as AuthAuthenticated).token;
 
-      // Perform any additional actions before sending the request
-      // Send the connection request using API service
-      ConnectionAPIService.create(token)
-          .postConnectionRequest(_connectionRequest)
-          .then((response) {
-        // Handle successful request
-        print('Connection request sent successfully!!');
-        if (response == 'Connection Request Already Exist') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => WorkOrderUI()),
-          );
-          const snackBar = SnackBar(
-            content: Text(
-                'Request already Sumbitted, please wait for it to be reviewed!'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }
-        if (response == 'Please at first request a connection request') {
-          const snackBar = SnackBar(
-            content: Text('Create New Connection First!'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }
-        if (response != null && response == "Connection Request Submitted") {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => WorkOrderUI()));
-          const snackBar = SnackBar(
-            content: Text('Request Submitted!'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }
-      }).catchError((error) {
-        // Handle error
-        print('Error sending connection request: $error');
-      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => WorkOrderUI()),
+      );
     } else {
       const snackBar = SnackBar(
         content: Text('Please fill up all fields'),
@@ -929,6 +1005,15 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
+
+  bool ErrorMsg() {
+    if (_formKey.currentState?.validate() ?? false) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
   bool _validateAndSave() {
     final divisionIdIsValid = _divisionID.isNotEmpty;
@@ -939,6 +1024,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     final linkCapacityIsValid = _linkCapacityID.isNotEmpty;
     final remarkIsValid = _remark.text.isNotEmpty;
     final serviceTypeisValid = _selectedServiceType.isNotEmpty;
+    final latitudeLongitudeIsValid = (_formKey.currentState?.validate() ?? false) ? true : false;
+    ErrorMsg();
 
     print(linkCapacityIsValid);
 
@@ -950,6 +1037,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         nttNIdIsValid &&
         linkCapacityIsValid &&
         serviceTypeisValid &&
+        latitudeLongitudeIsValid &&
         remarkIsValid;
 
     return allFieldsAreValid;

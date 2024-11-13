@@ -11,6 +11,8 @@
 /// - [linkCapacity]: A String representing the capacity of the link being requested.
 /// - [remark]: A String containing any additional remarks or comments about the connection request.
 class ConnectionRequestModel {
+  final String serviceType;
+  final String latlong;
   /// The ID of the division where the connection is requested.
   final String divisionId;
 
@@ -33,6 +35,12 @@ class ConnectionRequestModel {
 
   /// Any additional remarks or comments about the connection request.
   final String remark;
+  final String? packageName;
+  final String? contractDuration;
+  final String? discount;
+  final String? netPayment;
+  final String? paymentMode;
+  final String? orderRemark;
 
   /// Constructor for `ConnectionRequestModel`.
   ///
@@ -45,6 +53,14 @@ class ConnectionRequestModel {
     required this.nttnProvider,
     required this.linkCapacity,
     required this.remark,
+    required this.serviceType,
+    required this.latlong,
+    this.contractDuration,
+    this.discount,
+    this.netPayment,
+    this.paymentMode,
+    this.packageName,
+    this.orderRemark,
   });
 
   /// Converts the `ConnectionRequestModel` instance into a JSON map.
@@ -59,6 +75,14 @@ class ConnectionRequestModel {
       'nttn_provider': nttnProvider,
       'link_capacity': linkCapacity,
       'remark': remark,
+      'lat_and_long' : latlong,
+      'service_type': serviceType,
+      'package_name': packageName,
+      'contract_duration': contractDuration,
+      'discount': discount,
+      'net_payment': netPayment,
+      'payment_mode': paymentMode,
+      'order_remark': orderRemark,
     };
   }
 }

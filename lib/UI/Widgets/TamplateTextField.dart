@@ -17,6 +17,7 @@ class CustomTextInput extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
   final bool obscureText;
+  final String? suffix;
 
   const CustomTextInput({
     Key? key,
@@ -25,6 +26,7 @@ class CustomTextInput extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    this.suffix,
   }) : super(key: key);
 
   @override
@@ -49,6 +51,7 @@ class CustomTextInput extends StatelessWidget {
           border: const OutlineInputBorder(
               borderRadius:
               const BorderRadius.all(Radius.circular(10))),
+          suffixText: suffix,
           labelText: label,
           labelStyle: const TextStyle(
             color: Colors.black87,

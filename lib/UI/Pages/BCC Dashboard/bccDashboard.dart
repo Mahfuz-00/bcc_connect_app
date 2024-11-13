@@ -97,6 +97,9 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
   Future<void> fetchConnections() async {
     if (_isFetched) return;
     try {
+      setState(() {
+        _isLoading = true;
+      });
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
       final apiService = await BCCConnectionAPIService.create(token);
@@ -193,10 +196,12 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
         pendingConnectionRequests = pendingWidgets;
         acceptedConnectionRequests = acceptedWidgets;
         _isFetched = true;
+        _isLoading = false;
       });
     } catch (e) {
       print('Error fetching connection requests: $e');
-      _isFetched = false;
+      _isFetched = true;
+      _isLoading = false;
     }
   }
 
@@ -668,7 +673,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                           const SizedBox(height: 10),
                                     ),
                                   )
-                                : !_isLoading
+                                : _isLoading
                                     ? Center(
                                         child: CircularProgressIndicator(),
                                       )
