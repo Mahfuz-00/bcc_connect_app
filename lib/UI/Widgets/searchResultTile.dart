@@ -6,41 +6,29 @@ import 'package:flutter/material.dart';
 /// connection type, provider, and status in a structured format.
 ///
 /// **Variables:**
-/// - [Name]: The name of the person or entity.
-/// - [OrganizationName]: The name of the organization.
-/// - [MobileNo]: The mobile number associated with the connection.
-/// - [ConnectionType]: The type of connection (e.g., Pending, Accepted).
 /// - [Provider]: The service provider for the connection.
-/// - [Status]: The current status of the connection.
+/// - [ContactName]: The contact name associated with the provider.
+/// - [ContactMobileNo]: The contact mobile number associated with the provider.
+/// - [ContactEmail]: The contact email associated with the provider.
+/// - [Connections]: A list of maps, where each map contains details about a specific connection.
 class SearchConnectionsInfoCard extends StatelessWidget {
-  final String? Name; // The name of the person or entity.
-  final String? OrganizationName; // The name of the organization.
-  final String? MobileNo; // The mobile number associated with the connection.
-  final String?
-      ConnectionType; // The type of connection (e.g., Pending, Accepted).
-  final String Provider; // The service provider for the connection.
-  final String? Status; // The current status of the connection.
-  final String? ContactName;
-  final String? ContactMobileNo;
-  final String? ContactEmail;
+  final String? Provider; // The service provider for the connection.
+  final String? ContactName; // The contact name associated with the provider.
+  final String? ContactMobileNo; // The contact mobile number associated with the provider.
+  final String? ContactEmail; // The contact email associated with the provider.
+  final List<Map<String, String>>? Connections; // A list of maps, each containing connection details.
 
   const SearchConnectionsInfoCard({
     Key? key,
-    required this.Name, // Required for displaying the name.
-    required this.OrganizationName, // Required for displaying the organization name.
-    required this.MobileNo, // Required for displaying the mobile number.
-    required this.ConnectionType, // Required for displaying the connection type.
-    required this.Provider, // Required for displaying the provider.
-    required this.Status, // Required for displaying the status.
+    required this.Provider,
     required this.ContactName,
     required this.ContactMobileNo,
     required this.ContactEmail,
+    required this.Connections,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     return Material(
       elevation: 5, // Shadow effect to give a material design feel.
       borderRadius: BorderRadius.circular(10), // Rounded corners.
@@ -71,23 +59,17 @@ class SearchConnectionsInfoCard extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.symmetric(horizontal: 40),
                 child: Divider()),
-            buildProviderRow('Provider', Provider),
-            // Display provider.
-            const SizedBox(height: 5),
+            buildProviderRow('Provider', Provider!),
             if (ContactName != null && ContactName != 'none') ...[
               buildProviderRow('Contact Name', ContactName!),
-              const SizedBox(height: 5),
             ],
             if (ContactMobileNo != null && ContactMobileNo != 'none') ...[
               buildProviderRow('Contact Mobile No', ContactMobileNo!),
-              const SizedBox(height: 5),
             ],
             if (ContactEmail != null && ContactEmail != 'none') ...[
               buildProviderRow('Contact Email', ContactEmail!),
-              const SizedBox(height: 10),
             ],
             Divider(),
-            // Display contact details.
             const SizedBox(height: 10),
             Center(
               child: Text(
@@ -103,42 +85,34 @@ class SearchConnectionsInfoCard extends StatelessWidget {
               ),
             ),
             Padding(padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Divider()),
-            if (Name != null && Name != 'none') ...[
-              buildProviderRow('Name', Name!),
-              const SizedBox(height: 5),
-            ],
-            if (Name == null || Name == 'none') ...[
-              Text(
-                'No ISP Connection in this location',
-                style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 24,
-                    height: 1.6,
-                    letterSpacing: 1.3,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default'),
+                child: Divider()),
+            if (Connections != null && Connections!.isNotEmpty) ...[
+              for (var connection in Connections!) ...[
+                if (connection.isNotEmpty) ...[
+                  buildProviderRow('Connection Type', connection['connection_type']!),
+                  buildProviderRow('Name', connection['name']!),
+                  buildProviderRow('Organization', connection['organization']!),
+                  buildProviderRow('Mobile', connection['mobile']!),
+                  buildProviderRow('Status', connection['status']!),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ] else ...[
+              Center(
+                child: Text(
+                  'No ISP Connection in this location',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 24,
+                      height: 1.6,
+                      letterSpacing: 1.3,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default'),
+                ),
               ),
               const SizedBox(height: 5),
             ],
-            if (OrganizationName != null && OrganizationName != 'none') ...[
-              buildProviderRow('Organization', OrganizationName!),
-              const SizedBox(height: 5),
-            ],
-            if (MobileNo != null && MobileNo != 'none') ...[
-              buildProviderRow('Mobile No', MobileNo!),
-              const SizedBox(height: 5),
-            ],
-            if (ConnectionType != null && ConnectionType != 'none') ...[
-              buildProviderRow('Connection Type', ConnectionType!),
-              const SizedBox(height: 5),
-            ],
-            if (Status != null && Status != 'none') ...[
-              buildProviderRow('Status', Status!),
-              const SizedBox(height: 5),
-            ],
-            // Display status.
-            const SizedBox(height: 5),
           ],
         ),
       ),

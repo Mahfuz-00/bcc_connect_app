@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:bcc_connect_app/Data/Models/package.dart';
 import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
@@ -75,9 +76,9 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   late TextEditingController _discountController = TextEditingController();
   late TextEditingController _priceController = TextEditingController();
   late TextEditingController _netPaymentController = TextEditingController();
-  late TextEditingController _durationController = TextEditingController();
   late TextEditingController _linkcapcitycontroller = TextEditingController();
-  late TextEditingController _workOrderRemarkController = TextEditingController();
+  late TextEditingController _workOrderRemarkController =
+      TextEditingController();
   late String _packageID;
   late String _PaymentMode = '';
   bool _isPicked = false;
@@ -110,45 +111,48 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   double packageRate = 0;
   double discount = 0;
 
-  // Method to calculate Net Payment
   void _calculateNetPayment() {
     setState(() {
-      // Parse the package rate and discount to double, if valid
+      int contractDuration = int.parse(_contractDurationController.text);
       packageRate = double.tryParse(_priceController.text) ?? 0;
       discount = _parseDiscount(_discountController.text);
 
-      print('Package Rate: $packageRate');
-      print('Discount: $discount');
+      double netPayment;
+      if (discount == 0) {
+        // No discount
+        netPayment = contractDuration * packageRate;
+      } else if (discount > 1) {
+        // Absolute discount
+        netPayment = (contractDuration * packageRate) - discount;
+      } else {
+        // Percentage discount
+        netPayment = (packageRate - (packageRate * discount)) * contractDuration;
+      }
 
-      // Apply the discount based on its type (percentage or absolute)
-      double netPayment = discount == null
-          ? packageRate  // If no discount, the net payment is the full price
-          : (discount > 1 ? packageRate - discount : packageRate - (packageRate * discount));  // If absolute or percentage
-
-      print('Net Payment: $netPayment');
-
-      // Update the net payment controller
-      _netPaymentController.text = netPayment.toStringAsFixed(2); // Round to 2 decimal places
+      _netPaymentController.text = netPayment.toStringAsFixed(2);
     });
   }
 
-  // Helper function to parse the discount and figure out its type (absolute or percentage)
   double _parseDiscount(String discountText) {
-    print('Parsing discount: $discountText');
-
+    // Check if the discount is a percentage
     if (discountText.contains('%')) {
-      // If discount contains a %, treat it as a percentage
       String percentageText = discountText.replaceAll('%', '').trim();
       double percentage = double.tryParse(percentageText) ?? 0;
-      print('Parsed percentage: $percentage');
-      return percentage / 100; // Convert to decimal (20% => 0.2)
+      return percentage / 100; // Return as a fraction
     } else {
-      // Otherwise, treat it as an absolute currency discount
-      double absoluteDiscount = double.tryParse(discountText) ?? 0;
-      print('Parsed absolute discount: $absoluteDiscount');
-      return absoluteDiscount;
+      // If no percentage sign, treat it as an absolute discount
+      return double.tryParse(discountText) ?? 0;
     }
   }
+
+  late String divisionId;
+  late String districtId;
+  late String upazilaId;
+  late String unionId;
+  late String serviceType;
+  late String latlong;
+  late int nttnProvider;
+  late String requestRemark;
 
   @override
   void initState() {
@@ -157,11 +161,20 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       final datafromfirstpageCubit = context.read<FormDataCubit>();
       String? capacity = datafromfirstpageCubit.state.linkCapacity;
       _capacityController.text = capacity!;
+      divisionId = datafromfirstpageCubit.state.divisionId!;
+      districtId = datafromfirstpageCubit.state.districtId!;
+      upazilaId = datafromfirstpageCubit.state.upazilaId!;
+      unionId = datafromfirstpageCubit.state.unionId!;
+      serviceType = datafromfirstpageCubit.state.serviceType!;
+      latlong = datafromfirstpageCubit.state.latlong!;
+      nttnProvider = datafromfirstpageCubit.state.nttnProvider!;
+      requestRemark = datafromfirstpageCubit.state.remark!;
     });
     super.initState();
     // Add listeners to update the calculation automatically
     _priceController.addListener(_calculateNetPayment);
     _discountController.addListener(_calculateNetPayment);
+    _contractDurationController.addListener(_calculateNetPayment);
     _connectionRequest = ConnectionRequestModel(
       divisionId: "",
       districtId: "",
@@ -263,6 +276,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                   CustomTextInput(
                     controller: _contractDurationController,
                     label: 'Contact Duration (Month)',
+                    keyboardType: TextInputType.phone,
                     validator: (input) {
                       if (input == null || input.isEmpty) {
                         return 'Please enter your contact duration (month)';
@@ -489,7 +503,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                              const Color.fromRGBO(25, 192, 122, 1),
+                                  const Color.fromRGBO(25, 192, 122, 1),
                               fixedSize: Size(
                                   MediaQuery.of(context).size.width * 0.9,
                                   MediaQuery.of(context).size.height * 0.075),
@@ -577,38 +591,54 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   }
 
   void _connectionRequestForm() {
-    print('Remark: ${_workOrderRemarkController.text}');
-
-    if (_PaymentMode == 'Others') {
-      _PaymentMode = _linkcapcitycontroller.text;
-    }
-
-    print('Capacity: $_PaymentMode');
+    print('Service Type $serviceType');
+    print('Latititude and Longtitude: $latlong');
+    print('Division: $divisionId');
+    print('District: $districtId');
+    print('Upazila: $upazilaId');
+    print('Union: $unionId');
+    print('NTTN: $nttnProvider');
+    print('Link Capacity: ${_capacityController.text}');
+    print('Request Remark: $requestRemark');
+    print('Contract Duration: ${_contractDurationController.text}');
+    print('Package: $selectedPackage');
+    print('Discount: ${_discountController.text}');
+    print('Net Payment: ${_netPaymentController.text}');
+    print('Payment Mode: $selectedPaymentMode');
+    print('Work Order Remark: ${_workOrderRemarkController.text}');
 
     // Validate and save form data
     if (_validateAndSave()) {
       const snackBar = SnackBar(
-        content: Text('Processing'),
+        content: Text('Processing. Please wait...'),
+        duration: Duration(seconds: 10),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print('triggered Validation');
       // Initialize connection request model
-      /* _connectionRequest = ConnectionRequestModel(
-        divisionId: _divisionID,
-        districtId: _districtID,
-        upazilaId: _upazilaID,
-        unionId: _unionID,
-        nttnProvider: _NTTNID,
-        linkCapacity: _linkCapacityID,
-        remark: _remark.text,
-      );*/
+      _connectionRequest = ConnectionRequestModel(
+        divisionId: divisionId,
+        districtId: districtId,
+        upazilaId: upazilaId,
+        unionId: unionId,
+        nttnProvider: nttnProvider,
+        linkCapacity: _capacityController.text,
+        remark: requestRemark,
+        serviceType: serviceType,
+        latlong: latlong,
+        contractDuration: _contractDurationController.text,
+        packageName:  _packageID,
+        discount: _discountController.text,
+        netPayment: _netPaymentController.text,
+        paymentMode: selectedPaymentMode,
+      );
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
 
       // Perform any additional actions before sending the request
       // Send the connection request using API service
       ConnectionAPIService.create(token)
-          .postConnectionRequest(_connectionRequest)
+          .postConnectionRequest(_connectionRequest, _file)
           .then((response) {
         // Handle successful request
         print('Connection request sent successfully!!');
@@ -654,7 +684,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
   bool _validateAndSave() {
     final contactDurationIsValid = _contractDurationController.text.isNotEmpty;
-    final packageNameIsValid = selectedPackage?.isNotEmpty;
+    final packageNameIsValid =  _packageID.isNotEmpty;
     final discountIsValid = _discountController.text.isNotEmpty;
     final netPaymentIsValid = _netPaymentController.text.isNotEmpty;
     final paymentmodeIsValid = _PaymentMode.isNotEmpty;
@@ -665,10 +695,14 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
     print(linkCapacityIsValid);
 
     // Check if all fields are valid
-    final allFieldsAreValid =
-    contactDurationIsValid && packageNameIsValid! && discountIsValid &&
-        netPaymentIsValid && paymentmodeIsValid && packageIdIsValid &&
-        linkCapacityIsValid && remarkIsValid;
+    final allFieldsAreValid = contactDurationIsValid &&
+        packageNameIsValid! &&
+        discountIsValid &&
+        netPaymentIsValid &&
+        paymentmodeIsValid &&
+        packageIdIsValid &&
+        linkCapacityIsValid &&
+        remarkIsValid && _file != null;
 
     return allFieldsAreValid;
   }
@@ -717,7 +751,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content:
-                Text("File exceeds the maximum allowed size of 21 MB."),
+                    Text("File exceeds the maximum allowed size of 21 MB."),
                 duration: Duration(seconds: 3),
               ),
             );

@@ -97,7 +97,7 @@ class _NTTNActiveConnectionListUIState
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
-      /*  setState(() {
+        /*  setState(() {
           _isFetched = true;
         });*/
         return;
@@ -141,11 +141,17 @@ class _NTTNActiveConnectionListUIState
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
                   ConnectionType: request['connection_type'],
-                  ApplicationID: request['application_id'].toString(),
+                  FRNumber: request['fr_number'].toString(),
                   Location: request['location'],
                   Status: request['status'],
                   LinkCapacity: request['link'],
                   Remark: request['remark'],
+                  SerivceType: request['service_type'],
+                  Capacity: request['capacity'],
+                  WorkOrderNumber: request['work_order_number'],
+                  ContactDuration: request['contract_duration'],
+                  NetPayment: request['net_payment'],
+                  OrgAddress: request['client_address'],
                 ),
               ),
             );
@@ -233,11 +239,17 @@ class _NTTNActiveConnectionListUIState
                     OrganizationName: request['organization'],
                     MobileNo: request['mobile'],
                     ConnectionType: request['connection_type'],
-                    ApplicationID: request['application_id'].toString(),
+                    FRNumber: request['fr_number'].toString(),
                     Location: request['location'],
                     Status: request['status'],
                     LinkCapacity: request['link'],
                     Remark: request['remark'],
+                    SerivceType: request['service_type'],
+                    Capacity: request['capacity'],
+                    WorkOrderNumber: request['work_order_number'],
+                    ContactDuration: request['contract_duration'],
+                    NetPayment: request['net_payment'],
+                    OrgAddress: request['client_address'],
                   ),
                 ),
               );

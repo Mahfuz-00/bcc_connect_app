@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 /// The [BCCConnectionsInfoCard] class is a stateless widget that
 /// displays detailed information about a BCC connection, including
 /// the [Name], [OrganizationName], [MobileNo], [ConnectionType],
-/// [Provider], [ApplicationID], and [Status].
+/// [Provider], [FRNumber], and [Status].
 ///
 /// This widget is styled as a card with rounded corners and a shadow
 /// effect for visual elevation. It organizes the information into
@@ -17,11 +17,17 @@ import 'package:intl/intl.dart';
 class BCCConnectionsInfoCard extends StatelessWidget {
   final String Name;
   final String OrganizationName;
+  final String OrgAddress;
   final String MobileNo;
   final String ConnectionType;
   final String Provider;
-  final int ApplicationID;
+  final String FRNumber;
   final String Status;
+  final String? SerivceType;
+  final String? Capacity;
+  final String? WorkOrderNumber;
+  final int? ContactDuration;
+  final num? NetPayment;
 
   /// Constructor for the `BCCConnectionsInfoCard` widget.
   ///
@@ -33,8 +39,14 @@ class BCCConnectionsInfoCard extends StatelessWidget {
     required this.MobileNo,
     required this.ConnectionType,
     required this.Provider,
-    required this.ApplicationID,
+    required this.FRNumber,
     required this.Status,
+    required this.OrgAddress,
+    this.SerivceType,
+    this.Capacity,
+    this.WorkOrderNumber,
+    this.ContactDuration,
+    this.NetPayment,
   }) : super(key: key);
 
   @override
@@ -57,10 +69,18 @@ class BCCConnectionsInfoCard extends StatelessWidget {
           children: [
             _buildRow('Name', Name),
             _buildRow('Organization Name', OrganizationName),
+            _buildRow('Organization Address', OrgAddress),
             _buildRow('Mobile No', MobileNo),
             _buildRow('Provider', Provider),
             _buildRow('Connection Type', ConnectionType),
-            _buildRowApplicationID('Application ID', ApplicationID),
+            _buildRowApplicationID('FR Number', int.parse(FRNumber)),
+            if (WorkOrderNumber != null)
+              _buildRow('Work Order Number', WorkOrderNumber!),
+            _buildRow('Service Type', SerivceType!),
+            _buildRow('Capacity', Capacity!),
+            if (ContactDuration != null)
+              _buildRow('Contact Duration', '${ContactDuration.toString()} Months'!),
+            if (NetPayment != null) _buildRow('Net Payment', '${NetPayment.toString()} TK'!),
             _buildRow('Status', Status),
           ],
         ),

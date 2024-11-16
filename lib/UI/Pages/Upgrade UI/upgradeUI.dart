@@ -15,6 +15,7 @@ import '../ISP Request and Review List (Full)/ispRequestList.dart';
 import '../ISP Request and Review List (Full)/ispReviewedList.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
+import '../Package UI/packageUI.dart';
 import '../Profile UI/profileUI.dart';
 
 /// A [StatefulWidget] representing the [UpgradeUI] for connection management.
@@ -114,11 +115,16 @@ class _ISPDashboardState extends State<UpgradeUI> {
           UserID: request['user_id'].toString(),
           ConnectionType: request['request_type'],
           NTTNProvider: request['nttn_provider'],
-          ApplicationID: request['id'].toString(),
+          FRNumber: request['fr_number'].toString(),
           Division: request['division'],
           District: request['district'],
           Upazila: request['upazila'],
           Union: request['union'],
+          ServiceType: request['service_type'],
+          Capacity: request['link_capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
         );
       }).toList();
 
@@ -306,8 +312,25 @@ class _ISPDashboardState extends State<UpgradeUI> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ISPReviewedListUI(
-                                          shouldRefresh: true)));
+                                      builder: (context) => PackageUI()));
+                            },
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('Packages',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                )),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) {
+                                  return InformationUI();
+                                },
+                              ));
                             },
                           ),
                           Divider(),

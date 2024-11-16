@@ -21,24 +21,34 @@ import 'package:intl/intl.dart';
 /// the structured information, including rows for each attribute displayed
 /// in a readable format. The time is formatted for better readability.
 class ConnectionRequestInfoCard extends StatelessWidget {
-  final String ConnectionType; // The type of connection requested.
-  final String
+  final String? ConnectionType; // The type of connection requested.
+  final String?
       NTTNProvider; // The NTTN (Nationwide Telecommunications Transmission Network) provider involved.
-  final String ApplicationID; // The unique identifier for the application.
-  final String MobileNo; // The mobile number associated with the request.
-  final String Location; // The location where the connection is requested.
-  final String Time; // The timestamp of when the request was made.
-  final String Status; // The current status of the connection request.
+  final String? FRNumber; // The unique identifier for the application.
+  final String? MobileNo; // The mobile number associated with the request.
+  final String? Location; // The location where the connection is requested.
+  final String? Time; // The timestamp of when the request was made.
+  final String? Status; // The current status of the connection request.
+  final String? SerivceType;
+  final String? Capacity;
+  final String? WorkOrderNumber;
+  final int? ContactDuration;
+  final num? NetPayment;
 
   const ConnectionRequestInfoCard({
     Key? key,
     required this.ConnectionType,
     required this.NTTNProvider,
-    required this.ApplicationID,
+    required this.FRNumber,
     required this.MobileNo,
     required this.Location,
     required this.Time,
     required this.Status,
+    this.SerivceType,
+    this.Capacity,
+    this.WorkOrderNumber,
+    this.ContactDuration,
+    this.NetPayment,
   }) : super(key: key);
 
   @override
@@ -65,13 +75,18 @@ class ConnectionRequestInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildRow('Connection Type', ConnectionType),
-            _buildRow('NTTN Provider', NTTNProvider),
-            _buildRow('Application ID', ApplicationID),
-            _buildRow('Mobile No', MobileNo),
-            _buildRow('Location', Location),
-            _buildRowTime('Time', Time),
-            _buildRow('Status', Status),
+            _buildRow('Connection Type', ConnectionType ?? ' '),
+            _buildRow('FR Number', FRNumber ?? ' '),
+            _buildRow('Work Order Number', WorkOrderNumber?.toString() ?? ' '),
+            _buildRow('NTTN Provider', NTTNProvider ?? ' '),
+            _buildRow('Mobile No', MobileNo ?? ' '),
+            _buildRow('Location', Location ?? ' '),
+            _buildRow('Service Type', SerivceType ?? ' '),
+            _buildRow('Capacity', Capacity ?? ' '),
+            _buildRow('Contact Duration', '${ContactDuration?.toString()} Months' ?? ' '),
+            _buildRow('Net Payment', '${NetPayment?.toString()} TK'?? ' '),
+            _buildRowTime('Time', Time ?? ' '),
+            _buildRow('Status', Status ?? ' '),
           ],
         ),
       ),

@@ -24,6 +24,10 @@ class UpgradeConnectionAPIService {
     required String id,
     required String requestType,
     required String linkCapacity,
+    required String contractDuration,
+    required String packageid,
+    required String discount,
+    required String netPaymnet,
     required String remark,
   }) async {
     try {
@@ -39,6 +43,10 @@ class UpgradeConnectionAPIService {
           'request_type': requestType,
           'link_capacity': linkCapacity,
           'remark': remark,
+          'contract_duration': contractDuration,
+          'service_id': packageid,
+          'discount': discount,
+          'net_payment': netPaymnet,
         }),
       );
 

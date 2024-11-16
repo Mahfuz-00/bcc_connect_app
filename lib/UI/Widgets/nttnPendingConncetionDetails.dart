@@ -8,11 +8,11 @@ import '../Pages/NTTN Dashboard/nttnDashboard.dart';
 /// A [StatelessWidget] that displays the details of a pending connection.
 ///
 /// This page provides information such as the connection's [Name],
-/// [OrganizationName], [MobileNo], [ConnectionType], [ApplicationID],
+/// [OrganizationName], [MobileNo], [ConnectionType], [FRNumber],
 /// [Location], [Status], [LinkCapacity], and [Remark]. Users can accept
 /// or reject the connection request, triggering the appropriate API call.
 ///
-/// [ispConnectionId] is derived from [ApplicationID] for API operations.
+/// [ispConnectionId] is derived from [FRNumber] for API operations.
 ///
 /// The actions that can be performed are:
 /// - Accepting the connection, which sets the [action] to 'accepted'.
@@ -21,9 +21,10 @@ class PendingConnectionDetails extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String
       OrganizationName; // The organization name linked to the connection.
+  final String OrgAddress;
   final String MobileNo; // The mobile number associated with the connection.
   final String ConnectionType; // The type of connection (e.g., New, Upgrade).
-  final String ApplicationID; // The unique ID of the application.
+  final String FRNumber; // The unique ID of the application.
   final String Location; // The location of the connection.
   final String
       Status; // The current status of the connection (e.g., Pending, Accepted).
@@ -32,6 +33,11 @@ class PendingConnectionDetails extends StatelessWidget {
   final String Remark; // Any additional remarks about the connection.
   final int
       ispConnectionId; // The connection ID parsed from ApplicationID for API operations.
+  final String? SerivceType;
+  final String? Capacity;
+  final String? WorkOrderNumber;
+  final int? ContactDuration;
+  final num? NetPayment;
 
   PendingConnectionDetails({
     Key? key,
@@ -39,12 +45,18 @@ class PendingConnectionDetails extends StatelessWidget {
     required this.OrganizationName,
     required this.MobileNo,
     required this.ConnectionType,
-    required this.ApplicationID,
+    required this.FRNumber,
     required this.Location,
     required this.Status,
     required this.LinkCapacity,
     required this.Remark,
-  })  : ispConnectionId = int.tryParse(ApplicationID) ?? 0,
+    required this.OrgAddress,
+    this.SerivceType,
+    this.Capacity,
+    this.WorkOrderNumber,
+    this.ContactDuration,
+    this.NetPayment,
+  })  : ispConnectionId = int.tryParse(FRNumber) ?? 0,
         // Parses ApplicationID to integer for API operations.
         // Initialize ispConnectionId in the constructor initializer list
         super(key: key);
@@ -110,23 +122,19 @@ class PendingConnectionDetails extends StatelessWidget {
                 height: 40,
               ),
               _buildRow('Name', Name),
-              Divider(),
               _buildRow('Organiztion Name', OrganizationName),
-              Divider(),
+              _buildRow('Organization Address', OrgAddress),
               _buildRow('Mobile No', MobileNo),
-              Divider(),
               _buildRow('Connection Type', ConnectionType),
-              Divider(),
-              _buildRow('Application ID', ApplicationID),
-              Divider(),
+              _buildRow('FR Number', FRNumber),
+              _buildRow('Work Order Number', WorkOrderNumber.toString()?? ''),
               _buildRow('Location', Location),
-              Divider(),
+              _buildRow('Service Type', SerivceType?? ''),
+              _buildRow('Capacity', Capacity?? ''),
+              _buildRow('Contact Duration', '${ContactDuration.toString()} Months' ?? ''),
+              _buildRow('Net Payment', '${NetPayment.toString()} TK'?? ''),
               _buildRow('Status', Status),
-              Divider(),
-              _buildRow('Link Capacity', LinkCapacity),
-              Divider(),
               _buildRow('Remark', Remark),
-              Divider(),
               SizedBox(height: 40),
               Row(
                 children: [
@@ -141,7 +149,8 @@ class PendingConnectionDetails extends StatelessWidget {
                     ),
                     onPressed: () {
                       action = 'accepted'; // Set action to 'accepted'.
-                      handleAcceptOrReject(action, context); // Handle accept action.
+                      handleAcceptOrReject(
+                          action, context); // Handle accept action.
                       const snackBar = SnackBar(
                         content: Text(
                             'Processing...'), // Display processing message.
@@ -184,7 +193,8 @@ class PendingConnectionDetails extends StatelessWidget {
                     ),
                     onPressed: () {
                       action = 'rejected'; // Set action to 'rejected'.
-                      handleAcceptOrReject(action, context); // Handle reject action.
+                      handleAcceptOrReject(
+                          action, context); // Handle reject action.
                       const snackBar = SnackBar(
                         content: Text(
                             'Processing...'), // Display processing message.
@@ -287,7 +297,7 @@ class PendingConnectionDetails extends StatelessWidget {
     final apiService = await ConnectionAcceptRejectAPIService.create(token);
 
     print(Action);
-    print(ApplicationID);
+    print(FRNumber);
     print(ispConnectionId);
     if (action.isNotEmpty && ispConnectionId > 0) {
       await apiService.acceptOrRejectConnection(

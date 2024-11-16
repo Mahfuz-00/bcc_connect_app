@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../Models/connectionmodel.dart';
+import 'package:path/path.dart';
 
 /// A service class for handling connection requests to the API.
 ///
@@ -19,18 +21,32 @@ class ConnectionAPIService {
 
   ConnectionAPIService.create(this.authToken);
 
-  Future<String> postConnectionRequest(ConnectionRequestModel request) async {
+  Future<String> postConnectionRequest(ConnectionRequestModel request, File? documentFile) async {
     try {
       print('API Token :: $authToken');
 
-      final http.Response response = await http.post(
-        Uri.parse('$URL/isp/new-connection'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken'
-        },
-        body: jsonEncode(request.toJson()),
-      );
+      var uri = Uri.parse('$URL/isp/new-connection');
+      var requestMultipart = http.MultipartRequest('POST', uri);
+
+      requestMultipart.headers['Authorization'] = 'Bearer $authToken';
+      requestMultipart.headers['Content-Type'] = 'multipart/form-data';
+
+      request.toJson().forEach((key, value) {
+        requestMultipart.fields[key] = value.toString();
+      });
+
+      if (documentFile != null) {
+        requestMultipart.files.add(await http.MultipartFile.fromPath(
+          'document_file',
+          documentFile.path,
+          filename: basename(documentFile.path),
+        ));
+      }
+
+      var streamedResponse = await requestMultipart.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      print(response.body);
       print(response.body);
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);

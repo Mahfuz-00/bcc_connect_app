@@ -51,7 +51,8 @@ import '../Search UI/searchUI.dart';
 class NTTNDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNDashboardUI({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const NTTNDashboardUI({Key? key, this.shouldRefresh = false})
+      : super(key: key);
 
   @override
   State<NTTNDashboardUI> createState() => _NTTNDashboardUIState();
@@ -105,7 +106,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
-     /*   setState(() {
+        /*   setState(() {
           _isFetched = true;
         });*/
         return;
@@ -158,11 +159,17 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
                   ConnectionType: request['connection_type'],
-                  ApplicationID: request['application_id'].toString(),
+                  FRNumber: request['fr_number'].toString(),
                   Location: request['location'],
                   Status: request['status'],
                   LinkCapacity: request['link'],
                   Remark: request['remark'],
+                  SerivceType: request['service_type'],
+                  Capacity: request['capacity'],
+                  WorkOrderNumber: request['work_order_number'],
+                  ContactDuration: request['contract_duration'],
+                  NetPayment: request['net_payment'],
+                  OrgAddress: request['client_address'],
                 ),
               ),
             );
@@ -191,11 +198,17 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                   OrganizationName: request['organization'],
                   MobileNo: request['mobile'],
                   ConnectionType: request['connection_type'],
-                  ApplicationID: request['application_id'].toString(),
+                  FRNumber: request['fr_number'].toString(),
                   Location: request['location'],
                   Status: request['status'],
                   LinkCapacity: request['link'],
                   Remark: request['remark'],
+                  SerivceType: request['service_type'],
+                  Capacity: request['capacity'],
+                  WorkOrderNumber: request['work_order_number'],
+                  ContactDuration: request['contract_duration'],
+                  NetPayment: request['net_payment'],
+                  OrgAddress: request['client_address'],
                 ),
               ),
             );
@@ -250,7 +263,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                 final userProfile = state.userProfile;
                 return InternetConnectionChecker(
                   child: PopScope(
-                  /*  canPop: false,*/
+                    /*  canPop: false,*/
                     child: Scaffold(
                       key: _scaffoldKey,
                       appBar: AppBar(
@@ -489,8 +502,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              LoginUI()));
+                                          builder: (context) => LoginUI()));
                                 }
                               },
                             ),

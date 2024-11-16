@@ -623,7 +623,7 @@ class _SearchUIState extends State<SearchUI> {
                                     _providerInfo = Column(
                                       children: [
                                         Text(
-                                          'Provider Information',
+                                          'Provider and ISP Information',
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontSize: 20,
@@ -685,7 +685,7 @@ class _SearchUIState extends State<SearchUI> {
                                                   } else {
                                                     return buildNoRequestsWidget(
                                                         screenWidth,
-                                                        'No Connection Found!');
+                                                        'No Provider Found!');
                                                   }
                                                 }
                                                 return SizedBox();
@@ -774,15 +774,11 @@ class _SearchUIState extends State<SearchUI> {
         print('Connections:: $connections');
         final List<Widget> searchWidgets = connections.map((request) {
           return SearchConnectionsInfoCard(
-            Name: request['name'],
-            OrganizationName: request['organization'],
-            MobileNo: request['mobile'],
-            ConnectionType: request['connection_type'],
             Provider: request['provider'],
-            Status: request['status'],
             ContactName: request['contract_name'],
             ContactMobileNo: request['contract_phone'],
             ContactEmail: request['contract_email'],
+            Connections: request['connections'],
           );
         }).toList();
         setState(() {

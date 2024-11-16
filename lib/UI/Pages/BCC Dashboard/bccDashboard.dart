@@ -65,7 +65,8 @@ import '../Profile UI/profileUI.dart';
 class BCCDashboardUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const BCCDashboardUI({Key? key, this.shouldRefresh = false}) : super(key: key);
+  const BCCDashboardUI({Key? key, this.shouldRefresh = false})
+      : super(key: key);
 
   @override
   State<BCCDashboardUI> createState() => _BCCDashboardUIState();
@@ -134,7 +135,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
         print('No records available');
-      /*  setState(() {
+        /*  setState(() {
           _isFetched= true;
         });*/
         return;
@@ -175,8 +176,14 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
           MobileNo: request['mobile'],
           ConnectionType: request['connection_type'],
           Provider: request['provider'],
-          ApplicationID: request['application_id'],
+          FRNumber: request['fr_number'],
           Status: request['status'],
+          SerivceType: request['service_type'],
+          Capacity: request['capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
+          OrgAddress: request['client_address'],
         );
       }).toList();
 
@@ -187,8 +194,14 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
           MobileNo: request['mobile'],
           ConnectionType: request['connection_type'],
           Provider: request['provider'],
-          ApplicationID: request['application_id'],
+          FRNumber: request['fr_number'],
           Status: request['status'],
+          SerivceType: request['service_type'],
+          Capacity: request['capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
+          OrgAddress: request['client_address'],
         );
       }).toList();
 
@@ -268,8 +281,14 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
             MobileNo: request['mobile'],
             ConnectionType: request['connection_type'],
             Provider: request['provider'],
-            ApplicationID: request['application_id'],
+            FRNumber: request['fr_number'],
             Status: request['status'],
+            SerivceType: request['service_type'],
+            Capacity: request['capacity'],
+            WorkOrderNumber: request['work_order_number'],
+            ContactDuration: request['contract_duration'],
+            NetPayment: request['net_payment'],
+            OrgAddress: request['client_address'],
           );
         }).toList();
 
@@ -344,7 +363,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                 final userProfile = state.userProfile;
                 return InternetConnectionChecker(
                   child: PopScope(
-                  /*  canPop: false,*/
+                    /*  canPop: false,*/
                     child: Scaffold(
                       key: _scaffoldKey,
                       appBar: AppBar(
@@ -379,9 +398,12 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                 onPressed: () async {
                                   _showNotificationsOverlay(context);
                                   final authCubit = context.read<AuthCubit>();
-                                  final token = (authCubit.state as AuthAuthenticated).token;
+                                  final token =
+                                      (authCubit.state as AuthAuthenticated)
+                                          .token;
                                   var notificationApiService =
-                                      await NotificationReadApiService.create(token);
+                                      await NotificationReadApiService.create(
+                                          token);
                                   notificationApiService.readNotification();
                                 },
                               ),
@@ -521,7 +543,9 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
                                 final authCubit = context.read<AuthCubit>();
-                                final token = (authCubit.state as AuthAuthenticated).token;
+                                final token =
+                                    (authCubit.state as AuthAuthenticated)
+                                        .token;
                                 var logoutApiService =
                                     await LogOutApiService.create(token);
                                 logoutApiService.authToken;
@@ -537,8 +561,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              LoginUI()));
+                                          builder: (context) => LoginUI()));
                                 }
                               },
                             ),
@@ -632,7 +655,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 10.0),
                               child: Text(
-                                'Pending Authentication',
+                                'All Pending Requests',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black,

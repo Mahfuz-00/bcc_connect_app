@@ -123,11 +123,16 @@ class _ISPReviewedListUIState extends State<ISPReviewedListUI> {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
           NTTNProvider: request['provider'],
-          ApplicationID: request['application_id'].toString(),
+          FRNumber: request['fr_number'].toString(),
           MobileNo: request['phone'],
           Location: request['location'],
           Time: request['created_at'],
           Status: request['status'],
+          SerivceType: request['service_type'],
+          Capacity: request['capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
         );
       }).toList();
 
@@ -191,11 +196,16 @@ class _ISPReviewedListUIState extends State<ISPReviewedListUI> {
           return ConnectionRequestInfoCard(
             ConnectionType: request['connection_type'],
             NTTNProvider: request['provider'],
-            ApplicationID: request['application_id'].toString(),
+            FRNumber: request['fr_number'].toString(),
             MobileNo: request['phone'],
             Location: request['location'],
             Time: request['created_at'],
             Status: request['status'],
+            SerivceType: request['service_type'],
+            Capacity: request['capacity'],
+            WorkOrderNumber: request['work_order_number'],
+            ContactDuration: request['contract_duration'],
+            NetPayment: request['net_payment'],
           );
         }).toList();
 

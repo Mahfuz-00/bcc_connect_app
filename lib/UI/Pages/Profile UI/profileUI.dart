@@ -353,7 +353,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                 ),
                               )
                             ])),
-                            SizedBox(
+                           /* SizedBox(
                               height: 25,
                             ),
                             Center(
@@ -372,12 +372,7 @@ class _ProfileUIState extends State<ProfileUI> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ISPDashboardUI(
-                                              shouldRefresh: true)),
-                                    );
+                                    Navigator.pop(context);
                                   },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -403,9 +398,9 @@ class _ProfileUIState extends State<ProfileUI> {
                                   ),
                                 ),
                               ),
-                            ),
+                            ),*/
                             SizedBox(
-                              height: 20,
+                              height: 30,
                             )
                           ],
                         ),

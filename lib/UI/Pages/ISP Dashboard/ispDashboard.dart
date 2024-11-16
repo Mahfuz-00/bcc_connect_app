@@ -1,3 +1,4 @@
+import 'package:bcc_connect_app/UI/Pages/Package%20UI/packageUI.dart';
 import 'package:bcc_connect_app/UI/Widgets/requestWidget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -131,11 +132,16 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
           NTTNProvider: request['provider'],
-          ApplicationID: request['application_id'].toString(),
+          FRNumber: request['fr_number'].toString(),
           MobileNo: request['phone'],
           Location: request['location'],
           Time: request['created_at'],
           Status: request['status'],
+          SerivceType: request['service_type'],
+          Capacity: request['capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
         );
       }).toList();
 
@@ -143,11 +149,16 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],
           NTTNProvider: request['provider'],
-          ApplicationID: request['application_id'].toString(),
+          FRNumber: request['fr_number'].toString(),
           MobileNo: request['phone'],
           Location: request['location'],
           Time: request['created_at'],
           Status: request['status'],
+          SerivceType: request['service_type'],
+          Capacity: request['capacity'],
+          WorkOrderNumber: request['work_order_number'],
+          ContactDuration: request['contract_duration'],
+          NetPayment: request['net_payment'],
         );
       }).toList();
 
@@ -403,6 +414,24 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                                     MaterialPageRoute(
                                         builder: (context) => ISPReviewedListUI(
                                             shouldRefresh: true)));
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              title: Text('Packages',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'default',
+                                  )),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) {
+                                    return PackageUI();
+                                  },
+                                ));
                               },
                             ),
                             Divider(),

@@ -18,15 +18,21 @@ class ActiveConnectionDetails extends StatelessWidget {
       Name; // The name of the individual associated with the connection.
   final String
       OrganizationName; // The organization name linked to the connection.
+  final String OrgAddress;
   final String MobileNo; // The mobile number associated with the connection.
   final String ConnectionType; // The type of connection (e.g., New, Upgrade).
-  final String ApplicationID; // The unique ID of the application.
+  final String FRNumber; // The unique ID of the application.
   final String Location; // The location of the connection.
   final String
       Status; // The current status of the connection (e.g., Pending, Accepted).
   final String
       LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
   final String Remark; // Any additional remarks about the connection.
+  final String? SerivceType;
+  final String? Capacity;
+  final String? WorkOrderNumber;
+  final int? ContactDuration;
+  final num? NetPayment;
 
   const ActiveConnectionDetails({
     Key? key,
@@ -34,11 +40,17 @@ class ActiveConnectionDetails extends StatelessWidget {
     required this.OrganizationName,
     required this.MobileNo,
     required this.ConnectionType,
-    required this.ApplicationID,
+    required this.FRNumber,
     required this.Location,
     required this.Status,
     required this.LinkCapacity,
     required this.Remark,
+    this.SerivceType,
+    this.Capacity,
+    this.WorkOrderNumber,
+    this.ContactDuration,
+    this.NetPayment,
+    required this.OrgAddress,
   }) : super(key: key);
 
   @override
@@ -103,24 +115,19 @@ class ActiveConnectionDetails extends StatelessWidget {
                 height: 40, // Adds spacing between the title and avatar.
               ),
               _buildRow('Name', Name),
-              Divider(),
-              // Divider line between rows.
               _buildRow('Organiztion Name', OrganizationName),
-              Divider(),
+              _buildRow('Organization Address', OrgAddress),
               _buildRow('Mobile No', MobileNo),
-              Divider(),
               _buildRow('Connection Type', ConnectionType),
-              Divider(),
-              _buildRow('Application ID', ApplicationID),
-              Divider(),
+              _buildRow('FR Number', FRNumber),
+              _buildRow('Work Order Number', WorkOrderNumber?? ''),
               _buildRow('Location', Location),
-              Divider(),
+              _buildRow('Service Type', SerivceType?? ''),
+              _buildRow('Capacity', Capacity?? ''),
+              _buildRow('Contact Duration', '${ContactDuration.toString()} Months' ?? ''),
+              _buildRow('Net Payment', '${NetPayment.toString()} TK'?? ''),
               _buildRow('Status', Status),
-              Divider(),
-              _buildRow('Link Capacity', LinkCapacity),
-              Divider(),
               _buildRow('Remark', Remark),
-              Divider(),
               SizedBox(height: 40),
               // Adds spacing before the button.
               ElevatedButton(
