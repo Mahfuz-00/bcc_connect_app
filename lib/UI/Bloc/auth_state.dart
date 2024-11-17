@@ -32,5 +32,5 @@ class AuthAuthenticated extends AuthState {
   });
 
   @override
-  List<Object> get props => [userProfile, token];
+  List<Object> get props => [userProfile, token, usertype];
 }

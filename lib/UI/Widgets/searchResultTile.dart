@@ -16,7 +16,7 @@ class SearchConnectionsInfoCard extends StatelessWidget {
   final String? ContactName; // The contact name associated with the provider.
   final String? ContactMobileNo; // The contact mobile number associated with the provider.
   final String? ContactEmail; // The contact email associated with the provider.
-  final List<Map<String, String>>? Connections; // A list of maps, each containing connection details.
+  final List<Map<String, dynamic>>? Connections; // A list of maps, each containing connection details.
 
   const SearchConnectionsInfoCard({
     Key? key,
@@ -60,13 +60,13 @@ class SearchConnectionsInfoCard extends StatelessWidget {
             Padding(padding: EdgeInsets.symmetric(horizontal: 40),
                 child: Divider()),
             buildProviderRow('Provider', Provider!),
-            if (ContactName != null && ContactName != 'none') ...[
+            if (ContactName != null && ContactName != 'None') ...[
               buildProviderRow('Contact Name', ContactName!),
             ],
-            if (ContactMobileNo != null && ContactMobileNo != 'none') ...[
-              buildProviderRow('Contact Mobile No', ContactMobileNo!),
+            if (ContactMobileNo != null && ContactMobileNo != 'None') ...[
+              buildProviderRow('Contact Mobile No', ContactMobileNo.toString()!),
             ],
-            if (ContactEmail != null && ContactEmail != 'none') ...[
+            if (ContactEmail != null && ContactEmail != 'None') ...[
               buildProviderRow('Contact Email', ContactEmail!),
             ],
             Divider(),
@@ -89,12 +89,12 @@ class SearchConnectionsInfoCard extends StatelessWidget {
             if (Connections != null && Connections!.isNotEmpty) ...[
               for (var connection in Connections!) ...[
                 if (connection.isNotEmpty) ...[
-                  buildProviderRow('Connection Type', connection['connection_type']!),
-                  buildProviderRow('Name', connection['name']!),
-                  buildProviderRow('Organization', connection['organization']!),
-                  buildProviderRow('Mobile', connection['mobile']!),
-                  buildProviderRow('Status', connection['status']!),
-                  const SizedBox(height: 10),
+                  buildProviderRow('Connection Type', connection['connection_type'] ?? 'N/A'),
+                  buildProviderRow('Name', connection['name'] ?? 'N/A'),
+                  buildProviderRow('Organization', connection['organization'] ?? 'N/A'),
+                  buildProviderRow('Mobile', int.parse(connection['mobile']!).toString() ?? 'N/A'),
+                  buildProviderRow('Status', connection['status'] ?? 'N/A'),
+                  const SizedBox(height: 15),
                 ],
               ],
             ] else ...[

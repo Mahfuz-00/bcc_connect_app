@@ -62,7 +62,7 @@ class _UpgradePageState extends State<UpgradePage> {
 
     customCapacityController.text = widget.Capacity ?? '';
     _contractDurationController.text = widget.ContactDuration?.toString() ?? '';
-    _priceController.text = widget.NetPayment.toString() ?? '';
+    _netPaymentController.text = widget.NetPayment.toString() ?? '';
     fetchPackages();
   }
 
@@ -316,6 +316,7 @@ class _UpgradePageState extends State<UpgradePage> {
                         }
                         return null;
                       },
+                      keyboardType: TextInputType.phone,
                     ),
                     SizedBox(height: 10),
                     Container(
@@ -400,9 +401,7 @@ class _UpgradePageState extends State<UpgradePage> {
                           onPressed: () async {
                             await _SubmitData(context);
                           },
-                          child: isRequestLoading
-                              ? CircularProgressIndicator()
-                              : Text('Submit',
+                          child: Text('Submit',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
@@ -442,17 +441,6 @@ class _UpgradePageState extends State<UpgradePage> {
         content: Text('Processing'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      // Show the loading overlay
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Prevent dismissing the dialog
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
 
       String linkCapacity = customCapacityController.text;
       String contractDuration = _contractDurationController.text;

@@ -101,6 +101,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   String? selectedPackage;
   bool isLoading = false;
   bool isLoadingPackage = false;
+  bool isRequestLoading = false;
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
@@ -224,368 +225,384 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return InternetConnectionChecker(
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
+      child: Stack(
+        children: [
+          Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              title: const Text(
+                'Connection Form',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'default',
+                ),
+              ),
+              centerTitle: true,
             ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: const Text(
-            'Connection Form',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontFamily: 'default',
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Container(
-              color: Colors.grey[100],
-              padding: EdgeInsets.symmetric(vertical: 30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('Work Order',
-                      style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default')),
-                  SizedBox(height: 5),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text(
-                        'Please fill up the form. \n If you do not have a work order, please submit the form without it.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Container(
+                  color: Colors.grey[100],
+                  padding: EdgeInsets.symmetric(vertical: 30),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('Work Order',
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'default')),
+                      SizedBox(height: 5),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                            'Please fill up the form. \n If you do not have a work order, please submit the form without it.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color.fromRGBO(143, 150, 158, 1),
+                                fontSize: 18,
+                                fontFamily: 'default')),
+                      ),
+                      SizedBox(height: 40),
+                      CustomTextInput(
+                        controller: _contractDurationController,
+                        label: 'Contact Duration (Month)',
+                        keyboardType: TextInputType.phone,
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter your contact duration (month)';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 5),
+                      Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                            width: screenWidth * 0.9,
+                            height: screenHeight * 0.075,
+                            padding: EdgeInsets.only(left: 10, top: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: Stack(
+                              children: [
+                                DropdownFormField(
+                                    hintText: 'Select Package',
+                                    dropdownItems: packages
+                                        .map((package) => package.packageName)
+                                        .where((packageName) =>
+                                            packageName !=
+                                            null) // Filter out null values
+                                        .cast<String>() // Cast to List<String>
+                                        .toList(),
+                                    initialValue: selectedPackage,
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        selectedPackage = newValue;
+                                      });
+                                      if (newValue != null) {
+                                        // Find the selected division object
+                                        Package selectedPackageObject =
+                                            packages.firstWhere(
+                                          (package) =>
+                                              package.packageName == newValue,
+                                        );
+                                        if (selectedPackageObject != null) {
+                                          _packageID =
+                                              selectedPackageObject.id.toString();
+                                          _priceController.text =
+                                              selectedPackageObject.charge
+                                                  .toString();
+                                        }
+                                      }
+                                    }),
+                                if (isLoading)
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color: const Color.fromRGBO(25, 192, 122, 1),
+                                    ),
+                                  ),
+                              ],
+                            )),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: 70,
+                        child: TextFormField(
+                          controller: _priceController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: const OutlineInputBorder(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10))),
+                            labelText: 'Package Rate',
+                            labelStyle: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            prefixText: 'TK ',
+                          ),
+                          style: const TextStyle(
                             color: Color.fromRGBO(143, 150, 158, 1),
-                            fontSize: 18,
-                            fontFamily: 'default')),
-                  ),
-                  SizedBox(height: 40),
-                  CustomTextInput(
-                    controller: _contractDurationController,
-                    label: 'Contact Duration (Month)',
-                    keyboardType: TextInputType.phone,
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return 'Please enter your contact duration (month)';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 5),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Stack(
-                          children: [
-                            DropdownFormField(
-                                hintText: 'Select Package',
-                                dropdownItems: packages
-                                    .map((package) => package.packageName)
-                                    .where((packageName) =>
-                                        packageName !=
-                                        null) // Filter out null values
-                                    .cast<String>() // Cast to List<String>
-                                    .toList(),
-                                initialValue: selectedPackage,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    selectedPackage = newValue;
-                                  });
-                                  if (newValue != null) {
-                                    // Find the selected division object
-                                    Package selectedPackageObject =
-                                        packages.firstWhere(
-                                      (package) =>
-                                          package.packageName == newValue,
-                                    );
-                                    if (selectedPackageObject != null) {
-                                      _packageID =
-                                          selectedPackageObject.id.toString();
-                                      _priceController.text =
-                                          selectedPackageObject.charge
-                                              .toString();
-                                    }
-                                  }
-                                }),
-                            if (isLoading)
-                              Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(
-                                  color: const Color.fromRGBO(25, 192, 122, 1),
-                                ),
-                              ),
-                          ],
-                        )),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: 70,
-                    child: TextFormField(
-                      controller: _priceController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: const OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
-                        labelText: 'Package Rate',
-                        labelStyle: const TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          fontFamily: 'default',
-                        ),
-                        prefixText: 'TK ',
-                      ),
-                      style: const TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter your contact duration (month)';
-                        }
-                        return null;
-                      },
-                      readOnly: true,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  CustomTextInput(
-                    controller: _discountController,
-                    label: 'Discount',
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return 'Please enter your organization name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 5),
-                  CustomTextInput(
-                    controller: _capacityController,
-                    label: 'Capacity',
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return 'Please enter your organization name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 5),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: 70,
-                    child: TextFormField(
-                      controller: _netPaymentController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        labelText: 'Net Payment',
-                        labelStyle: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          fontFamily: 'default',
-                        ),
-                        prefixText: 'TK ',
-                      ),
-                      style: TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                      readOnly: true,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.075,
-                        padding: EdgeInsets.only(left: 10, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: DropdownFormField(
-                          hintText: 'Select Payment Method',
-                          dropdownItems: PaymentOptions.toList(),
-                          initialValue: selectedPaymentMode,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedPaymentMode = newValue;
-                              _PaymentMode = newValue ?? '';
-                              print(_PaymentMode);
-                            });
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          ),
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter your contact duration (month)';
+                            }
+                            return null;
                           },
-                        )),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    width: screenWidth * 0.9,
-                    height: 120,
-                    child: TextFormField(
-                      controller: _workOrderRemarkController,
-                      enabled: selectedPaymentMode != null,
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter some remarks';
-                        }
-                        return null;
-                      },
-                      style: const TextStyle(
-                        color: Color.fromRGBO(143, 150, 158, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        labelText: 'Remarks',
-                        labelStyle: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          fontFamily: 'default',
+                          readOnly: true,
                         ),
-                        alignLabelWithHint: true,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 145),
-                        border: const OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ElevatedButton(
+                      const SizedBox(height: 10),
+                      CustomTextInput(
+                        controller: _discountController,
+                        label: 'Discount',
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter your organization name';
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 5),
+                      CustomTextInput(
+                        controller: _capacityController,
+                        label: 'Capacity',
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter your organization name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: 70,
+                        child: TextFormField(
+                          controller: _netPaymentController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                            labelText: 'Net Payment',
+                            labelStyle: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            prefixText: 'TK ',
+                          ),
+                          style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          ),
+                          readOnly: true,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                            width: screenWidth * 0.9,
+                            height: screenHeight * 0.075,
+                            padding: EdgeInsets.only(left: 10, top: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: DropdownFormField(
+                              hintText: 'Select Payment Method',
+                              dropdownItems: PaymentOptions.toList(),
+                              initialValue: selectedPaymentMode,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedPaymentMode = newValue;
+                                  _PaymentMode = newValue ?? '';
+                                  print(_PaymentMode);
+                                });
+                              },
+                            )),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: screenWidth * 0.9,
+                        height: 120,
+                        child: TextFormField(
+                          controller: _workOrderRemarkController,
+                          enabled: selectedPaymentMode != null,
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter some remarks';
+                            }
+                            return null;
+                          },
+                          style: const TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: 'Remarks',
+                            labelStyle: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            alignLabelWithHint: true,
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 10, vertical: 145),
+                            border: const OutlineInputBorder(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10))),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromRGBO(25, 192, 122, 1),
+                                  fixedSize: Size(
+                                      MediaQuery.of(context).size.width * 0.9,
+                                      MediaQuery.of(context).size.height * 0.075),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                onPressed: _isPicked ? null : _pickFile,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (_isPicked) ...[
+                                      CircularProgressIndicator(
+                                        color: Color.fromRGBO(25, 192, 122, 1),
+                                      ),
+                                    ] else if (_file == null) ...[
+                                      Icon(
+                                        Icons.document_scanner,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text('Pick File',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'default',
+                                          )),
+                                    ],
+                                    if (_file != null) ...[
+                                      Text('File Picked',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'default',
+                                          )),
+                                    ]
+                                  ],
+                                )),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      Center(
+                        child: Material(
+                          elevation: 5,
+                          borderRadius: BorderRadius.circular(10),
+                          child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   const Color.fromRGBO(25, 192, 122, 1),
                               fixedSize: Size(
                                   MediaQuery.of(context).size.width * 0.9,
-                                  MediaQuery.of(context).size.height * 0.075),
+                                  MediaQuery.of(context).size.height * 0.08),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            onPressed: _isPicked ? null : _pickFile,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (_isPicked) ...[
-                                  CircularProgressIndicator(
-                                    color: Color.fromRGBO(25, 192, 122, 1),
-                                  ),
-                                ] else if (_file == null) ...[
-                                  Icon(
-                                    Icons.document_scanner,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text('Pick File',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      )),
-                                ],
-                                if (_file != null) ...[
-                                  Text('File Picked',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      )),
-                                ]
-                              ],
-                            )),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  Center(
-                    child: Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromRGBO(25, 192, 122, 1),
-                          fixedSize: Size(
-                              MediaQuery.of(context).size.width * 0.9,
-                              MediaQuery.of(context).size.height * 0.08),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            onPressed: _connectionRequestForm,
+                            child: const Text('Submit',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                )),
                           ),
                         ),
-                        onPressed: _connectionRequestForm,
-                        child: const Text('Submit',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            )),
                       ),
-                    ),
+                      SizedBox(
+                        height: 20,
+                      )
+                    ],
                   ),
-                  SizedBox(
-                    height: 20,
-                  )
-                ],
+                ),
               ),
             ),
           ),
-        ),
+          // The loading overlay
+          if (isRequestLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                // Semi-transparent background
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -609,9 +626,11 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
     // Validate and save form data
     if (_validateAndSave()) {
+      setState(() {
+        isRequestLoading = true; // Show the loading indicator
+      });
       const snackBar = SnackBar(
         content: Text('Processing. Please wait...'),
-        duration: Duration(seconds: 10),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print('triggered Validation');
@@ -640,6 +659,9 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       ConnectionAPIService.create(token)
           .postConnectionRequest(_connectionRequest, _file)
           .then((response) {
+        setState(() {
+          isRequestLoading = false; // Show the loading indicator
+        });
         // Handle successful request
         print('Connection request sent successfully!!');
         if (response == 'Connection Request Already Exist') {

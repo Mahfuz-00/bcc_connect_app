@@ -436,7 +436,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                         controller: _latitudeLongtitudeController,
                         keyboardType: TextInputType.numberWithOptions(decimal: true), // Ensure proper input
                         decoration: InputDecoration(
-                          labelText: 'Latitude and Longitude of The connection',
+                          labelText: 'Latitude and Longitude of The Location',
                           hintText: 'e.g., 12.3456, 65.4321',
                           helperText: 'Enter in format: latitude, longitude',
                           filled: true,
@@ -994,7 +994,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         remark: _remark.text,
       );
 
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => WorkOrderUI()),
       );

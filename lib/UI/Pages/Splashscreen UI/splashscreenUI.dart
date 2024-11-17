@@ -1,7 +1,12 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../Bloc/auth_cubit.dart';
+import '../BCC Dashboard/bccDashboard.dart';
+import '../ISP Dashboard/ispDashboard.dart';
 import '../Login UI/loginUI.dart';
+import '../NTTN Dashboard/nttnDashboard.dart';
 import '../Sign Up UI/signupUI.dart';
 
 /// [SplashScreenUI] is a StatefulWidget that represents the initial splash screen
@@ -54,6 +59,13 @@ class _SplashScreenUIState extends State<SplashScreenUI>
     Future.delayed(const Duration(seconds: 5), () {
       animationController.forward();
     });
+    // Check authentication and navigate accordingly
+    Future.delayed(const Duration(seconds: 3), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        checkAuthAndNavigate(context);
+      });
+    });
+
     _checkInternetConnection();
   }
 
@@ -64,6 +76,92 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         _isLoading = true;
       });
     }
+  }
+
+  void checkAuthAndNavigate(BuildContext context) {
+    final authCubit = context.read<AuthCubit>(); // Read the AuthCubit from context
+    final authState = authCubit.state; // Get the current state
+
+    if (authState is AuthAuthenticated && authState.token != null && authState.token.isNotEmpty) {
+      // Extract user information from the AuthAuthenticated state
+      final userProfile = authState.userProfile;
+      final userType = authState.usertype;
+      final token = authState.token;
+
+      print('User Profile: ${userProfile.Id}, ${userProfile.name}, ${userProfile.organization}, ${userProfile.photo}');
+      print('User Type: $userType');
+      print('Token: $token');
+
+      // Now you can use the `userType` for navigation or any other logic
+      if (userType == 'isp_staff') {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => ISPDashboardUI(shouldRefresh: true)),
+              (route) => false,
+        );
+      } else if (userType == 'bcc_staff') {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => BCCDashboardUI(shouldRefresh: true)),
+              (route) => false,
+        );
+      } else if (userType == 'nttn_sbl_staff' || userType == 'nttn_adsl_staff') {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => NTTNDashboardUI(shouldRefresh: true)),
+              (route) => false,
+        );
+      } else {
+        String errorMessage = 'Invalid User! Please enter a valid email address.';
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showTopToast(context, errorMessage);
+        });
+      }
+    } else {
+      // If the token is not valid or the user is not authenticated, redirect to login
+      String errorMessage = 'Invalid token or session expired. Please log in again.';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showTopToast(context, errorMessage);
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginUI()),
+      );
+    }
+  }
+
+
+  void showTopToast(BuildContext context, String message) {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top +
+            10,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3)).then((_) {
+      overlayEntry.remove();
+    });
   }
 
   @override

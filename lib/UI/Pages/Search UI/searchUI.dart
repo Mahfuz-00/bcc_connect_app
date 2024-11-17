@@ -772,13 +772,29 @@ class _SearchUIState extends State<SearchUI> {
       if (filteredData.containsKey('records')) {
         List<dynamic> connections = filteredData['records'];
         print('Connections:: $connections');
+
         final List<Widget> searchWidgets = connections.map((request) {
+          print('Provider type: ${request['provider']?.runtimeType}');
+          print('Contract Name type: ${request['contract_name']?.runtimeType}');
+          print('Contract Phone type: ${request['contract_phone']?.runtimeType}');
+          print('Contract Email type: ${request['contract_email']?.runtimeType}');
+          print('Connections type: ${request['connections']?.runtimeType}');
           return SearchConnectionsInfoCard(
-            Provider: request['provider'],
-            ContactName: request['contract_name'],
-            ContactMobileNo: request['contract_phone'],
-            ContactEmail: request['contract_email'],
-            Connections: request['connections'],
+            Provider: request['provider'].toString(),
+            ContactName: request['contract_name'].toString(),
+            ContactMobileNo: request['contract_phone'].toString()!,
+            ContactEmail: request['contract_email'].toString(),
+            Connections: (request['connections'] is List)
+                ? (request['connections'] as List).map((connection) {
+              if (connection is Map<String, dynamic>) {
+                // Return the map directly as is, without forcing it to Map<String, String>
+                return connection;
+              } else {
+                return <String, dynamic>{}; // Return empty map if it's not a valid Map<String, dynamic>
+              }
+            }).toList()
+                : [], // Default to empty list if it's not a valid List
+
           );
         }).toList();
         setState(() {
