@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../Data/Models/profilemodel.dart';
 
 part 'auth_state.dart';
@@ -15,14 +16,42 @@ part 'auth_state.dart';
 /// - [AuthAuthenticated]: The state when a user is authenticated with a valid profile and token.
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+
+  Future<void> initializeAuthState() async {
+    try {
+      final token = await _secureStorage.read(key: 'auth_token');
+      final userType = await _secureStorage.read(key: 'user_type');
+
+      if (token != null && userType != null && token.isNotEmpty && userType.isNotEmpty) {
+        print('Emiting authentication');
+        final userProfile = UserProfile(
+          Id: 0,
+          name: 'N/A',
+          organization: 'N/A',
+          photo: 'N/A',
+        );
+        emit(AuthAuthenticated(userProfile: userProfile, token: token, usertype: userType));
+      } else {
+        print('No authentication data found in secure storage');
+        emit(AuthInitial());
+      }
+    } catch (e) {
+      print('Error initializing authentication state: $e');
+      emit(AuthInitial());
+    }
+  }
 
   /// Logs in a user by saving their profile and token.
   ///
   /// - Parameters:
   ///   - `userProfile`: An instance of `UserProfile` containing user details.
   ///   - `token`: A string representing the authentication token.
-  void login(UserProfile userProfile, String token, String type) {
+  Future<void> login(UserProfile userProfile, String token, String type) async {
     emit(AuthAuthenticated(userProfile: userProfile, token: token, usertype: type));
+    await _secureStorage.write(key: 'auth_token', value: token);
+    await _secureStorage.write(key: 'user_type', value: type);
+
     print('User profile and token saved in Cubit:');
     print('User Profile: ${userProfile.Id}, ${userProfile.name}, ${userProfile.organization}, ${userProfile.photo}');
     print('Token: $token');
@@ -52,7 +81,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Logs out the user by resetting the state.
-  void logout() {
+  Future<void> logout() async {
     if (state is AuthAuthenticated) {
       final currentState = state as AuthAuthenticated;
       print('User profile and token removed from Cubit');
@@ -65,6 +94,10 @@ class AuthCubit extends Cubit<AuthState> {
           'Photo: ${currentState.userProfile.photo}');
     }
     emit(AuthInitial());
+
+    // Remove data from secure storage
+    await _secureStorage.delete(key: 'auth_token');
+    await _secureStorage.delete(key: 'user_type');
 
     // After resetting, confirm that the data has been removed
     if (state is AuthInitial) {

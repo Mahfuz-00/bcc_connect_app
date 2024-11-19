@@ -119,16 +119,16 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       discount = _parseDiscount(_discountController.text);
 
       double netPayment;
-      if (discount == 0) {
+     /* if (discount == 0) {
         // No discount
         netPayment = contractDuration * packageRate;
       } else if (discount > 1) {
         // Absolute discount
         netPayment = (contractDuration * packageRate) - discount;
       } else {
-        // Percentage discount
+        // Percentage discount*/
         netPayment = (packageRate - (packageRate * discount)) * contractDuration;
-      }
+     /* }*/
 
       _netPaymentController.text = netPayment.toStringAsFixed(2);
     });
@@ -267,13 +267,15 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                       SizedBox(height: 5),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text(
-                            'Please fill up the form. \n If you do not have a work order, please submit the form without it.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color.fromRGBO(143, 150, 158, 1),
-                                fontSize: 18,
-                                fontFamily: 'default')),
+                        child: Center(
+                          child: Text(
+                              'Please fill up the form. \n If you do not have a work order, please submit the form without it.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 18,
+                                  fontFamily: 'default')),
+                        ),
                       ),
                       SizedBox(height: 40),
                       CustomTextInput(
@@ -381,7 +383,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                       const SizedBox(height: 10),
                       CustomTextInput(
                         controller: _discountController,
-                        label: 'Discount',
+                        label: 'Discount(%)',
                         validator: (input) {
                           if (input == null || input.isEmpty) {
                             return 'Please enter your organization name';

@@ -2,6 +2,9 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../Data/Data Sources/API Service (Profile)/apiserviceprofile.dart';
+import '../../../Data/Models/profilemodel.dart';
 import '../../Bloc/auth_cubit.dart';
 import '../BCC Dashboard/bccDashboard.dart';
 import '../ISP Dashboard/ispDashboard.dart';
@@ -56,15 +59,7 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         .animate(
             CurvedAnimation(parent: animationController, curve: Curves.easeIn));
 
-    Future.delayed(const Duration(seconds: 5), () {
-      animationController.forward();
-    });
-    // Check authentication and navigate accordingly
-    Future.delayed(const Duration(seconds: 3), () {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        checkAuthAndNavigate(context);
-      });
-    });
+    _checkAuthAndNavigate(context);
 
     _checkInternetConnection();
   }
@@ -78,66 +73,123 @@ class _SplashScreenUIState extends State<SplashScreenUI>
     }
   }
 
-  void checkAuthAndNavigate(BuildContext context) {
-    final authCubit = context.read<AuthCubit>(); // Read the AuthCubit from context
-    final authState = authCubit.state; // Get the current state
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
-    if (authState is AuthAuthenticated && authState.token != null && authState.token.isNotEmpty) {
-      // Extract user information from the AuthAuthenticated state
-      final userProfile = authState.userProfile;
-      final userType = authState.usertype;
-      final token = authState.token;
+// In the SplashScreen widget:
+  Future<void> _checkAuthAndNavigate(BuildContext context) async {
+    final authCubit = context.read<AuthCubit>();
+    print('Auth Invoked');
+    try {
+      // Retrieve the token and user type from secure storage
+      final token = await _secureStorage.read(key: 'auth_token');
+      final userType = await _secureStorage.read(key: 'user_type');
 
-      print('User Profile: ${userProfile.Id}, ${userProfile.name}, ${userProfile.organization}, ${userProfile.photo}');
-      print('User Type: $userType');
-      print('Token: $token');
+      print(token);
+      print(userType);
 
-      // Now you can use the `userType` for navigation or any other logic
-      if (userType == 'isp_staff') {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => ISPDashboardUI(shouldRefresh: true)),
-              (route) => false,
-        );
-      } else if (userType == 'bcc_staff') {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => BCCDashboardUI(shouldRefresh: true)),
-              (route) => false,
-        );
-      } else if (userType == 'nttn_sbl_staff' || userType == 'nttn_adsl_staff') {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => NTTNDashboardUI(shouldRefresh: true)),
-              (route) => false,
-        );
-      } else {
-        String errorMessage = 'Invalid User! Please enter a valid email address.';
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showTopToast(context, errorMessage);
-        });
+      // If token or userType is missing, handle this case appropriately
+      if (token == null ||
+          token.isEmpty ||
+          userType == null ||
+          userType.isEmpty) {
+        print('No token or user type found, staying on current screen');
+        animationController.forward();
+        // You can either show a message, keep the user on the page, or handle differently
+        return; // Stay on the current screen without navigating
       }
-    } else {
-      // If the token is not valid or the user is not authenticated, redirect to login
-      String errorMessage = 'Invalid token or session expired. Please log in again.';
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showTopToast(context, errorMessage);
-      });
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginUI()),
-      );
+      // If token and userType exist, check if the state is AuthInitial or AuthAuthenticated
+      if (authCubit.state is AuthInitial) {
+        // Proceed with fetching the user profile
+        await _fetchUserProfile(token, userType, context);
+      } else if (authCubit.state is AuthAuthenticated) {
+        // If already authenticated, navigate based on the user type
+        final currentState = authCubit.state as AuthAuthenticated;
+        final userType = currentState.usertype;
+        final userProfile = currentState.userProfile;
+        print('Usertype from State: ' + userType);
+
+        print(
+            'User Profile from State: ${userProfile.name}, ${userProfile.organization}, ${userProfile.Id}, ${userProfile.photo}');
+        await _fetchUserProfile(token, userType, context);
+        print(
+            'User Profile from State: ${userProfile.name}, ${userProfile.organization}, ${userProfile.Id}, ${userProfile.photo}');
+        _navigateToAppropriateDashboard(context, userType);
+      }
+    } catch (e) {
+      print('Error while checking authentication: $e');
+      _navigateToLogin(context);
     }
   }
 
+  Future<void> _fetchUserProfile(
+      String token, String userType, BuildContext context) async {
+    try {
+      // Fetch user profile from the API
+      final apiService = ProfileAPIService();
+      final profile = await apiService.fetchUserProfile(token);
+
+      // If profile is fetched successfully, create the UserProfile and login
+      final userProfile = UserProfile.fromJson(profile);
+
+      print('Profile Loaded: $userProfile');
+
+      // Log the user in via the AuthCubit
+      context.read<AuthCubit>().login(userProfile, token, userType);
+      print('User successfully logged in with type: $userType');
+
+      // Navigate to the appropriate dashboard after login
+      _navigateToAppropriateDashboard(context, userType);
+    } catch (e) {
+      print('Error fetching user profile: $e');
+      _navigateToLogin(context);
+    }
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    print('Navigating to login');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginUI()),
+    );
+  }
+
+  void _navigateToAppropriateDashboard(BuildContext context, String userType) {
+    print('Navigating to appropriate dashboard based on user type: $userType');
+    if (userType == 'isp_staff') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ISPDashboardUI(shouldRefresh: true)),
+        (route) => false,
+      );
+    } else if (userType == 'bcc_staff') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => BCCDashboardUI(shouldRefresh: true)),
+        (route) => false,
+      );
+    } else if (userType == 'nttn_sbl_staff' || userType == 'nttn_adsl_staff') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NTTNDashboardUI(shouldRefresh: true)),
+        (route) => false,
+      );
+    } else {
+      String errorMessage = 'Invalid User! Please enter a valid email address.';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showTopToast(context, errorMessage);
+      });
+    }
+  }
 
   void showTopToast(BuildContext context, String message) {
     OverlayState? overlayState = Overlay.of(context);
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: MediaQuery.of(context).padding.top +
-            10,
+        top: MediaQuery.of(context).padding.top + 10,
         left: 20,
         right: 20,
         child: Material(

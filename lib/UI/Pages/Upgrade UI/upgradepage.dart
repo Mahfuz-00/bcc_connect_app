@@ -173,21 +173,25 @@ class _UpgradePageState extends State<UpgradePage> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Text(
-                      'Upgrade Connection',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'default',
+                    Center(
+                      child: Text(
+                        'Upgrade Connection',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'default',
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),
-                    Text(
-                      'Enter new details to upgrade your connection.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'default',
+                    Center(
+                      child: Text(
+                        'Enter new details to upgrade your connection.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'default',
+                        ),
                       ),
                     ),
                     SizedBox(height: 30),

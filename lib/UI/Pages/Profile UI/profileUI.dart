@@ -154,281 +154,278 @@ class _ProfileUIState extends State<ProfileUI> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return InternetConnectionChecker(
-      child: PopScope(
-        canPop: true,
-        child: Scaffold(
-          backgroundColor: Colors.grey[100],
-          appBar: AppBar(
-            backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
             ),
-            title: Text(
-              'Profile Overview',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'default',
-              ),
-            ),
-            centerTitle: true,
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          body: _pageLoading
-              ? Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: SafeArea(
-                    child: Container(
-                      color: const Color.fromRGBO(25, 192, 122, 1),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 50.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                                child: Column(children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    width: 120,
-                                    height: 120,
+          title: Text(
+            'Profile Overview',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'default',
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: _pageLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: SafeArea(
+                  child: Container(
+                    color: const Color.fromRGBO(25, 192, 122, 1),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 50.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                              child: Column(children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile!.photo}'),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    height: 35,
+                                    width: 35,
                                     decoration: BoxDecoration(
+                                      color: Colors.white,
                                       shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile!.photo}'),
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: IconButton(
+                                      onPressed: () {
+                                        _showImagePicker();
+                                      },
+                                      alignment: Alignment.center,
+                                      icon: Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Colors.black,
+                                        size: 20,
                                       ),
                                     ),
                                   ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      height: 35,
-                                      width: 35,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: IconButton(
-                                        onPressed: () {
-                                          _showImagePicker();
-                                        },
-                                        alignment: Alignment.center,
-                                        icon: Icon(
-                                          Icons.camera_alt_outlined,
-                                          color: Colors.black,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                userProfile!.name,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
                                 ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                userProfile!.organization,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                              const SizedBox(height: 50),
-                              Material(
-                                elevation: 5,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10),
-                                ),
-                                child: Container(
-                                  width: screenWidth,
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 15, horizontal: 10),
-                                  child: Column(
-                                    children: [
-                                      _buildDataCouple(Icons.person, 'Name',
-                                          userProfile!.name),
-                                      Divider(),
-                                      _buildDataCouple(
-                                          Icons.house_outlined,
-                                          'Organization Name',
-                                          userProfile!.organization),
-                                      Divider(),
-                                      _buildDataCouple(
-                                          Icons.work,
-                                          'Designation',
-                                          userProfile!.designation),
-                                      Divider(),
-                                      _buildDataCouple(
-                                          Icons.phone_android_outlined,
-                                          'Phone no',
-                                          userProfile!.phone as String),
-                                      Divider(),
-                                      if(type == 'isp_staff') ... [
-                                        _buildDataCouple(
-                                            Icons.book,
-                                            'License Number',
-                                            userProfile!.license),
-                                        Divider(),
-                                        _buildDataCouple(
-                                            Icons.supervised_user_circle_rounded,
-                                            'UserType',
-                                            userProfile!.ISPuserType),
-                                        Divider(),
-                                      ],
-                                      _buildDataCouple(Icons.mail, 'Email',
-                                          userProfile!.email),
-                                      Divider(),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PasswordChangeUI(),
-                                              ));
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 9,
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    children: [
-                                                      TextSpan(
-                                                        text: 'Change Password',
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 20,
-                                                          height: 1.6,
-                                                          letterSpacing: 1.3,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontFamily: 'default',
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 1,
-                                                child: Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ])),
-                           /* SizedBox(
-                              height: 25,
+                              ],
                             ),
-                            Center(
-                              child: Material(
-                                elevation: 5,
-                                borderRadius: BorderRadius.circular(10),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    fixedSize: Size(
-                                        MediaQuery.of(context).size.width * 0.8,
-                                        MediaQuery.of(context).size.height *
-                                            0.08),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Center(
-                                          child: Icon(
-                                        Icons.home,
-                                        color: const Color.fromRGBO(
-                                            25, 192, 122, 1),
-                                      )),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      const Text('Back to Home',
-                                          style: TextStyle(
-                                            color: const Color.fromRGBO(
-                                                25, 192, 122, 1),
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'default',
-                                          )),
+                            const SizedBox(height: 20),
+                            Text(
+                              userProfile!.name,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              userProfile!.organization,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                            const SizedBox(height: 50),
+                            Material(
+                              elevation: 5,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                              child: Container(
+                                width: screenWidth,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 15, horizontal: 10),
+                                child: Column(
+                                  children: [
+                                    _buildDataCouple(Icons.person, 'Name',
+                                        userProfile!.name),
+                                    Divider(),
+                                    _buildDataCouple(
+                                        Icons.house_outlined,
+                                        'Organization Name',
+                                        userProfile!.organization),
+                                    Divider(),
+                                    _buildDataCouple(
+                                        Icons.work,
+                                        'Designation',
+                                        userProfile!.designation),
+                                    Divider(),
+                                    _buildDataCouple(
+                                        Icons.phone_android_outlined,
+                                        'Phone no',
+                                        userProfile!.phone as String),
+                                    Divider(),
+                                    if(type == 'isp_staff') ... [
+                                      _buildDataCouple(
+                                          Icons.book,
+                                          'License Number',
+                                          userProfile!.license),
+                                      Divider(),
+                                      _buildDataCouple(
+                                          Icons.supervised_user_circle_rounded,
+                                          'UserType',
+                                          userProfile!.ISPuserType),
+                                      Divider(),
                                     ],
-                                  ),
+                                    _buildDataCouple(Icons.mail, 'Email',
+                                        userProfile!.email),
+                                    Divider(),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PasswordChangeUI(),
+                                            ));
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(10),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 9,
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: 'Change Password',
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 20,
+                                                        height: 1.6,
+                                                        letterSpacing: 1.3,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontFamily: 'default',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Icon(
+                                                Icons.arrow_forward_ios,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),*/
-                            SizedBox(
-                              height: 30,
                             )
-                          ],
-                        ),
+                          ])),
+                         /* SizedBox(
+                            height: 25,
+                          ),
+                          Center(
+                            child: Material(
+                              elevation: 5,
+                              borderRadius: BorderRadius.circular(10),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  fixedSize: Size(
+                                      MediaQuery.of(context).size.width * 0.8,
+                                      MediaQuery.of(context).size.height *
+                                          0.08),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Center(
+                                        child: Icon(
+                                      Icons.home,
+                                      color: const Color.fromRGBO(
+                                          25, 192, 122, 1),
+                                    )),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    const Text('Back to Home',
+                                        style: TextStyle(
+                                          color: const Color.fromRGBO(
+                                              25, 192, 122, 1),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),*/
+                          SizedBox(
+                            height: 30,
+                          )
+                        ],
                       ),
                     ),
                   ),
                 ),
-          floatingActionButton: _pageLoading
-              ? null
-              : FloatingActionButton(
-                  onPressed: () {
-                    _showEditDialog();
-                  },
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                  elevation: 8,
-                  highlightElevation: 12,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        30),
-                  ),
+              ),
+        floatingActionButton: _pageLoading
+            ? null
+            : FloatingActionButton(
+                onPressed: () {
+                  _showEditDialog();
+                },
+                child: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                  size: 30,
                 ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        ),
+                backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                elevation: 8,
+                highlightElevation: 12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                      30),
+                ),
+              ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }
