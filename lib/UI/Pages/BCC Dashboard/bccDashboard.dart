@@ -577,7 +577,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                               child: Container(
                                 color: Colors.grey[100],
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
+                                    horizontal: 20, vertical: 10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [

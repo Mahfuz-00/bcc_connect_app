@@ -515,7 +515,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                           child: Container(
                             color: Colors.grey[100],
                             padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
+                                horizontal: 20, vertical: 10),
                             child: Padding(
                               padding: const EdgeInsets.only(top: 10.0),
                               child: Column(

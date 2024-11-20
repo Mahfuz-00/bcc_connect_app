@@ -147,6 +147,7 @@ class _SplashScreenUIState extends State<SplashScreenUI>
   }
 
   void _navigateToLogin(BuildContext context) {
+    showTopToast(context, 'Session expired. Please log in again.');
     print('Navigating to login');
     Navigator.pushReplacement(
       context,

@@ -167,7 +167,7 @@ class _UpgradePageState extends State<UpgradePage> {
             centerTitle: true, // Centers the title in the app bar.
           ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30),
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(

@@ -1,5 +1,6 @@
 import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
 import 'package:bcc_connect_app/UI/Pages/Work%20Order/workOrder.dart';
+import 'package:bcc_connect_app/UI/Widgets/labelText.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Core/Connection Checker/internetconnectioncheck.dart';
@@ -354,21 +355,26 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
           child: SingleChildScrollView(
             child: Container(
               color: Colors.grey[100],
-              padding: EdgeInsets.symmetric(vertical: 30),
+              padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('FR/Link Request Form',
-                      style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'default')),
+                  Center(
+                    child: Text('FR/Link Request Form',
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default')),
+                  ),
                   SizedBox(height: 5),
-                  Text('Please fill up the form',
-                      style: TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 18,
-                          fontFamily: 'default')),
+                  Center(
+                    child: Text('Please fill up the form',
+                        style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 18,
+                            fontFamily: 'default')),
+                  ),
                   SizedBox(height: 40),
                   /*     Padding(
                     padding:
@@ -480,13 +486,17 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text('Select Location:',
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 18,
-                          fontFamily: 'default')),
+                  Center(
+                    child: Text('Select Location:',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 18,
+                            fontFamily: 'default')),
+                  ),
                   SizedBox(height: 10),
+                  LabeledTextWithAsterisk(text: 'Division'),
+                  SizedBox(height: 5),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -553,6 +563,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   SizedBox(
                     height: 10,
                   ),
+                  LabeledTextWithAsterisk(text: 'District'),
+                  SizedBox(height: 5),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -618,6 +630,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   SizedBox(
                     height: 10,
                   ),
+                  LabeledTextWithAsterisk(text: 'Upzilla'),
+                  SizedBox(height: 5),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -679,6 +693,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   SizedBox(
                     height: 10,
                   ),
+                  LabeledTextWithAsterisk(text: 'Union'),
+                  SizedBox(height: 5),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -755,9 +771,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           },
                         ),
                       ] else if (providerValues != 'zero') ...[
+                        LabeledTextWithAsterisk(text: 'NTTN Providers in this area'),
+                        SizedBox(height: 5),
                         Material(
                           elevation: 5,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(20),
                           child: Container(
                             width: screenWidth * 0.9,
                             height: screenHeight * 0.075,
@@ -804,6 +822,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     SizedBox(
                       height: 10,
                     ),
+                    LabeledTextWithAsterisk(text: 'Link Capacity'),
+                    SizedBox(height: 5),
                     Material(
                       elevation: 5,
                       borderRadius: BorderRadius.circular(10),
@@ -874,6 +894,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   SizedBox(
                     height: 15,
                   ),
+                  LabeledTextWithAsterisk(text: 'Remark'),
+                  SizedBox(height: 5),
                   Container(
                     width: screenWidth * 0.9,
                     height: 120,
@@ -1000,7 +1022,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
       );
     } else {
       const snackBar = SnackBar(
-        content: Text('Please fill up all fields'),
+        content: Text('Please fill up all fields properly'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }

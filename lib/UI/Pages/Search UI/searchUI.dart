@@ -313,7 +313,7 @@ class _SearchUIState extends State<SearchUI> {
           child: SingleChildScrollView(
             child: Container(
               color: Colors.grey[100],
-              padding: EdgeInsets.symmetric(vertical: 30),
+              padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,

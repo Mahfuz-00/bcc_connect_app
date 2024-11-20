@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:bcc_connect_app/Data/Models/package.dart';
 import 'package:bcc_connect_app/UI/Bloc/form_data_cubit.dart';
+import 'package:bcc_connect_app/UI/Widgets/labelTextTemplate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import '../../Bloc/auth_cubit.dart';
 import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/dropdownservice.dart';
+import '../../Widgets/labelText.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
 /// [WorkOrderUI] is a [StatefulWidget] that represents a form for users to fill out
@@ -107,6 +109,9 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   late String photoUrl = '';
   late String providerValues = '';
   bool isSelected = false;
+  final _formPart1Key = GlobalKey<FormState>();
+  final _formPart2Key = GlobalKey<FormState>();
+  final _formPart3Key = GlobalKey<FormState>();
 
   // Variables for calculations
   double packageRate = 0;
@@ -119,7 +124,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       discount = _parseDiscount(_discountController.text);
 
       double netPayment;
-     /* if (discount == 0) {
+      /* if (discount == 0) {
         // No discount
         netPayment = contractDuration * packageRate;
       } else if (discount > 1) {
@@ -127,8 +132,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         netPayment = (contractDuration * packageRate) - discount;
       } else {
         // Percentage discount*/
-        netPayment = (packageRate - (packageRate * discount)) * contractDuration;
-     /* }*/
+      netPayment = (packageRate - (packageRate * discount)) * contractDuration;
+      /* }*/
 
       _netPaymentController.text = netPayment.toStringAsFixed(2);
     });
@@ -142,7 +147,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       return percentage / 100; // Return as a fraction
     } else {
       // If no percentage sign, treat it as an absolute discount
-      return double.tryParse(discountText) ?? 0;
+      return (double.tryParse(discountText) ?? 0) / 100;
     }
   }
 
@@ -255,15 +260,18 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
               child: SingleChildScrollView(
                 child: Container(
                   color: Colors.grey[100],
-                  padding: EdgeInsets.symmetric(vertical: 30),
+                  padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Work Order',
-                          style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default')),
+                      Center(
+                        child: Text('Work Order',
+                            style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default')),
+                      ),
                       SizedBox(height: 5),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -278,17 +286,30 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ),
                       ),
                       SizedBox(height: 40),
-                      CustomTextInput(
-                        controller: _contractDurationController,
-                        label: 'Contact Duration (Month)',
-                        keyboardType: TextInputType.phone,
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter your contact duration (month)';
-                          }
-                          return null;
-                        },
-                      ),
+                      Form(
+                          key: _formPart1Key,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LabeledTextWithAsterisk(
+                                  text: 'Contact Duration (Month)'),
+                              SizedBox(height: 5),
+                              CustomTextInput(
+                                controller: _contractDurationController,
+                                label: 'Contact Duration (Month)',
+                                keyboardType: TextInputType.phone,
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your contact duration (month)';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          )),
+                      SizedBox(height: 5),
+                      LabeledTextWithAsterisk(text: 'Package'),
                       SizedBox(height: 5),
                       Material(
                         elevation: 5,
@@ -326,8 +347,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                                               package.packageName == newValue,
                                         );
                                         if (selectedPackageObject != null) {
-                                          _packageID =
-                                              selectedPackageObject.id.toString();
+                                          _packageID = selectedPackageObject.id
+                                              .toString();
                                           _priceController.text =
                                               selectedPackageObject.charge
                                                   .toString();
@@ -338,13 +359,16 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                                   Align(
                                     alignment: Alignment.center,
                                     child: CircularProgressIndicator(
-                                      color: const Color.fromRGBO(25, 192, 122, 1),
+                                      color:
+                                          const Color.fromRGBO(25, 192, 122, 1),
                                     ),
                                   ),
                               ],
                             )),
                       ),
                       const SizedBox(height: 10),
+                      LabeledTextWithoutAsterisk(text: 'Package rate'),
+                      SizedBox(height: 5),
                       Container(
                         width: MediaQuery.of(context).size.width * 0.9,
                         height: 70,
@@ -354,8 +378,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                             filled: true,
                             fillColor: Colors.white,
                             border: const OutlineInputBorder(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10))),
                             labelText: 'Package Rate',
                             labelStyle: const TextStyle(
                               color: Colors.black87,
@@ -381,18 +405,25 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      CustomTextInput(
-                        controller: _discountController,
-                        label: 'Discount(%)',
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter your organization name';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.phone,
+                      LabeledTextWithAsterisk(text: 'Discount(%)'),
+                      SizedBox(height: 5),
+                      Form(
+                        key: _formPart2Key,
+                        child: CustomTextInput(
+                          controller: _discountController,
+                          label: 'Discount(%)',
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter the discount(%)';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.phone,
+                        ),
                       ),
                       const SizedBox(height: 5),
+                      LabeledTextWithoutAsterisk(text: 'Link Capacity'),
+                      SizedBox(height: 5),
                       CustomTextInput(
                         controller: _capacityController,
                         label: 'Capacity',
@@ -404,6 +435,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         },
                       ),
                       const SizedBox(height: 5),
+                      LabeledTextWithAsterisk(text: 'Net Payment'),
+                      SizedBox(height: 5),
                       Container(
                         width: MediaQuery.of(context).size.width * 0.9,
                         height: 70,
@@ -413,7 +446,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                             labelText: 'Net Payment',
                             labelStyle: TextStyle(
@@ -434,6 +468,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ),
                       ),
                       const SizedBox(height: 5),
+                      LabeledTextWithAsterisk(text: 'Payment Method'),
+                      SizedBox(height: 5),
                       Material(
                         elevation: 5,
                         borderRadius: BorderRadius.circular(10),
@@ -462,45 +498,62 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                       SizedBox(
                         height: 15,
                       ),
-                      Container(
-                        width: screenWidth * 0.9,
-                        height: 120,
-                        child: TextFormField(
-                          controller: _workOrderRemarkController,
-                          enabled: selectedPaymentMode != null,
-                          validator: (input) {
-                            if (input == null || input.isEmpty) {
-                              return 'Please enter some remarks';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: Color.fromRGBO(143, 150, 158, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            labelText: 'Remarks',
-                            labelStyle: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'default',
+                      Form(
+                        key: _formPart3Key,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            LabeledTextWithAsterisk(text: 'Remark'),
+                            SizedBox(height: 5),
+                            Container(
+                              width: screenWidth * 0.9,
+                              height: 120,
+                              child: TextFormField(
+                                controller: _workOrderRemarkController,
+                                enabled: selectedPaymentMode != null,
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter some remarks';
+                                  }
+                                  return null;
+                                },
+                                style: const TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  labelText: 'Remarks',
+                                  labelStyle: TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    fontFamily: 'default',
+                                  ),
+                                  alignLabelWithHint: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 145),
+                                  border: const OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(10))),
+                                ),
+                              ),
                             ),
-                            alignLabelWithHint: true,
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10, vertical: 145),
-                            border: const OutlineInputBorder(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10))),
-                          ),
+                          ],
                         ),
                       ),
                       SizedBox(
                         height: 30,
+                      ),
+                      LabeledTextWithoutAsterisk(
+                        text: 'Term Of Reference',
+                      ),
+                      SizedBox(
+                        height: 5,
                       ),
                       Center(
                         child: Column(
@@ -512,7 +565,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                                       const Color.fromRGBO(25, 192, 122, 1),
                                   fixedSize: Size(
                                       MediaQuery.of(context).size.width * 0.9,
-                                      MediaQuery.of(context).size.height * 0.075),
+                                      MediaQuery.of(context).size.height *
+                                          0.075),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
                                   ),
@@ -648,7 +702,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         serviceType: serviceType,
         latlong: latlong,
         contractDuration: _contractDurationController.text,
-        packageName:  _packageID,
+        packageName: _packageID,
         discount: _discountController.text,
         netPayment: _netPaymentController.text,
         paymentMode: selectedPaymentMode,
@@ -703,32 +757,61 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         // Handle error
         print('Error sending connection request: $error');
       });
+    } else {
+      setState(() {
+        isRequestLoading = false; // Show the loading indicator
+      });
+      const snackBar = SnackBar(
+        content: Text('Please fill up all fields properly'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
   bool _validateAndSave() {
-    final contactDurationIsValid = _contractDurationController.text.isNotEmpty;
-    final packageNameIsValid =  _packageID.isNotEmpty;
-    final discountIsValid = _discountController.text.isNotEmpty;
-    final netPaymentIsValid = _netPaymentController.text.isNotEmpty;
-    final paymentmodeIsValid = _PaymentMode.isNotEmpty;
-    final packageIdIsValid = _packageID.isNotEmpty;
-    final linkCapacityIsValid = _PaymentMode.isNotEmpty;
-    final remarkIsValid = _workOrderRemarkController.text.isNotEmpty;
+    bool valid = _formPart1Key.currentState!.validate() &&
+        _formPart2Key.currentState!.validate() &&
+        _formPart3Key.currentState!.validate();
+    if (valid) {
+      final contactDurationIsValid =
+          _contractDurationController.text.isNotEmpty;
+      final packageNameIsValid = _packageID.isNotEmpty;
+      final discountIsValid = _discountController.text.isNotEmpty;
+      final netPaymentIsValid = _netPaymentController.text.isNotEmpty;
+      final paymentmodeIsValid = _PaymentMode.isNotEmpty;
+      final packageIdIsValid = _packageID.isNotEmpty;
+      final linkCapacityIsValid = _PaymentMode.isNotEmpty;
+      final remarkIsValid = _workOrderRemarkController.text.isNotEmpty;
 
-    print(linkCapacityIsValid);
+      print(linkCapacityIsValid);
 
-    // Check if all fields are valid
-    final allFieldsAreValid = contactDurationIsValid &&
-        packageNameIsValid! &&
-        discountIsValid &&
-        netPaymentIsValid &&
-        paymentmodeIsValid &&
-        packageIdIsValid &&
-        linkCapacityIsValid &&
-        remarkIsValid && _file != null;
+      if (selectedPackage == null) {
+        const snackBar = SnackBar(
+          content: Text('Please select a package'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
 
-    return allFieldsAreValid;
+      // Check if all fields are valid
+      final allFieldsAreValid = contactDurationIsValid &&
+          packageNameIsValid! &&
+          discountIsValid &&
+          netPaymentIsValid &&
+          paymentmodeIsValid &&
+          packageIdIsValid &&
+          linkCapacityIsValid &&
+          remarkIsValid;
+
+ /*     if (_file == null) {
+        const snackBar = SnackBar(
+          content: Text('Please upload your tor file/document'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }*/
+
+      return allFieldsAreValid;
+    }
+    return false;
   }
 
   Future<void> _pickFile() async {

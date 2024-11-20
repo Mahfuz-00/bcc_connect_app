@@ -501,7 +501,7 @@ class _ISPRequestListUIState extends State<ISPRequestListUI> {
                             child: Container(
                               color: Colors.grey[100],
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 20),
+                                  horizontal: 20, vertical: 20),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

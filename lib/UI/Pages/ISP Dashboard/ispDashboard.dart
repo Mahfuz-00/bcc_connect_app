@@ -519,7 +519,7 @@ class _ISPDashboardUIState extends State<ISPDashboardUI> {
                           child: Container(
                             color: Colors.grey[100],
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 30),
+                                horizontal: 20, vertical: 30),
                             child: Padding(
                               padding: const EdgeInsets.only(top: 15),
                               child: Column(

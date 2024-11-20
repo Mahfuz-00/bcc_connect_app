@@ -122,7 +122,7 @@ class _PackageUIState extends State<PackageUI> {
                 child: SingleChildScrollView(
                   child: Container(
                     color: Colors.grey[100],
-                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
