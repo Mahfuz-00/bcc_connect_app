@@ -75,7 +75,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   late TextEditingController _contractDurationController =
       TextEditingController();
   late TextEditingController _capacityController = TextEditingController();
-  late TextEditingController _discountController = TextEditingController();
+
+/*  late TextEditingController _discountController = TextEditingController();*/
   late TextEditingController _priceController = TextEditingController();
   late TextEditingController _netPaymentController = TextEditingController();
   late TextEditingController _linkcapcitycontroller = TextEditingController();
@@ -90,7 +91,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
   late PackageAPIService apiService;
 
-  List<String> PaymentOptions = ['Cash', 'Online'];
+  List<String> PaymentOptions = ['Offline', 'Online'];
 
   Future<PackageAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
@@ -115,8 +116,21 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
   // Variables for calculations
   double packageRate = 0;
-  double discount = 0;
 
+  void _calculateNetPayment() {
+    setState(() {
+      int contractDuration = int.parse(_contractDurationController.text);
+      packageRate = double.tryParse(_priceController.text) ?? 0;
+
+      double netPayment;
+      netPayment = contractDuration * packageRate;
+      _netPaymentController.text = netPayment.toStringAsFixed(2);
+    });
+  }
+
+  /*double discount = 0;*/
+
+/*
   void _calculateNetPayment() {
     setState(() {
       int contractDuration = int.parse(_contractDurationController.text);
@@ -124,16 +138,20 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       discount = _parseDiscount(_discountController.text);
 
       double netPayment;
-      /* if (discount == 0) {
+      */
+/* if (discount == 0) {
         // No discount
         netPayment = contractDuration * packageRate;
       } else if (discount > 1) {
         // Absolute discount
         netPayment = (contractDuration * packageRate) - discount;
       } else {
-        // Percentage discount*/
+        // Percentage discount*/ /*
+
       netPayment = (packageRate - (packageRate * discount)) * contractDuration;
-      /* }*/
+      */
+/* }*/ /*
+
 
       _netPaymentController.text = netPayment.toStringAsFixed(2);
     });
@@ -150,6 +168,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       return (double.tryParse(discountText) ?? 0) / 100;
     }
   }
+*/
 
   late String divisionId;
   late String districtId;
@@ -177,10 +196,12 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       requestRemark = datafromfirstpageCubit.state.remark!;
     });
     super.initState();
-    // Add listeners to update the calculation automatically
+    _priceController.addListener(_calculateNetPayment);
+    _contractDurationController.addListener(_calculateNetPayment);
+    /*  // Add listeners to update the calculation automatically
     _priceController.addListener(_calculateNetPayment);
     _discountController.addListener(_calculateNetPayment);
-    _contractDurationController.addListener(_calculateNetPayment);
+    _contractDurationController.addListener(_calculateNetPayment);*/
     _connectionRequest = ConnectionRequestModel(
       divisionId: "",
       districtId: "",
@@ -309,6 +330,19 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                             ],
                           )),
                       SizedBox(height: 5),
+                      LabeledTextWithoutAsterisk(text: 'Connection Capacity'),
+                      SizedBox(height: 5),
+                      CustomTextInput(
+                        controller: _capacityController,
+                        label: 'Capacity',
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return 'Please enter your Connection Capacity';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 5),
                       LabeledTextWithAsterisk(text: 'Package'),
                       SizedBox(height: 5),
                       Material(
@@ -405,7 +439,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      LabeledTextWithAsterisk(text: 'Discount(%)'),
+                      /*  LabeledTextWithAsterisk(text: 'Discount(%)'),
                       SizedBox(height: 5),
                       Form(
                         key: _formPart2Key,
@@ -421,20 +455,8 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                           keyboardType: TextInputType.phone,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      LabeledTextWithoutAsterisk(text: 'Link Capacity'),
-                      SizedBox(height: 5),
-                      CustomTextInput(
-                        controller: _capacityController,
-                        label: 'Capacity',
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter your organization name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 5),*/
+                  /*    SizedBox(height: 10),*/
                       LabeledTextWithAsterisk(text: 'Net Payment'),
                       SizedBox(height: 5),
                       Container(
@@ -498,53 +520,50 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                       SizedBox(
                         height: 15,
                       ),
-                      Form(
-                        key: _formPart3Key,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LabeledTextWithAsterisk(text: 'Remark'),
-                            SizedBox(height: 5),
-                            Container(
-                              width: screenWidth * 0.9,
-                              height: 120,
-                              child: TextFormField(
-                                controller: _workOrderRemarkController,
-                                enabled: selectedPaymentMode != null,
-                                validator: (input) {
-                                  if (input == null || input.isEmpty) {
-                                    return 'Please enter some remarks';
-                                  }
-                                  return null;
-                                },
-                                style: const TextStyle(
-                                  color: Color.fromRGBO(143, 150, 158, 1),
-                                  fontSize: 16,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LabeledTextWithoutAsterisk(text: 'Remark'),
+                          SizedBox(height: 5),
+                          Container(
+                            width: screenWidth * 0.9,
+                            height: 120,
+                            child: TextFormField(
+                              controller: _workOrderRemarkController,
+                              enabled: selectedPaymentMode != null,
+                              validator: (input) {
+                                if (input == null || input.isEmpty) {
+                                  return 'Please enter some remarks';
+                                }
+                                return null;
+                              },
+                              style: const TextStyle(
+                                color: Color.fromRGBO(143, 150, 158, 1),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelText: 'Remarks',
+                                labelStyle: TextStyle(
+                                  color: Colors.black87,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                   fontFamily: 'default',
                                 ),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  labelText: 'Remarks',
-                                  labelStyle: TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    fontFamily: 'default',
-                                  ),
-                                  alignLabelWithHint: true,
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 145),
-                                  border: const OutlineInputBorder(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(10))),
-                                ),
+                                alignLabelWithHint: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 145),
+                                border: const OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10))),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 30,
@@ -675,7 +694,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
     print('Request Remark: $requestRemark');
     print('Contract Duration: ${_contractDurationController.text}');
     print('Package: $selectedPackage');
-    print('Discount: ${_discountController.text}');
+    /*  print('Discount: ${_discountController.text}');*/
     print('Net Payment: ${_netPaymentController.text}');
     print('Payment Mode: $selectedPaymentMode');
     print('Work Order Remark: ${_workOrderRemarkController.text}');
@@ -703,9 +722,10 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         latlong: latlong,
         contractDuration: _contractDurationController.text,
         packageName: _packageID,
-        discount: _discountController.text,
+        /*   discount: _discountController.text,*/
         netPayment: _netPaymentController.text,
         paymentMode: selectedPaymentMode,
+        orderRemark: _workOrderRemarkController.text
       );
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
@@ -769,21 +789,14 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   }
 
   bool _validateAndSave() {
-    bool valid = _formPart1Key.currentState!.validate() &&
-        _formPart2Key.currentState!.validate() &&
-        _formPart3Key.currentState!.validate();
+    bool valid = _formPart1Key.currentState!.validate();
     if (valid) {
       final contactDurationIsValid =
           _contractDurationController.text.isNotEmpty;
-      final packageNameIsValid = _packageID.isNotEmpty;
-      final discountIsValid = _discountController.text.isNotEmpty;
+/*      final discountIsValid = _discountController.text.isNotEmpty;*/
       final netPaymentIsValid = _netPaymentController.text.isNotEmpty;
       final paymentmodeIsValid = _PaymentMode.isNotEmpty;
       final packageIdIsValid = _packageID.isNotEmpty;
-      final linkCapacityIsValid = _PaymentMode.isNotEmpty;
-      final remarkIsValid = _workOrderRemarkController.text.isNotEmpty;
-
-      print(linkCapacityIsValid);
 
       if (selectedPackage == null) {
         const snackBar = SnackBar(
@@ -794,15 +807,12 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
       // Check if all fields are valid
       final allFieldsAreValid = contactDurationIsValid &&
-          packageNameIsValid! &&
-          discountIsValid &&
+          /*discountIsValid &&*/
           netPaymentIsValid &&
           paymentmodeIsValid &&
-          packageIdIsValid &&
-          linkCapacityIsValid &&
-          remarkIsValid;
+          packageIdIsValid;
 
- /*     if (_file == null) {
+      /*     if (_file == null) {
         const snackBar = SnackBar(
           content: Text('Please upload your tor file/document'),
         );

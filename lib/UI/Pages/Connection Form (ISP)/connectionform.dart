@@ -67,6 +67,9 @@ class ConnectionFormUI extends StatefulWidget {
 class _ConnectionFormUIState extends State<ConnectionFormUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? selectedLinkCapacity;
+  String? selectedRackSpace;
+  String? selectedUnit;
+  String fullLinkCapacity = "";
   late ConnectionRequestModel _connectionRequest;
   late TextEditingController _fullNameController = TextEditingController();
   late TextEditingController _addressController = TextEditingController();
@@ -90,7 +93,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
 
   late RegionAPIService apiService;
 
-  List<String> dropdownItems = ["Data", "Core", "Co Location"];
+  // Define possible dropdown items for Service type
+  List<String> dropdownItems = ["Data", "Core", "Co-Location"];
+
+// Additional dropdown options for Rack Space
+  List<String> rackSpaceOptions = ["1", "2", "3", "4", "5", "6"];
 
   Future<RegionAPIService> initializeApiService() async {
     final authCubit = context.read<AuthCubit>();
@@ -407,6 +414,10 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     ),
                   ),
                   */
+                  LabeledTextWithAsterisk(
+                    text: "Service Type",
+                  ),
+                  SizedBox(height: 5,),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -432,6 +443,189 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           },
                         )),
                   ),
+                  if (selectedServiceType != null) ...[
+                    SizedBox(height: 10),
+                    LabeledTextWithAsterisk(
+                      text: selectedServiceType == "Data"
+                          ? "Bandwidth"
+                          : selectedServiceType == "Core"
+                          ? "Core"
+                          : "Rack Space",
+                    ),
+                    SizedBox(height: 5),
+                    if (selectedServiceType == "Co-Location") ...[
+                      Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.075,
+                          padding: EdgeInsets.only(left: 10, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownFormField(
+                            hintText: 'Select Rack Space',
+                            dropdownItems: rackSpaceOptions,
+                            initialValue: selectedRackSpace,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedRackSpace = newValue;
+                                _linkcapcitycontroller.text = newValue!;
+                                fullLinkCapacity = '$newValue U';
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ] else if (selectedServiceType == "Data") ...[
+                      Container(
+                        width: screenWidth * 0.9,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: TextFormField(
+                                controller: _linkcapcitycontroller,
+                                onChanged: (value) {
+                                  setState(() {
+                                    fullLinkCapacity = "${value.trim()} $selectedUnit";
+                                  });
+                                },
+                                validator: (input) {
+                                  if (input == null || input.isEmpty) {
+                                    return 'Please enter your required Bandwidth';
+                                  }
+                                  return null;
+                                },
+                                keyboardType: TextInputType.number,
+                                style: const TextStyle(
+                                  color: Color.fromRGBO(143, 150, 158, 1),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'default',
+                                ),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  labelText: 'Enter Bandwidth',
+                                  labelStyle: TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    fontFamily: 'default',
+                                  ),
+                                  alignLabelWithHint: true,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                                  border: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              flex: 1,
+                              child: Material(
+                                elevation: 5,
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                 // width: screenWidth * 0.9,
+                                  height: screenHeight * 0.075,
+                                  padding: EdgeInsets.only(top: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey),
+                                  ),
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedUnit,
+                                    items: ["MB", "GB"].map((unit) {
+                                      return DropdownMenuItem(
+                                        value: unit,
+                                        child: Text(
+                                          unit,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'default',
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (newUnit) {
+                                      setState(() {
+                                        selectedUnit = newUnit!;
+                                        fullLinkCapacity = "${_linkcapcitycontroller.text} $selectedUnit";
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none, // No border for the dropdown field.
+                                      hintText: 'Unit', // Placeholder text when no item is selected.
+                                      hintStyle: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 12), // Padding for the dropdown field.
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.075,
+                        child: TextFormField(
+                          controller: _linkcapcitycontroller,
+                          validator: (input) {
+                            if (input == null || input.isEmpty) {
+                              return 'Please enter your required Core';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(
+                            color: Color.fromRGBO(143, 150, 158, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: 'Enter your required Core',
+                            labelStyle: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'default',
+                            ),
+                            suffixText: "Core",
+                            alignLabelWithHint: true,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              fullLinkCapacity = "$value Core";
+                            });
+                          },
+                        ),
+                      ),
+                    ]
+                  ],
                   SizedBox(height: 10),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
@@ -818,79 +1012,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                       ]
                     ]
                   ],
-                  if (selectedNTTNProvider != null) ...[
-                    SizedBox(
-                      height: 10,
-                    ),
-                    LabeledTextWithAsterisk(text: 'Link Capacity'),
-                    SizedBox(height: 5),
-                    Material(
-                      elevation: 5,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.075,
-                          padding: EdgeInsets.only(left: 10, top: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: DropdownFormField(
-                            hintText: 'Select Link Capacity',
-                            dropdownItems: linkCapacityOptions.toList(),
-                            initialValue: selectedLinkCapacity,
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedLinkCapacity = newValue;
-                                _linkCapacityID = newValue ?? '';
-                                print(_linkCapacityID);
-                              });
-                            },
-                          )),
-                    ),
-                    if (_linkCapacityID == 'Others') ...[
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Container(
-                        width: screenWidth * 0.9,
-                        height: screenWidth * 0.2,
-                        child: TextFormField(
-                          controller: _linkcapcitycontroller,
-                          validator: (input) {
-                            if (input == null || input.isEmpty) {
-                              return 'Please enter your required link capacity';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: Color.fromRGBO(143, 150, 158, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'default',
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            labelText: 'Enter your required Link Capacity',
-                            labelStyle: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'default',
-                            ),
-                            alignLabelWithHint: true,
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 80),
-                            border: const OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10))),
-                          ),
-                        ),
-                      ),
-                    ]
-                  ],
                   SizedBox(
                     height: 15,
                   ),
@@ -901,7 +1022,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     height: 120,
                     child: TextFormField(
                       controller: _remark,
-                      enabled: selectedLinkCapacity != null,
+                      enabled: providerValues != null,
                       validator: (input) {
                         if (input == null || input.isEmpty) {
                           return 'Please enter some remarks';
@@ -1012,7 +1133,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         serviceType: _selectedServiceType,
         latlong: _latitudeLongtitudeController.text,
         nttnProvider: _NTTNID,
-        linkCapacity: _linkCapacityID,
+        linkCapacity: fullLinkCapacity,
         remark: _remark.text,
       );
 
@@ -1043,13 +1164,36 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     final upazilaIdIsValid = _upazilaID.isNotEmpty;
     final unionIdIsValid = _unionID.isNotEmpty;
     final nttNIdIsValid = _NTTNID != 0;
-    final linkCapacityIsValid = _linkCapacityID.isNotEmpty;
+    final linkCapacityIsValid = fullLinkCapacity.isNotEmpty;
     final remarkIsValid = _remark.text.isNotEmpty;
     final serviceTypeisValid = _selectedServiceType.isNotEmpty;
     final latitudeLongitudeIsValid = (_formKey.currentState?.validate() ?? false) ? true : false;
     ErrorMsg();
 
     print(linkCapacityIsValid);
+
+    if(selectedServiceType == null){
+      return false;
+    }
+
+
+
+    if (selectedServiceType == "Data") {
+      if(selectedUnit == null)
+        return false;
+      if(_linkcapcitycontroller.text.isEmpty)
+        return false;
+    }
+
+    if(selectedServiceType == "Core"){
+      if(_linkcapcitycontroller.text.isEmpty)
+        return false;
+    }
+
+    if(selectedServiceType == "Co-Location"){
+      if(_linkcapcitycontroller.text.isEmpty)
+        return false;
+    }
 
     // Check if all fields are valid
     final allFieldsAreValid = divisionIdIsValid &&

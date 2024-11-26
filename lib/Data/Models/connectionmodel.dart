@@ -37,7 +37,7 @@ class ConnectionRequestModel {
   final String remark;
   final String? packageName;
   final String? contractDuration;
-  final String? discount;
+/*  final String? discount;*/
   final String? netPayment;
   final String? paymentMode;
   final String? orderRemark;
@@ -56,7 +56,7 @@ class ConnectionRequestModel {
     required this.serviceType,
     required this.latlong,
     this.contractDuration,
-    this.discount,
+ /*   this.discount,*/
     this.netPayment,
     this.paymentMode,
     this.packageName,
@@ -79,7 +79,7 @@ class ConnectionRequestModel {
       'service_type': serviceType,
       'service_id': packageName,
       'contract_duration': contractDuration,
-      'discount': discount,
+    /*  'discount': discount,*/
       'net_payment': netPayment,
       'payment_mode': paymentMode,
       'order_remark': orderRemark,
