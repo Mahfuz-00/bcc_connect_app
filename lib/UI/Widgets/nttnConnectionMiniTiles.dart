@@ -23,31 +23,31 @@ import 'package:flutter/material.dart';
 /// with a trailing arrow icon indicating it is clickable.
 class ConnectionsTile extends StatelessWidget {
   final String Name; // The name associated with the connection.
-  final String
+  final String?
       OrganizationName; // The organization name linked to the connection.
-  final String MobileNo; // The mobile number associated with the connection.
-  final String ConnectionType; // The type of connection (e.g., New, Upgrade).
-  final String ApplicationID; // The unique ID of the application.
-  final String Location; // The location of the connection.
-  final String
+  final String? MobileNo; // The mobile number associated with the connection.
+  final String? ConnectionType; // The type of connection (e.g., New, Upgrade).
+  final String? ApplicationID; // The unique ID of the application.
+  final String? Location; // The location of the connection.
+  final String?
       Status; // The current status of the connection (e.g., Pending, Accepted).
   final String
       LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
-  final String Remark; // Any additional remarks about the connection.
+  final String? Remark; // Any additional remarks about the connection.
   final VoidCallback
       onPressed; // Callback function to be executed when the tile is tapped.
 
   const ConnectionsTile({
     Key? key,
     required this.Name,
-    required this.OrganizationName,
-    required this.MobileNo,
-    required this.ConnectionType,
-    required this.ApplicationID,
-    required this.Location,
-    required this.Status,
+    this.OrganizationName,
+    this.MobileNo,
+    this.ConnectionType,
+    this.ApplicationID,
+    this.Location,
+    this.Status,
     required this.LinkCapacity,
-    required this.Remark,
+    this.Remark,
     required this.onPressed,
   }) : super(key: key);
 
@@ -92,7 +92,7 @@ class ConnectionsTile extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                OrganizationName, // Displays the organization name.
+                OrganizationName ?? "N/A", // Displays the organization name.
                 style: TextStyle(
                   color: Colors.white70, // Text color.
                   fontWeight: FontWeight.bold, // Text weight.

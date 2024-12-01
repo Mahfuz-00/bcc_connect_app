@@ -1,5 +1,4 @@
-import 'package:bcc_connect_app/UI/Pages/NTTN%20Work%20Order/nttnWorkOrder.dart';
-import 'package:bcc_connect_app/UI/Pages/Work%20Order/workOrder.dart';
+import 'package:bcc_connect_app/Data/Data%20Sources/API%20Service%20(Work%20Order)/apiserviceWorkOrder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +13,15 @@ import '../../Bloc/email_cubit.dart';
 import '../../Widgets/nttnActiveConnectionDetails.dart';
 import '../../Widgets/nttnConnectionMiniTiles.dart';
 import '../../Widgets/nttnPendingConncetionDetails.dart';
+import '../../Widgets/nttnWorkOrderActiveDetails.dart';
+import '../../Widgets/nttnWorkOrderPendingDetails.dart';
 import '../../Widgets/requestWidget.dart';
 import '../NTTN Pending and Active Connection/nttnActiveConnectionList.dart';
 import '../NTTN Pending and Active Connection/nttnPendingConnectionList.dart';
 import '../Information/information.dart';
 import '../Login UI/loginUI.dart';
+import '../NTTN Pending and Active Work Order/nttnActiveWorkOrdersList.dart';
+import '../NTTN Pending and Active Work Order/nttnPendingWorkOrdersList.dart';
 import '../Profile UI/profileUI.dart';
 import '../Search UI/searchUI.dart';
 
@@ -50,17 +53,17 @@ import '../Search UI/searchUI.dart';
 /// - A section showing connection status with counts for active and pending connections.
 /// - Two [RequestsWidget] components displaying pending and active connection requests.
 /// - A bottom navigation bar with options to navigate to Home, Search, and Information screens.
-class NTTNDashboardUI extends StatefulWidget {
+class NTTNWorkOrderUI extends StatefulWidget {
   final bool shouldRefresh;
 
-  const NTTNDashboardUI({Key? key, this.shouldRefresh = false})
+  const NTTNWorkOrderUI({Key? key, this.shouldRefresh = false})
       : super(key: key);
 
   @override
-  State<NTTNDashboardUI> createState() => _NTTNDashboardUIState();
+  State<NTTNWorkOrderUI> createState() => _NTTNWorkOrderUIState();
 }
 
-class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
+class _NTTNWorkOrderUIState extends State<NTTNWorkOrderUI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
   bool _pageLoading = true;
@@ -85,9 +88,9 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
     try {
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
-      final apiService = await NTTNConnectionAPIService.create(token);
+      final apiService = await WorkOrderAPIService.create(token);
       final Map<String, dynamic> dashboardData =
-          await apiService.fetchConnections();
+          await apiService.fetchWorkOrders();
       if (dashboardData == null || dashboardData.isEmpty) {
         print(
             'No data available or error occurred while fetching dashboard data');
@@ -95,15 +98,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       }
 
       print(dashboardData);
-
-      final Map<String, dynamic>? counts = dashboardData['records']['total'];
-      print(counts);
-      setState(() {
-        CountActive = counts?['active'];
-        CountPending = counts?['inactive'];
-        print('SBL Active: $CountActive');
-        print('SBL Pending: $CountPending');
-      });
 
       final Map<String, dynamic> records = dashboardData['records'];
       if (records == null || records.isEmpty) {
@@ -125,8 +119,6 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
       canFetchMorePending = pendingPagination.canFetchNext;
       canFetchMoreAccepted = acceptedPagination.canFetchNext;
 
-      notifications = List<String>.from(records['notifications'] ?? []);
-
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
       for (var index = 0; index < pendingRequestsData.length; index++) {
@@ -142,36 +134,24 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
 
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionsTile(
-          Name: request['name'],
-          OrganizationName: request['organization'],
-          MobileNo: request['mobile'],
-          ConnectionType: request['connection_type'],
-          ApplicationID: request['application_id'].toString(),
-          Location: request['location'],
-          Status: request['status'],
-          LinkCapacity: request['link'],
-          Remark: request['remark'],
+          Name: request['client_name'],
+          LinkCapacity: request['link_capacity'],
           onPressed: () {
             print('Pending tapped');
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PendingConnectionDetails(
-                  Name: request['name'],
-                  OrganizationName: request['organization'],
-                  MobileNo: request['mobile'],
-                  ConnectionType: request['connection_type'],
+                builder: (context) => PendingWorkOrderDetails(
+                  Name: request['client_name'],
                   FRNumber: request['fr_number'].toString(),
-                  Location: request['location'],
-                  Status: request['status'],
-                  LinkCapacity: request['link'],
-                  Remark: request['remark'],
+                  LinkCapacity: request['link_capacity'],
                   SerivceType: request['service_type'],
-                  Capacity: request['capacity'],
                   WorkOrderNumber: request['work_order_number'],
                   ContactDuration: request['contract_duration'],
                   NetPayment: request['net_payment'],
-                  OrgAddress: request['client_address'],
+                  PackageName: request['package_name'],
+                  PaymentMethod: request['payment_mode'],
+                  Discount: request['discount'],
                 ),
               ),
             );
@@ -181,36 +161,24 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
 
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionsTile(
-          Name: request['name'],
-          OrganizationName: request['organization'],
-          MobileNo: request['mobile'],
-          ConnectionType: request['connection_type'],
-          ApplicationID: request['application_id'].toString(),
-          Location: request['location'],
-          Status: request['status'],
-          LinkCapacity: request['link'],
-          Remark: request['remark'],
+          Name: request['client_name'],
+          LinkCapacity: request['link_capacity'],
           onPressed: () {
             print('Active tapped');
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ActiveConnectionDetails(
-                  Name: request['name'],
-                  OrganizationName: request['organization'],
-                  MobileNo: request['mobile'],
-                  ConnectionType: request['connection_type'],
+                builder: (context) => ActiveWorkOrderDetails(
+                  Name: request['client_name'],
                   FRNumber: request['fr_number'].toString(),
-                  Location: request['location'],
-                  Status: request['status'],
-                  LinkCapacity: request['link'],
-                  Remark: request['remark'],
+                  LinkCapacity: request['link_capacity'],
                   SerivceType: request['service_type'],
-                  Capacity: request['capacity'],
                   WorkOrderNumber: request['work_order_number'],
                   ContactDuration: request['contract_duration'],
                   NetPayment: request['net_payment'],
-                  OrgAddress: request['client_address'],
+                  PackageName: request['package_name'],
+                  PaymentMethod: request['payment_mode'],
+                  Discount: request['discount'],
                 ),
               ),
             );
@@ -236,6 +204,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
     if (widget.shouldRefresh) {
       Future.delayed(Duration(seconds: 5), () {
         setState(() {
+          print('stop');
           _pageLoading = false;
         });
       });
@@ -281,7 +250,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                           },
                         ),
                         title: const Text(
-                          'NTTN Dashboard',
+                          'All Work Orders',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -388,14 +357,14 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => NTTNDashboardUI(
+                                        builder: (context) => NTTNWorkOrderUI(
                                               shouldRefresh: true,
                                             )));
                               },
                             ),
                             Divider(),
                             ListTile(
-                              title: Text('Pending Application',
+                              title: Text('Pending Work Orders',
                                   style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 20,
@@ -408,14 +377,14 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNPendingConnectionListUI(
+                                            NTTNPendingWorkOrderListUI(
                                               shouldRefresh: true,
                                             )));
                               },
                             ),
                             Divider(),
                             ListTile(
-                              title: Text('Connections',
+                              title: Text('Active Work Orders',
                                   style: TextStyle(
                                     color: Colors.black87,
                                     fontSize: 20,
@@ -428,27 +397,9 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            NTTNActiveConnectionListUI(
+                                            NTTNActiveWorkOrderListUI(
                                               shouldRefresh: true,
                                             )));
-                              },
-                            ),
-                            Divider(),
-                            ListTile(
-                              title: Text('Work Order',
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  )),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) {
-                                    return NTTNWorkOrderUI(shouldRefresh: true,);
-                                  },
-                                ));
                               },
                             ),
                             Divider(),
@@ -544,6 +495,19 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                   Center(
                                     child: Text(
                                       'Welcome, ${userProfile.name}',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'default',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Center(
+                                    child: Text(
+                                      'Work Orders List',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.black,
@@ -554,114 +518,10 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                     ),
                                   ),
                                   const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Center(
-                                    child: Text(
-                                      'Connection Status',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
                                     height: 20,
                                   ),
                                   Container(
-                                      child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Material(
-                                        elevation: 3,
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Container(
-                                          width: screenWidth * 0.45,
-                                          height: screenHeight * 0.2,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                    Radius.circular(10)),
-                                            color: Colors.deepPurple,
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(CountActive.toString(),
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 50,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'default',
-                                                  )),
-                                              SizedBox(
-                                                height: 15,
-                                              ),
-                                              Text('Total Active Connection',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'default',
-                                                  ))
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Material(
-                                        elevation: 3,
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Container(
-                                          width: screenWidth * 0.45,
-                                          height: screenHeight * 0.2,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                    Radius.circular(10)),
-                                            color: Colors.greenAccent,
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(CountPending.toString(),
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 50,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'default',
-                                                  )),
-                                              SizedBox(
-                                                height: 15,
-                                              ),
-                                              Text('New Pending Connection',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'default',
-                                                  ))
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Container(
-                                    child: const Text('Pending Application',
+                                    child: const Text('Pending Work Orders',
                                         textAlign: TextAlign.left,
                                         style: TextStyle(
                                           color: Colors.black,
@@ -676,18 +536,18 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                       loading: _isLoading,
                                       fetch: _isFetched,
                                       errorText:
-                                          'There is no new connection request at this moment.',
+                                          'There is no new work order at this moment.',
                                       listWidget: pendingConnectionRequests,
                                       fetchData: fetchConnectionApplications(),
                                       showSeeAllButton: canFetchMorePending,
-                                      seeAllButtonText: 'See All Request',
+                                      seeAllButtonText: 'See All Pending Work Orders',
                                       nextPage: NTTNPendingConnectionListUI(
                                         shouldRefresh: true,
                                       )),
                                   Divider(),
                                   const SizedBox(height: 5),
                                   Container(
-                                    child: const Text('Active Connections',
+                                    child: const Text('Active Work Orders',
                                         textAlign: TextAlign.left,
                                         style: TextStyle(
                                           color: Colors.black,
@@ -701,12 +561,12 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                   RequestsWidget(
                                       loading: _isLoading,
                                       fetch: _isFetched,
-                                      errorText: 'No Active connection.',
+                                      errorText: 'No Active Work Order.',
                                       listWidget: acceptedConnectionRequests,
                                       fetchData: fetchConnectionApplications(),
                                       showSeeAllButton: canFetchMoreAccepted,
                                       seeAllButtonText:
-                                          'See All Reviewed Request',
+                                          'See All Active Work Order',
                                       nextPage: NTTNActiveConnectionListUI(
                                         shouldRefresh: true,
                                       )),
@@ -729,7 +589,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => NTTNDashboardUI(
+                                          builder: (context) => NTTNWorkOrderUI(
                                               shouldRefresh: true)));
                                 });
                               },
