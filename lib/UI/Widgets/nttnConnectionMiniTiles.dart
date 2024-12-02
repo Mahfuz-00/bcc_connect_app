@@ -22,8 +22,8 @@ import 'package:flutter/material.dart';
 /// It includes a [ListTile] to display the [Name] and [OrganizationName], along
 /// with a trailing arrow icon indicating it is clickable.
 class ConnectionsTile extends StatelessWidget {
-  final String Name; // The name associated with the connection.
-  final String
+  final String? Name; // The name associated with the connection.
+  final String?
       OrganizationName; // The organization name linked to the connection.
   final String? MobileNo; // The mobile number associated with the connection.
   final String? ConnectionType; // The type of connection (e.g., New, Upgrade).
@@ -83,7 +83,7 @@ class ConnectionsTile extends StatelessWidget {
             ),
             child: ListTile(
               title: Text(
-                Name, // Displays the name of the connection.
+                Name ?? 'N/A', // Displays the name of the connection.
                 style: TextStyle(
                   color: Colors.white, // Text color.
                   fontWeight: FontWeight.bold, // Text weight.
@@ -92,7 +92,7 @@ class ConnectionsTile extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                OrganizationName, // Displays the organization name.
+                OrganizationName ?? 'N/A', // Displays the organization name.
                 style: TextStyle(
                   color: Colors.white70, // Text color.
                   fontWeight: FontWeight.bold, // Text weight.

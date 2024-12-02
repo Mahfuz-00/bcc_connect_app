@@ -580,7 +580,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                         elevation: 3,
                                         borderRadius: BorderRadius.circular(10),
                                         child: Container(
-                                          width: screenWidth * 0.45,
+                                          width: screenWidth * 0.43,
                                           height: screenHeight * 0.2,
                                           decoration: BoxDecoration(
                                             borderRadius:
@@ -602,7 +602,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                               SizedBox(
                                                 height: 15,
                                               ),
-                                              Text('Total Active Connection',
+                                              Text('Active Connections',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -621,7 +621,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                         elevation: 3,
                                         borderRadius: BorderRadius.circular(10),
                                         child: Container(
-                                          width: screenWidth * 0.45,
+                                          width: screenWidth * 0.43,
                                           height: screenHeight * 0.2,
                                           decoration: BoxDecoration(
                                             borderRadius:
@@ -643,7 +643,7 @@ class _NTTNDashboardUIState extends State<NTTNDashboardUI> {
                                               SizedBox(
                                                 height: 15,
                                               ),
-                                              Text('New Pending Connection',
+                                              Text('Pending Connections',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.white,

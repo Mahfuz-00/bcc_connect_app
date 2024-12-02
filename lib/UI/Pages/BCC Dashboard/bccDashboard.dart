@@ -899,7 +899,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
           elevation: 3,
           borderRadius: BorderRadius.circular(10),
           child: Container(
-            width: screenWidth * 0.45,
+            width: screenWidth * 0.43,
             height: screenHeight * 0.2,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -918,7 +918,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                 SizedBox(
                   height: 10,
                 ),
-                Text('Total Active Connection',
+                Text('Active Connections',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -936,7 +936,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
           elevation: 3,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            width: screenWidth * 0.45,
+            width: screenWidth * 0.43,
             height: screenHeight * 0.2,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -955,7 +955,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                 SizedBox(
                   height: 10,
                 ),
-                Text('New Pending Connection',
+                Text('Pending Connections',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
