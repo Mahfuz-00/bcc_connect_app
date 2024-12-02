@@ -311,18 +311,6 @@ class _UpgradePageState extends State<UpgradePage> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    CustomTextInput(
-                      controller: _discountController,
-                      label: 'Discount',
-                      validator: (input) {
-                        if (input == null || input.isEmpty) {
-                          return 'Please enter the discount amount or percentage';
-                        }
-                        return null;
-                      },
-                      keyboardType: TextInputType.phone,
-                    ),
-                    SizedBox(height: 10),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: 70,
@@ -466,7 +454,6 @@ class _UpgradePageState extends State<UpgradePage> {
           remark: remark,
           contractDuration: contractDuration,
           packageid: packageID,
-          discount: discount,
           netPaymnet: netPayment,
         );
 

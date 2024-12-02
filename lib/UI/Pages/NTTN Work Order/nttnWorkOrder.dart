@@ -136,6 +136,7 @@ class _NTTNWorkOrderUIState extends State<NTTNWorkOrderUI> {
         return ConnectionsTile(
           Name: request['client_name'],
           LinkCapacity: request['link_capacity'],
+          OrganizationName: request['organization'],
           onPressed: () {
             print('Pending tapped');
             Navigator.push(
@@ -163,6 +164,7 @@ class _NTTNWorkOrderUIState extends State<NTTNWorkOrderUI> {
         return ConnectionsTile(
           Name: request['client_name'],
           LinkCapacity: request['link_capacity'],
+          OrganizationName: request['organization'],
           onPressed: () {
             print('Active tapped');
             Navigator.push(
@@ -541,7 +543,7 @@ class _NTTNWorkOrderUIState extends State<NTTNWorkOrderUI> {
                                       fetchData: fetchConnectionApplications(),
                                       showSeeAllButton: canFetchMorePending,
                                       seeAllButtonText: 'See All Pending Work Orders',
-                                      nextPage: NTTNPendingConnectionListUI(
+                                      nextPage: NTTNPendingWorkOrderListUI(
                                         shouldRefresh: true,
                                       )),
                                   Divider(),
@@ -567,7 +569,7 @@ class _NTTNWorkOrderUIState extends State<NTTNWorkOrderUI> {
                                       showSeeAllButton: canFetchMoreAccepted,
                                       seeAllButtonText:
                                           'See All Active Work Order',
-                                      nextPage: NTTNActiveConnectionListUI(
+                                      nextPage: NTTNActiveWorkOrderListUI(
                                         shouldRefresh: true,
                                       )),
                                 ],

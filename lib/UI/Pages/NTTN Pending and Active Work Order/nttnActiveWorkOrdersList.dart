@@ -127,6 +127,7 @@ class _NTTNActiveWorkOrderListUIState
         return ConnectionsTile(
           Name: request['client_name'],
           LinkCapacity: request['link_capacity'],
+          OrganizationName: request['organization'],
           onPressed: () {
             print('Active tapped');
             Navigator.push(
@@ -213,6 +214,7 @@ class _NTTNActiveWorkOrderListUIState
           return ConnectionsTile(
             Name: request['client_name'],
             LinkCapacity: request['link_capacity'],
+            OrganizationName: request['organization'],
             onPressed: () {
               print('Active tapped');
               Navigator.push(

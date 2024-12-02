@@ -126,6 +126,7 @@ class _NTTNPendingWorkOrderListUIState
         return ConnectionsTile(
           Name: request['client_name'],
           LinkCapacity: request['link_capacity'],
+          OrganizationName: request['organization'],
           onPressed: () {
             print('Pending tapped');
             Navigator.push(
@@ -221,6 +222,7 @@ class _NTTNPendingWorkOrderListUIState
           return ConnectionsTile(
             Name: request['client_name'],
             LinkCapacity: request['link_capacity'],
+            OrganizationName: request['organization'],
             onPressed: () {
               print('Pending tapped');
               Navigator.push(

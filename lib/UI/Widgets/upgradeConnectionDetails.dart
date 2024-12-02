@@ -519,7 +519,6 @@ class _UpgradeConnectionInfoCardState extends State<UpgradeConnectionInfoCard> {
                           remark: remark,
                           contractDuration: contractDuration,
                           packageid: packageID,
-                          discount: discount,
                           netPaymnet: netPayment,
                         );
                         print('Response: $response');
