@@ -13,6 +13,7 @@ import '../../Bloc/form_data_cubit.dart';
 import '../../Widgets/TamplateTextField.dart';
 import '../../Widgets/dropdownfieldConnectionForm.dart';
 import '../../Widgets/dropdownservice.dart';
+import '../../Widgets/labelTextTemplate.dart';
 import '../ISP Dashboard/ispDashboard.dart';
 
 /// [ConnectionFormUI] is a [StatefulWidget] that represents a form for users to fill out
@@ -481,12 +482,13 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                         ),
                       ),
                     ] else if (selectedServiceType == "Data") ...[
-                      Container(
-                        width: screenWidth * 0.9,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              width: screenWidth * 0.9,
+                              height: screenHeight * 0.075,
                               child: TextFormField(
                                 controller: _linkcapcitycontroller,
                                 onChanged: (value) {
@@ -514,72 +516,72 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                   labelStyle: TextStyle(
                                     color: Colors.black87,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 17,
                                     fontFamily: 'default',
                                   ),
                                   alignLabelWithHint: true,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 25),
                                   border: const OutlineInputBorder(
                                     borderRadius: BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
                               ),
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              flex: 1,
-                              child: Material(
-                                elevation: 5,
-                                borderRadius: BorderRadius.circular(10),
-                                child: Container(
-                                 // width: screenWidth * 0.9,
-                                  height: screenHeight * 0.075,
-                                  padding: EdgeInsets.only(top: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey),
-                                  ),
-                                  child: DropdownButtonFormField<String>(
-                                    value: selectedUnit,
-                                    items: ["MB", "GB"].map((unit) {
-                                      return DropdownMenuItem(
-                                        value: unit,
-                                        child: Text(
-                                          unit,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'default',
-                                          ),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            flex: 1,
+                            child: Material(
+                              elevation: 5,
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                width: screenWidth * 0.9,
+                                height: screenHeight * 0.075,
+                                padding: EdgeInsets.only(top: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  value: selectedUnit,
+                                  items: ["MB", "GB"].map((unit) {
+                                    return DropdownMenuItem(
+                                      value: unit,
+                                      child: Text(
+                                        unit,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'default',
                                         ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (newUnit) {
-                                      setState(() {
-                                        selectedUnit = newUnit!;
-                                        fullLinkCapacity = "${_linkcapcitycontroller.text} $selectedUnit";
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none, // No border for the dropdown field.
-                                      hintText: 'Unit', // Placeholder text when no item is selected.
-                                      hintStyle: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'default',
                                       ),
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 12), // Padding for the dropdown field.
+                                    );
+                                  }).toList(),
+                                  onChanged: (newUnit) {
+                                    setState(() {
+                                      selectedUnit = newUnit!;
+                                      fullLinkCapacity = "${_linkcapcitycontroller.text} $selectedUnit";
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none, // No border for the dropdown field.
+                                    hintText: 'Unit', // Placeholder text when no item is selected.
+                                    hintStyle: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
                                     ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12), // Padding for the dropdown field.
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ] else ...[
                       Container(
@@ -607,12 +609,12 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                             labelStyle: TextStyle(
                               color: Colors.black87,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 17,
                               fontFamily: 'default',
                             ),
                             suffixText: "Core",
                             alignLabelWithHint: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 25),
                             border: const OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10)),
                             ),
@@ -627,56 +629,57 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                     ]
                   ],
                   SizedBox(height: 10),
+                  LabeledTextWithoutAsterisk(
+                    text: "Latitude and Longitude of The Location",
+                  ),
+                  SizedBox(height: 5,),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 100,
-                    child: Form( // Wrap the TextFormField with a Form widget
-                      key: _formKey,  // Assign the form key to the form widget
-                      child: TextFormField(
-                        controller: _latitudeLongtitudeController,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true), // Ensure proper input
-                        decoration: InputDecoration(
-                          labelText: 'Latitude and Longitude of The Location',
-                          hintText: 'e.g., 12.3456, 65.4321',
-                          helperText: 'Enter in format: latitude, longitude',
-                          filled: true,
-                          fillColor: Colors.white,
-                          labelStyle: const TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'default',
-                          ),
-                          border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10))
-                          ),
-                        ),
-                        style: const TextStyle(
-                          color: Color.fromRGBO(143, 150, 158, 1),
-                          fontSize: 16,
+                    child: TextFormField(
+                      controller: _latitudeLongtitudeController,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true), // Ensure proper input
+                      decoration: InputDecoration(
+                        labelText: 'Latitude and Longitude of The Location',
+                        hintText: 'e.g., 12.3456,65.4321',
+                        helperText: 'Enter in format: latitude, longitude',
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelStyle: const TextStyle(
+                          color: Colors.black87,
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                           fontFamily: 'default',
                         ),
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return 'Please enter latitude and longitude'; // Form-level error message
-                          }
-
-                          // Regular expression to validate latitude, longitude format
-                          final latLongRegExp = RegExp(
-                              r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
-
-                          if (!input.contains(',')) {
-                            return 'Please use a comma to separate latitude and longitude'; // Error if comma is missing
-                          }
-
-                          if (!latLongRegExp.hasMatch(input)) {
-                            return 'Invalid format. Use "latitude, longitude"'; // Error if format doesn't match
-                          }
-
-                          return null; // If all validations pass, return null
-                        },
+                        border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10))
+                        ),
                       ),
+                      style: const TextStyle(
+                        color: Color.fromRGBO(143, 150, 158, 1),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                      ),
+                      validator: (input) {
+                        if (input == null || input.isEmpty) {
+                          return 'Please enter latitude and longitude'; // Form-level error message
+                        }
+
+                        // Regular expression to validate latitude, longitude format
+                        final latLongRegExp = RegExp(
+                            r'^-?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$');
+
+                        if (!input.contains(',')) {
+                          return 'Please use a comma to separate latitude and longitude'; // Error if comma is missing
+                        }
+
+                        if (!latLongRegExp.hasMatch(input)) {
+                          return 'Invalid format. Use "latitude, longitude"'; // Error if format doesn't match
+                        }
+
+                        return null; // If all validations pass, return null
+                      },
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -1137,7 +1140,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         remark: _remark.text,
       );
 
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => WorkOrderUI()),
       );
@@ -1167,7 +1170,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     final linkCapacityIsValid = fullLinkCapacity.isNotEmpty;
     final remarkIsValid = _remark.text.isNotEmpty;
     final serviceTypeisValid = _selectedServiceType.isNotEmpty;
-    final latitudeLongitudeIsValid = (_formKey.currentState?.validate() ?? false) ? true : false;
+    /*final latitudeLongitudeIsValid = (_formKey.currentState?.validate() ?? false) ? true : false;*/
     ErrorMsg();
 
     print(linkCapacityIsValid);
@@ -1203,7 +1206,7 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         nttNIdIsValid &&
         linkCapacityIsValid &&
         serviceTypeisValid &&
-        latitudeLongitudeIsValid &&
+        /*latitudeLongitudeIsValid &&*/
         remarkIsValid;
 
     return allFieldsAreValid;

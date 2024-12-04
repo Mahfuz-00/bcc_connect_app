@@ -106,11 +106,10 @@ class _ProfileUIState extends State<ProfileUI> {
     });
 
     context.read<AuthCubit>().updateProfile(UserProfile(
-            Id: userProfile!.id,
-            name: userProfile!.name,
-            organization: userProfile!.organization,
-            photo: userProfile!.photo)
-        );
+        Id: userProfile!.id,
+        name: userProfile!.name,
+        organization: userProfile!.organization,
+        photo: userProfile!.photo));
   }
 
   late UserProfile userProfileCubit;
@@ -200,7 +199,8 @@ class _ProfileUIState extends State<ProfileUI> {
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
                                       fit: BoxFit.cover,
-                                      image: CachedNetworkImageProvider('https://bcc.touchandsolve.com${userProfile!.photo}'),
+                                      image: CachedNetworkImageProvider(
+                                          'https://bcc.touchandsolve.com${userProfile!.photo}'),
                                     ),
                                   ),
                                 ),
@@ -276,9 +276,14 @@ class _ProfileUIState extends State<ProfileUI> {
                                         'Organization Name',
                                         userProfile!.organization),
                                     Divider(),
-                                    _buildDataCouple(
-                                        Icons.work,
-                                        'Designation',
+                                    if (type == 'isp_staff') ...[
+                                      _buildDataCouple(
+                                          Icons.supervised_user_circle_rounded,
+                                          'Organization Type',
+                                          userProfile!.ISPuserType),
+                                      Divider(),
+                                    ],
+                                    _buildDataCouple(Icons.work, 'Designation',
                                         userProfile!.designation),
                                     Divider(),
                                     _buildDataCouple(
@@ -286,16 +291,11 @@ class _ProfileUIState extends State<ProfileUI> {
                                         'Phone no',
                                         userProfile!.phone as String),
                                     Divider(),
-                                    if(type == 'isp_staff') ... [
+                                    if (type == 'isp_staff') ...[
                                       _buildDataCouple(
                                           Icons.book,
                                           'License Number',
                                           userProfile!.license),
-                                      Divider(),
-                                      _buildDataCouple(
-                                          Icons.supervised_user_circle_rounded,
-                                          'UserType',
-                                          userProfile!.ISPuserType),
                                       Divider(),
                                     ],
                                     _buildDataCouple(Icons.mail, 'Email',
@@ -351,7 +351,7 @@ class _ProfileUIState extends State<ProfileUI> {
                               ),
                             )
                           ])),
-                         /* SizedBox(
+                          /* SizedBox(
                             height: 25,
                           ),
                           Center(
@@ -421,8 +421,7 @@ class _ProfileUIState extends State<ProfileUI> {
                 elevation: 8,
                 highlightElevation: 12,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                      30),
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -553,7 +552,7 @@ class _ProfileUIState extends State<ProfileUI> {
                   SizedBox(
                     height: 5,
                   ),
-                  if(type == 'isp_staff') ...[
+                  if (type == 'isp_staff') ...[
                     _buildTextField('License Number', userProfile!.license,
                         _licenseNumberController),
                     SizedBox(
@@ -621,8 +620,10 @@ class _ProfileUIState extends State<ProfileUI> {
                         licenseNumber: _licenseNumberController.text,
                       );
                       final authCubit = context.read<AuthCubit>();
-                      final token = (authCubit.state as AuthAuthenticated).token;
-                      final apiService = await UpdateUserAPIService.create(token);
+                      final token =
+                          (authCubit.state as AuthAuthenticated).token;
+                      final apiService =
+                          await UpdateUserAPIService.create(token);
                       final result =
                           await apiService.updateUserProfile(userProfileUpdate);
                       Navigator.of(context).pop();
@@ -713,13 +714,15 @@ class _ProfileUIState extends State<ProfileUI> {
             children: <Widget>[
               ListTile(
                 leading: Icon(Icons.camera),
-                title: Text('Take a picture',
+                title: Text(
+                  'Take a picture',
                   style: const TextStyle(
                     color: Color.fromRGBO(143, 150, 158, 1),
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'default',
-                  ),),
+                  ),
+                ),
                 onTap: () async {
                   final pickedImage = await picker.pickImage(
                     source: ImageSource.camera,
@@ -736,13 +739,15 @@ class _ProfileUIState extends State<ProfileUI> {
               Divider(),
               ListTile(
                 leading: Icon(Icons.photo_library),
-                title: Text('Choose from gallery',
+                title: Text(
+                  'Choose from gallery',
                   style: const TextStyle(
                     color: Color.fromRGBO(143, 150, 158, 1),
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'default',
-                  ),),
+                  ),
+                ),
                 onTap: () async {
                   final pickedImage = await picker.pickImage(
                     source: ImageSource.gallery,
@@ -767,8 +772,7 @@ class _ProfileUIState extends State<ProfileUI> {
     try {
       Navigator.pop(context);
       const snackBar = SnackBar(
-        content: Text(
-            'Profile Picture Updating ....'),
+        content: Text('Profile Picture Updating ....'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       final authCubit = context.read<AuthCubit>();
@@ -780,17 +784,13 @@ class _ProfileUIState extends State<ProfileUI> {
       print('Profile picture update status: ${response.status}');
       print('Message: ${response.message}');
       const snackBar2 = SnackBar(
-        content: Text(
-            'Profile Picture Update Successfully'),
+        content: Text('Profile Picture Update Successfully'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar2);
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  ProfileUI(
-                      shouldRefresh:
-                      true)));
+              builder: (context) => ProfileUI(shouldRefresh: true)));
     } catch (e) {
       print('Error updating profile picture: $e');
     }

@@ -207,17 +207,17 @@ class _SignupUIState extends State<SignupUI> {
                                 },
                               ),
                               const SizedBox(height: 5),
-                              CustomTextInput(
-                                controller: _organizationTypeController,
-                                label: 'Organization Type',
-                                validator: (input) {
-                                  if (input == null || input.isEmpty) {
-                                    return 'Please enter your organization name';
-                                  }
-                                  return null;
+                              DropdownFormField(
+                                hintText: 'Type of Organization',
+                                dropdownItems: types,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedUserType = value ?? '';
+                                    //print('New: $_selectedUserType');
+                                  });
                                 },
                               ),
-                              const SizedBox(height: 5),
+                              const SizedBox(height: 10),
                               CustomTextInput(
                                 controller: _addressController,
                                 label: 'Organization Address',
@@ -266,7 +266,9 @@ class _SignupUIState extends State<SignupUI> {
                                   decoration: const InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(
+                                        borderRadius:
+                                        const BorderRadius.all(Radius.circular(10))),
                                     labelText: 'Email',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -306,7 +308,9 @@ class _SignupUIState extends State<SignupUI> {
                                   decoration: const InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(
+                                        borderRadius:
+                                        const BorderRadius.all(Radius.circular(10))),
                                     labelText: 'Mobile Number',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -365,7 +369,9 @@ class _SignupUIState extends State<SignupUI> {
                                   decoration: InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(
+                                        borderRadius:
+                                        const BorderRadius.all(Radius.circular(10))),
                                     labelText: 'Password',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -419,7 +425,9 @@ class _SignupUIState extends State<SignupUI> {
                                   decoration: InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(
+                                        borderRadius:
+                                        const BorderRadius.all(Radius.circular(10))),
                                     labelText: 'Confirm Password',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -442,17 +450,6 @@ class _SignupUIState extends State<SignupUI> {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              DropdownFormField(
-                                hintText: 'Type of User',
-                                dropdownItems: types,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedUserType = value ?? '';
-                                    //print('New: $_selectedUserType');
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 20),
                               CustomTextInput(
                                 controller: _licenseNumberController,
                                 label: 'License Number',
@@ -643,10 +640,42 @@ class _SignupUIState extends State<SignupUI> {
             context,
             MaterialPageRoute(builder: (context) => LoginUI()),
           );
-          const snackBar = SnackBar(
-            content: Text('Registration Submitted!'),
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Registration Submitted',
+                  style: TextStyle(
+                    color: Color.fromRGBO(25, 192, 122, 1),
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                    fontSize: 22,
+                  ),),
+                content: Text(
+                    'Your registration has been submitted successfully. Please wait for approval before logging in.',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                    fontSize: 16,
+                  ),),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: Text('OK',
+                      style: TextStyle(
+                        color: Color.fromRGBO(25, 192, 122, 1),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'default',
+                        fontSize: 16,
+                      ),),
+                  ),
+                ],
+              );
+            },
           );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else if (response != null &&
             response == "The email has already been taken.") {
           setState(() {

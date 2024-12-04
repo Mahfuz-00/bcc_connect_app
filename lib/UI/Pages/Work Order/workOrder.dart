@@ -82,7 +82,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   late TextEditingController _linkcapcitycontroller = TextEditingController();
   late TextEditingController _workOrderRemarkController =
       TextEditingController();
-  late String _packageID;
+  late String _packageID = '';
   late String _PaymentMode = '';
   bool _isPicked = false;
   File? _file;
@@ -105,6 +105,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   bool isLoading = false;
   bool isLoadingPackage = false;
   bool isRequestLoading = false;
+  bool isSkipped = true;
   late String userName = '';
   late String organizationName = '';
   late String photoUrl = '';
@@ -198,6 +199,13 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
     super.initState();
     _priceController.addListener(_calculateNetPayment);
     _contractDurationController.addListener(_calculateNetPayment);
+
+    _contractDurationController.addListener(_isEmpty);
+    _capacityController.addListener(_isEmpty);
+    _priceController.addListener(_isEmpty);
+    _netPaymentController.addListener(_isEmpty);
+    _workOrderRemarkController.addListener(_isEmpty);
+
     /*  // Add listeners to update the calculation automatically
     _priceController.addListener(_calculateNetPayment);
     _discountController.addListener(_calculateNetPayment);
@@ -214,12 +222,6 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       latlong: '',
     );
     fetchPackages();
-  }
-
-  @override
-  void dispose() {
-    _workOrderRemarkController.dispose();
-    super.dispose();
   }
 
   Future<void> fetchPackages() async {
@@ -456,7 +458,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                         ),
                       ),
                       const SizedBox(height: 5),*/
-                  /*    SizedBox(height: 10),*/
+                      /*    SizedBox(height: 10),*/
                       LabeledTextWithAsterisk(text: 'Net Payment'),
                       SizedBox(height: 5),
                       Container(
@@ -508,13 +510,17 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                               hintText: 'Select Payment Method',
                               dropdownItems: PaymentOptions.toList(),
                               initialValue: selectedPaymentMode,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedPaymentMode = newValue;
-                                  _PaymentMode = newValue ?? '';
-                                  print(_PaymentMode);
-                                });
-                              },
+                              onChanged: (_netPaymentController.text != null &&
+                                      _netPaymentController.text.isNotEmpty &&
+                                      _netPaymentController.text != '')
+                                  ? (newValue) {
+                                      setState(() {
+                                        selectedPaymentMode = newValue;
+                                        _PaymentMode = newValue ?? '';
+                                        print(_PaymentMode);
+                                      });
+                                    }
+                                  : null,
                             )),
                       ),
                       SizedBox(
@@ -647,13 +653,21 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                               ),
                             ),
                             onPressed: _connectionRequestForm,
-                            child: const Text('Submit',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
-                                )),
+                            child: isSkipped
+                                ? const Text('Skip',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
+                                    ))
+                                : const Text('Submit',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'default',
+                                    )),
                           ),
                         ),
                       ),
@@ -699,8 +713,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
     print('Payment Mode: $selectedPaymentMode');
     print('Work Order Remark: ${_workOrderRemarkController.text}');
 
-    // Validate and save form data
-    if (_validateAndSave()) {
+    if (_isEmpty()) {
       setState(() {
         isRequestLoading = true; // Show the loading indicator
       });
@@ -711,22 +724,21 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       print('triggered Validation');
       // Initialize connection request model
       _connectionRequest = ConnectionRequestModel(
-        divisionId: divisionId,
-        districtId: districtId,
-        upazilaId: upazilaId,
-        unionId: unionId,
-        nttnProvider: nttnProvider,
-        linkCapacity: _capacityController.text,
-        remark: requestRemark,
-        serviceType: serviceType,
-        latlong: latlong,
-        contractDuration: _contractDurationController.text,
-        packageName: _packageID,
-        /*   discount: _discountController.text,*/
-        netPayment: _netPaymentController.text,
-        paymentMode: selectedPaymentMode,
-        orderRemark: _workOrderRemarkController.text
-      );
+          divisionId: divisionId,
+          districtId: districtId,
+          upazilaId: upazilaId,
+          unionId: unionId,
+          nttnProvider: nttnProvider,
+          linkCapacity: _capacityController.text,
+          remark: requestRemark,
+          serviceType: serviceType,
+          latlong: latlong,
+          contractDuration: _contractDurationController.text,
+          packageName: _packageID,
+          /*   discount: _discountController.text,*/
+          netPayment: _netPaymentController.text,
+          paymentMode: selectedPaymentMode,
+          orderRemark: _workOrderRemarkController.text);
       final authCubit = context.read<AuthCubit>();
       final token = (authCubit.state as AuthAuthenticated).token;
 
@@ -740,13 +752,16 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         });
         // Handle successful request
         print('Connection request sent successfully!!');
+        print(response);
         if (response == 'Connection Request Already Exist') {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (context) => ISPDashboardUI(
-                      shouldRefresh: true,
-                    )),
+              builder: (context) => ISPDashboardUI(
+                shouldRefresh: true,
+              ),
+            ),
+            (Route<dynamic> route) => false, // Removes all previous routes
           );
           const snackBar = SnackBar(
             content: Text(
@@ -777,14 +792,96 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
         // Handle error
         print('Error sending connection request: $error');
       });
-    } else {
-      setState(() {
-        isRequestLoading = false; // Show the loading indicator
-      });
-      const snackBar = SnackBar(
-        content: Text('Please fill up all fields properly'),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else if (!_isEmpty()) {
+      // Validate and save form data
+      if (_validateAndSave()) {
+        setState(() {
+          isRequestLoading = true; // Show the loading indicator
+        });
+        const snackBar = SnackBar(
+          content: Text('Processing. Please wait...'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        print('triggered Validation');
+        // Initialize connection request model
+        _connectionRequest = ConnectionRequestModel(
+            divisionId: divisionId,
+            districtId: districtId,
+            upazilaId: upazilaId,
+            unionId: unionId,
+            nttnProvider: nttnProvider,
+            linkCapacity: _capacityController.text,
+            remark: requestRemark,
+            serviceType: serviceType,
+            latlong: latlong,
+            contractDuration: _contractDurationController.text,
+            packageName: _packageID,
+            /*   discount: _discountController.text,*/
+            netPayment: _netPaymentController.text,
+            paymentMode: selectedPaymentMode,
+            orderRemark: _workOrderRemarkController.text);
+        final authCubit = context.read<AuthCubit>();
+        final token = (authCubit.state as AuthAuthenticated).token;
+
+        // Perform any additional actions before sending the request
+        // Send the connection request using API service
+        ConnectionAPIService.create(token)
+            .postConnectionRequest(_connectionRequest, _file)
+            .then((response) {
+          setState(() {
+            isRequestLoading = false; // Show the loading indicator
+          });
+          // Handle successful request
+          print('Connection request sent successfully!!');
+          print(response);
+          if (response == 'Connection Request Already Exist') {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ISPDashboardUI(
+                  shouldRefresh: true,
+                ),
+              ),
+              (Route<dynamic> route) => false, // Removes all previous routes
+            );
+            const snackBar = SnackBar(
+              content: Text(
+                  'Request already Sumbitted, please wait for it to be reviewed!'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+          if (response == 'Please at first request a connection request') {
+            const snackBar = SnackBar(
+              content: Text('Create New Connection First!'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+          if (response != null && response == "Connection Request Submitted") {
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ISPDashboardUI(
+                          shouldRefresh: true,
+                        )),
+                (route) => false);
+            const snackBar = SnackBar(
+              content: Text('Request Submitted!'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        }).catchError((error) {
+          // Handle error
+          print('Error sending connection request: $error');
+        });
+      } else {
+        setState(() {
+          isRequestLoading = false; // Show the loading indicator
+        });
+        const snackBar = SnackBar(
+          content: Text('Please fill up all fields properly'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
     }
   }
 
@@ -822,6 +919,35 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       return allFieldsAreValid;
     }
     return false;
+  }
+
+  bool _isEmpty() {
+    final contactDurationIsValid = _contractDurationController.text.isEmpty;
+/*      final discountIsValid = _discountController.text.isNotEmpty;*/
+    final netPaymentIsValid = _netPaymentController.text.isEmpty;
+    final paymentmodeIsValid = _PaymentMode.isEmpty;
+    final packageIdIsValid = _packageID == '';
+    final workOrderRemarkIsValid = _workOrderRemarkController.text.isEmpty;
+
+    // Check if all fields are valid
+    final allFieldsAreEmpty = contactDurationIsValid &&
+        /*discountIsValid &&*/
+        netPaymentIsValid &&
+        paymentmodeIsValid &&
+        workOrderRemarkIsValid &&
+        packageIdIsValid;
+
+    /*     if (_file == null) {
+        const snackBar = SnackBar(
+          content: Text('Please upload your tor file/document'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }*/
+
+    if (!allFieldsAreEmpty) {
+      isSkipped = false;
+    }
+    return allFieldsAreEmpty;
   }
 
   Future<void> _pickFile() async {
