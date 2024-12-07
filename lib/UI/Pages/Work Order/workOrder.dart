@@ -631,6 +631,17 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                                     ]
                                   ],
                                 )),
+                            const SizedBox(height: 10),
+                            // Text to display acceptable file formats
+                            if (_file == null) // Show only when no file is picked
+                              Text(
+                                'Acceptable file formats: pdf, doc, docx, ppt, pptx, xls, xlsx, bmg',
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -985,7 +996,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
 
         if (fileExtension != null &&
             allowedExtensions.contains(fileExtension.toLowerCase())) {
-          if (result.files.single.size <= 21000 * 1024) {
+          if (result.files.single.size <= 5000 * 1024) {
             setState(() {
               _file = File(result.files.single.path!);
               _isPicked = false;

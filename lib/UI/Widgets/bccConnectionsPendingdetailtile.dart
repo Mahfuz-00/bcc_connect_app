@@ -15,14 +15,14 @@ import 'package:intl/intl.dart';
 /// the widget. The card is designed for use in BCC-related
 /// applications where displaying connection information is necessary.
 class BCCConnectionsInfoCard extends StatelessWidget {
-  final String Name;
-  final String OrganizationName;
-  final String OrgAddress;
-  final String MobileNo;
-  final String ConnectionType;
-  final String Provider;
-  final String FRNumber;
-  final String Status;
+  final String? Name;
+  final String? OrganizationName;
+  final String? OrgAddress;
+  final String? MobileNo;
+  final String? ConnectionType;
+  final String? Provider;
+  final String? FRNumber;
+  final String? Status;
   final String? SerivceType;
   final String? Capacity;
   final String? WorkOrderNumber;
@@ -73,14 +73,18 @@ class BCCConnectionsInfoCard extends StatelessWidget {
             _buildRow('Mobile No', MobileNo),
             _buildRow('Provider', Provider),
             _buildRow('Connection Type', ConnectionType),
-            _buildRowApplicationID('FR Number', int.parse(FRNumber)),
-            if (WorkOrderNumber != null)
-              _buildRow('Work Order Number', WorkOrderNumber!),
+            _buildRow('FR Number', FRNumber),
             _buildRow('Service Type', SerivceType!),
             _buildRow('Capacity', Capacity!),
-            if (ContactDuration != null)
-              _buildRow('Contact Duration', '${ContactDuration.toString()} Months'!),
-            if (NetPayment != null) _buildRow('Net Payment', '${NetPayment.toString()} TK'!),
+            if (ContactDuration != 0) ...[
+              if (WorkOrderNumber != null)
+                _buildRow('Work Order Number', WorkOrderNumber!),
+              if (ContactDuration != null)
+                _buildRow('Contact Duration',
+                    '${ContactDuration.toString()} Months'!),
+              if (NetPayment != null)
+                _buildRow('Net Payment', '${NetPayment.toString()} TK'!),
+            ],
             _buildRow('Status', Status),
           ],
         ),
@@ -95,7 +99,7 @@ class BCCConnectionsInfoCard extends StatelessWidget {
 /// - Parameters:
 ///   - label: The label text to be displayed.
 ///   - value: The value text to be displayed next to the label.
-Widget _buildRow(String label, String value) {
+Widget _buildRow(String label, String? value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -134,7 +138,7 @@ Widget _buildRow(String label, String value) {
           text: TextSpan(
             children: [
               TextSpan(
-                text: value,
+                text: value == 'none' ? 'N/A' : value,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
@@ -158,7 +162,7 @@ Widget _buildRow(String label, String value) {
 /// - Parameters:
 ///   - label: The label text to be displayed.
 ///   - value: The integer value to be displayed next to the label.
-Widget _buildRowApplicationID(String label, int value) {
+Widget _buildRowApplicationID(String label, int? value) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -197,7 +201,7 @@ Widget _buildRowApplicationID(String label, int value) {
           text: TextSpan(
             children: [
               TextSpan(
-                text: value.toString(),
+                text: value.toString() ?? 'N/A',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,

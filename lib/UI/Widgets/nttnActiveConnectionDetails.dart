@@ -201,7 +201,7 @@ class ActiveConnectionDetails extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: value,
+                  text: value == 'none' ? 'N/A' : value,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,

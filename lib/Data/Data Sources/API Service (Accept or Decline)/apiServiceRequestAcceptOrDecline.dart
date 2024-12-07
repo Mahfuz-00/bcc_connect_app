@@ -25,7 +25,7 @@ class ConnectionAcceptRejectAPIService {
 
   Future<void> acceptOrRejectConnection({
     required String type,
-    required int ispConnectionId,
+    required String ispConnectionId,
   }) async {
     final String url = '$URL/connection/accept/or/reject';
 

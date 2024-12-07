@@ -213,6 +213,8 @@ class _SignupUIState extends State<SignupUI> {
                                 onChanged: (value) {
                                   setState(() {
                                     _selectedUserType = value ?? '';
+                                    _organizationTypeController.text =
+                                        _selectedUserType;
                                     //print('New: $_selectedUserType');
                                   });
                                 },
@@ -267,8 +269,8 @@ class _SignupUIState extends State<SignupUI> {
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: const OutlineInputBorder(
-                                        borderRadius:
-                                        const BorderRadius.all(Radius.circular(10))),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
                                     labelText: 'Email',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -309,8 +311,8 @@ class _SignupUIState extends State<SignupUI> {
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: const OutlineInputBorder(
-                                        borderRadius:
-                                        const BorderRadius.all(Radius.circular(10))),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
                                     labelText: 'Mobile Number',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -370,8 +372,8 @@ class _SignupUIState extends State<SignupUI> {
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: const OutlineInputBorder(
-                                        borderRadius:
-                                        const BorderRadius.all(Radius.circular(10))),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
                                     labelText: 'Password',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -426,8 +428,8 @@ class _SignupUIState extends State<SignupUI> {
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: const OutlineInputBorder(
-                                        borderRadius:
-                                        const BorderRadius.all(Radius.circular(10))),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
                                     labelText: 'Confirm Password',
                                     labelStyle: TextStyle(
                                       color: Colors.black87,
@@ -603,6 +605,14 @@ class _SignupUIState extends State<SignupUI> {
   }
 
   void _registerUser() {
+    print('Full Name: ${_fullNameController.text}');
+    print('Organization: ${_organizationController.text}');
+    print('Designation: ${_designationController.text}');
+    print('Email: ${_emailController.text}');
+    print('Phone: ${_phoneController.text}');
+    print('Password: ${_passwordController.text}');
+    print('Confirm Password: ${_confirmPasswordController.text}');
+    print('Org Type: ${_organizationTypeController.text}');
     setState(() {
       _isButtonLoading = true;
     });
@@ -619,7 +629,7 @@ class _SignupUIState extends State<SignupUI> {
         phone: _phoneController.text,
         password: _passwordController.text,
         confirmPassword: _confirmPasswordController.text,
-        userType: _selectedUserType,
+        userType: _organizationTypeController.text,
         licenseNumber: _licenseNumberController.text,
         organiazationAddress: _addressController.text,
         organiazationType: _organizationTypeController.text,
@@ -644,33 +654,38 @@ class _SignupUIState extends State<SignupUI> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Registration Submitted',
+                title: Text(
+                  'Registration Submitted',
                   style: TextStyle(
                     color: Color.fromRGBO(25, 192, 122, 1),
                     fontWeight: FontWeight.bold,
                     fontFamily: 'default',
                     fontSize: 22,
-                  ),),
+                  ),
+                ),
                 content: Text(
-                    'Your registration has been submitted successfully. Please wait for approval before logging in.',
+                  'Your registration has been submitted successfully. Please wait for approval before logging in.',
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'default',
                     fontSize: 16,
-                  ),),
+                  ),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the dialog
                     },
-                    child: Text('OK',
+                    child: Text(
+                      'OK',
                       style: TextStyle(
                         color: Color.fromRGBO(25, 192, 122, 1),
                         fontWeight: FontWeight.bold,
                         fontFamily: 'default',
                         fontSize: 16,
-                      ),),
+                      ),
+                    ),
                   ),
                 ],
               );

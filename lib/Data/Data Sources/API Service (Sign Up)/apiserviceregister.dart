@@ -27,6 +27,7 @@ class UserRegistrationAPIService {
       request.fields['full_name'] = registerRequestModel.fullName;
       request.fields['organization'] = registerRequestModel.organization;
       request.fields['designation'] = registerRequestModel.designation;
+      request.fields['address'] = registerRequestModel.organiazationAddress;
       request.fields['email'] = registerRequestModel.email;
       request.fields['phone'] = registerRequestModel.phone;
       request.fields['password'] = registerRequestModel.password;
@@ -34,6 +35,7 @@ class UserRegistrationAPIService {
           registerRequestModel.confirmPassword;
       request.fields['isp_user_type'] = registerRequestModel.userType;
       request.fields['license_number'] = registerRequestModel.licenseNumber;
+      request.fields['type_of_organization'] = registerRequestModel.organiazationType;
 
       var imageStream = http.ByteStream(imageFile!.openRead());
       var length = await imageFile.length();

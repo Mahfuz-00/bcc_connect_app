@@ -26,6 +26,7 @@ class ISPConnectionAPIService {
         headers: {'Authorization': 'Bearer $authToken'},
       );
 
+      print(response.statusCode);
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         print(data);

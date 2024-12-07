@@ -272,7 +272,7 @@ class PendingConnectionDetails extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: value,
+                  text: value == 'none' ? 'N/A' : value,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -299,9 +299,9 @@ class PendingConnectionDetails extends StatelessWidget {
     print(Action);
     print(FRNumber);
     print(ispConnectionId);
-    if (action.isNotEmpty && ispConnectionId > 0) {
+    if (action.isNotEmpty && FRNumber != null) {
       await apiService.acceptOrRejectConnection(
-          type: Action, ispConnectionId: ispConnectionId);
+          type: Action, ispConnectionId: FRNumber);
     } else {
       print('Action or ISP connection ID is missing');
     }

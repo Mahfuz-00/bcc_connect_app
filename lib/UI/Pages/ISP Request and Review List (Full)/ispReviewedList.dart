@@ -306,14 +306,20 @@ class _ISPReviewedListUIState extends State<ISPReviewedListUI> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 60,
                             height: 60,
+                            width: 60,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: CachedNetworkImageProvider(
-                                    'https://bcc.touchandsolve.com${userProfile.photo}'),
+                              shape: BoxShape.circle, // For a circular image
+                            ),
+                            child: AspectRatio(
+                              aspectRatio: 1, // 1:1 ratio for a square or circular image
+                              child: ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: 'https://bcc.touchandsolve.com${userProfile.photo}',
+                                  fit: BoxFit.cover, // Ensures the image covers the available space
+                                  placeholder: (context, url) => CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) => Icon(Icons.person, size: 40),
+                                ),
                               ),
                             ),
                           ),

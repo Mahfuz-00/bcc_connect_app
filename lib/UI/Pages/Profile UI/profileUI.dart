@@ -193,14 +193,20 @@ class _ProfileUIState extends State<ProfileUI> {
                             Stack(
                               children: [
                                 Container(
-                                  width: 120,
                                   height: 120,
+                                  width: 120,
                                   decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: CachedNetworkImageProvider(
-                                          'https://bcc.touchandsolve.com${userProfile!.photo}'),
+                                    shape: BoxShape.circle, // For a circular image
+                                  ),
+                                  child: AspectRatio(
+                                    aspectRatio: 1, // 1:1 ratio for a square or circular image
+                                    child: ClipOval(
+                                      child: CachedNetworkImage(
+                                        imageUrl: 'https://bcc.touchandsolve.com${userProfile!.photo}',
+                                        fit: BoxFit.cover, // Ensures the image covers the available space
+                                        placeholder: (context, url) => CircularProgressIndicator(),
+                                        errorWidget: (context, url, error) => Icon(Icons.person, size: 40),
+                                      ),
                                     ),
                                   ),
                                 ),

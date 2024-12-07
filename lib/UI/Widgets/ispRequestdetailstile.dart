@@ -75,18 +75,36 @@ class ConnectionRequestInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildRow('Connection Type', ConnectionType ?? ' '),
-            _buildRow('FR Number', FRNumber ?? ' '),
-            _buildRow('Work Order Number', WorkOrderNumber?.toString() ?? ' '),
-            _buildRow('NTTN Provider', NTTNProvider ?? ' '),
-            _buildRow('Mobile No', MobileNo ?? ' '),
-            _buildRow('Location', Location ?? ' '),
-            _buildRow('Service Type', SerivceType ?? ' '),
-            _buildRow('Capacity', Capacity ?? ' '),
-            _buildRow('Contact Duration', '${ContactDuration?.toString()} Months' ?? ' '),
-            _buildRow('Net Payment', '${NetPayment?.toString()} TK'?? ' '),
-            _buildRowTime('Time', Time ?? ' '),
-            _buildRow('Status', Status ?? ' '),
+            _buildRow('Connection Type', ConnectionType ?? ''),
+            _buildRow('FR Number', FRNumber ?? ''),
+            if(ContactDuration != 0)...[
+              _buildRow('Work Order Number', WorkOrderNumber?.toString() ?? ''),
+            ],
+            _buildRow('NTTN Provider', NTTNProvider ?? ''),
+            _buildRow('Mobile No', MobileNo ?? ''),
+            _buildRow('Location', Location ?? ''),
+            _buildRow('Service Type', SerivceType ?? ''),
+            _buildRow('Capacity', Capacity ?? ''),
+            if(ContactDuration != 0)...[
+              _buildRow('Contact Duration', '${ContactDuration?.toString()} Months' ?? ''),
+              _buildRow('Net Payment', '${NetPayment?.toString()} TK'?? ''),
+            ],
+            _buildRowTime('Time', Time ?? ''),
+            _buildRow('Work Order Status', Status ?? ''),
+
+            if(ContactDuration == 0)...[
+              SizedBox(height: 10,),
+              Text('*Please contact $NTTNProvider for Work Order.*',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  height: 1.6,
+                  letterSpacing: 1.3,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'default',
+                ),)
+            ],
           ],
         ),
       ),
@@ -134,7 +152,7 @@ Widget _buildRow(String label, String value) {
           text: TextSpan(
             children: [
               TextSpan(
-                text: value,
+                text: value ?? 'N/A',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
