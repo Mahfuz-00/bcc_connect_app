@@ -123,6 +123,18 @@ class _NTTNActiveWorkOrderListUIState
       final List<dynamic> acceptedRequestsData = records['Accepted'] ?? [];
       print('Accepted: $acceptedRequestsData');
 
+      if (acceptedRequestsData == null || acceptedRequestsData.isEmpty) {
+        print('No pending records available');
+        setState(() {
+          acceptedRequestsData.isEmpty;
+          print(_isLoading);
+          _isFetched = true;
+          _isLoading = !_isLoading;
+          print(_isLoading);
+        });
+        return;
+      }
+
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionsTile(
           Name: request['client_name'],

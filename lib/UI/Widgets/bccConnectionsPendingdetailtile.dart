@@ -26,7 +26,7 @@ class BCCConnectionsInfoCard extends StatelessWidget {
   final String? SerivceType;
   final String? Capacity;
   final String? WorkOrderNumber;
-  final int? ContactDuration;
+  final dynamic? ContactDuration;
   final num? NetPayment;
 
   /// Constructor for the `BCCConnectionsInfoCard` widget.

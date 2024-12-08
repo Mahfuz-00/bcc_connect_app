@@ -113,12 +113,25 @@ class _NTTNPendingConnectionListUIState
         print(pendingPagination.nextPage);
         canFetchMorePending = pendingPagination.canFetchNext;
       } else {
+        print('No pending pagination available');
         url = '';
         canFetchMorePending = false;
       }
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
+
+      if (pendingRequestsData == null || pendingRequestsData.isEmpty) {
+        print('No pending records available');
+        setState(() {
+          pendingRequestsData.isEmpty;
+          print(_isLoading);
+          _isFetched = true;
+          _isLoading = !_isLoading;
+          print(_isLoading);
+        });
+        return;
+      }
 
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionsTile(
@@ -365,13 +378,18 @@ class _NTTNPendingConnectionListUIState
                               shape: BoxShape.circle, // For a circular image
                             ),
                             child: AspectRatio(
-                              aspectRatio: 1, // 1:1 ratio for a square or circular image
+                              aspectRatio: 1,
+                              // 1:1 ratio for a square or circular image
                               child: ClipOval(
                                 child: CachedNetworkImage(
-                                  imageUrl: 'https://bcc.touchandsolve.com${userProfile.photo}',
-                                  fit: BoxFit.cover, // Ensures the image covers the available space
-                                  placeholder: (context, url) => CircularProgressIndicator(),
-                                  errorWidget: (context, url, error) => Icon(Icons.person, size: 40),
+                                  imageUrl:
+                                      'https://bcc.touchandsolve.com${userProfile.photo}',
+                                  fit: BoxFit.cover,
+                                  // Ensures the image covers the available space
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.person, size: 40),
                                 ),
                               ),
                             ),
@@ -610,11 +628,19 @@ class _NTTNPendingConnectionListUIState
                                   ),
                                 )
                               : !_isLoading
-                                  ? Center(
-                                      child: CircularProgressIndicator(),
+                                  ? Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ],
                                     )
                                   : buildNoRequestsWidget(screenWidth,
-                                      'You currently don\'t have any new requests pending.'),
+                                      'You currently don\'t have any new pending requests.'),
                         ],
                       ),
                     ),

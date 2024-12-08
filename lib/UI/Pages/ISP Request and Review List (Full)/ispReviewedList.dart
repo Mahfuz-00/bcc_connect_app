@@ -119,6 +119,18 @@ class _ISPReviewedListUIState extends State<ISPReviewedListUI> {
             'Accepted Request at index $index: ${acceptedRequestsData[index]}\n');
       }
 
+      if (acceptedRequestsData == null || acceptedRequestsData.isEmpty) {
+        print('No pending records available');
+        setState(() {
+          acceptedRequestsData.isEmpty;
+          print(_isLoading);
+          _isFetched = true;
+          _isLoading = !_isLoading;
+          print(_isLoading);
+        });
+        return;
+      }
+
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],

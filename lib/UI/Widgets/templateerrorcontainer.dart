@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 /// - [screenWidth]: The width of the screen, used to set the width of the widget.
 /// - [message]: The message to display in the widget, typically indicating that there are no requests.
 Widget buildNoRequestsWidget(double screenWidth, String message) {
+  print('Building a widget that displays a message');
   return Material(
     elevation: 5,
     // Adds a shadow effect to give a material design feel.

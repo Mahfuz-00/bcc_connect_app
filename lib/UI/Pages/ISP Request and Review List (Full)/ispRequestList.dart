@@ -120,6 +120,18 @@ class _ISPRequestListUIState extends State<ISPRequestListUI> {
 
       print('Current count: $initialLoadCount');
 
+      if (pendingRequestsData == null || pendingRequestsData.isEmpty) {
+        print('No pending records available');
+        setState(() {
+          pendingRequestsData.isEmpty;
+          print(_isLoading);
+          _isFetched = true;
+          _isLoading = !_isLoading;
+          print(_isLoading);
+        });
+        return;
+      }
+
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionRequestInfoCard(
           ConnectionType: request['connection_type'],

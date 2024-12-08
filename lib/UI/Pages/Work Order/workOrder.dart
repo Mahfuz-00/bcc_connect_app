@@ -635,7 +635,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                             // Text to display acceptable file formats
                             if (_file == null) // Show only when no file is picked
                               Text(
-                                'Acceptable file formats: pdf, doc, docx, ppt, pptx, xls, xlsx, bmg',
+                                'Acceptable file formats: pdf, doc, docx, ppt, pptx, xls, xlsx, bmg and must be less be 5MB or less',
                                 style: const TextStyle(
                                   color: Colors.grey,
                                   fontSize: 16,
@@ -1005,7 +1005,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content:
-                    Text("File exceeds the maximum allowed size of 21 MB."),
+                    Text("File exceeds the maximum allowed size of 5 MB or less."),
                 duration: Duration(seconds: 3),
               ),
             );

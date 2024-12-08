@@ -115,12 +115,25 @@ class _NTTNPendingWorkOrderListUIState
         print(pendingPagination.nextPage);
         canFetchMorePending = pendingPagination.canFetchNext;
       } else {
+        print('No Pagination available');
         url = '';
         canFetchMorePending = false;
       }
 
       final List<dynamic> pendingRequestsData = records['Pending'] ?? [];
       print('Pending: $pendingRequestsData');
+
+      if (pendingRequestsData == null || pendingRequestsData.isEmpty) {
+        print('No pending records available');
+        setState(() {
+          pendingRequestsData.isEmpty;
+          print(_isLoading);
+          _isFetched = true;
+          _isLoading = !_isLoading;
+          print(_isLoading);
+        });
+        return;
+      }
 
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
         return ConnectionsTile(
