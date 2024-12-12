@@ -114,19 +114,38 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   final _formPart1Key = GlobalKey<FormState>();
   final _formPart2Key = GlobalKey<FormState>();
   final _formPart3Key = GlobalKey<FormState>();
+  String? number = '';
+  String? unit = '';
 
   // Variables for calculations
   double packageRate = 0;
 
-  void _calculateNetPayment() {
-    setState(() {
-      int contractDuration = int.parse(_contractDurationController.text);
-      packageRate = double.tryParse(_priceController.text) ?? 0;
+  void separateNumberAndUnit(String input) {
+    final regex = RegExp(r'^(\d+)\s*(\w+)$');
+    final match = regex.firstMatch(input);
 
-      double netPayment;
-      netPayment = contractDuration * packageRate;
-      _netPaymentController.text = netPayment.toStringAsFixed(2);
-    });
+    if (match != null) {
+      number = match.group(1);
+      unit = match.group(2);
+
+      print('Number: $number');
+      print('Unit: $unit');
+    } else {
+      print('Invalid format');
+    }
+  }
+
+  void _calculateNetPayment() {
+    if(_contractDurationController.text.isNotEmpty && _priceController.text.isNotEmpty){
+      setState(() {
+        int contractDuration = int.parse(_contractDurationController.text);
+        packageRate = double.tryParse(_priceController.text) ?? 0;
+
+        double netPayment;
+        netPayment = contractDuration * packageRate * double.parse(number!);
+        _netPaymentController.text = netPayment.toStringAsFixed(2);
+      });
+    }
   }
 
   /*double discount = 0;*/
@@ -187,6 +206,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       final datafromfirstpageCubit = context.read<FormDataCubit>();
       String? capacity = datafromfirstpageCubit.state.linkCapacity;
       _capacityController.text = capacity!;
+      separateNumberAndUnit(capacity);
       divisionId = datafromfirstpageCubit.state.divisionId!;
       districtId = datafromfirstpageCubit.state.districtId!;
       upazilaId = datafromfirstpageCubit.state.upazilaId!;
@@ -197,6 +217,7 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       requestRemark = datafromfirstpageCubit.state.remark!;
     });
     super.initState();
+    _netPaymentController.text = '0';
     _priceController.addListener(_calculateNetPayment);
     _contractDurationController.addListener(_calculateNetPayment);
 
@@ -221,10 +242,42 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       serviceType: '',
       latlong: '',
     );
-    fetchPackages();
+    fetchPackages(unit!);
   }
 
-  Future<void> fetchPackages() async {
+  void showTopToast(BuildContext context, String message) {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top +
+            10,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3)).then((_) {
+      overlayEntry.remove();
+    });
+  }
+
+  Future<void> fetchPackages(String Unit) async {
     setState(() {
       isLoading = true;
     });
@@ -232,15 +285,22 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
       await initializeApiService();
       final List<Package> fetchedPackages = await apiService.fetchPackages();
       setState(() {
-        packages = fetchedPackages;
-        for (Package package in fetchedPackages) {
-          print('Service Name: ${package.name}');
-          print('Package ID: ${package.id}');
-          print('Package Name: ${package.packageName}');
-          print('Package Description: ${package.packageDescription}');
-          print('Package Price: ${package.charge}');
+        if(fetchedPackages == null) {
+          showTopToast(context, 'No Package Found for this Capacity Unit');
+          isLoading = false;
+        } else {
+          isLoading = false;
+          packages = fetchedPackages.where((package) => package.unit == unit).toList();
+
+          for (Package package in packages) {
+            print('Service Name: ${package.name}');
+            print('Package ID: ${package.id}');
+            print('Package Unit: ${package.unit}');
+            print('Package Name: ${package.packageName}');
+            print('Package Description: ${package.packageDescription}');
+            print('Package Price: ${package.charge}');
+          }
         }
-        isLoading = false;
       });
     } catch (e) {
       print('Error fetching divisions: $e');
@@ -855,17 +915,10 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
               ),
               (Route<dynamic> route) => false, // Removes all previous routes
             );
-            const snackBar = SnackBar(
-              content: Text(
-                  'Request already Sumbitted, please wait for it to be reviewed!'),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            showTopToast(context, 'Request already Sumbitted, please wait for it to be reviewed!');
           }
           if (response == 'Please at first request a connection request') {
-            const snackBar = SnackBar(
-              content: Text('Create New Connection First!'),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            showTopToast(context, 'Request Failed');
           }
           if (response != null && response == "Connection Request Submitted") {
             Navigator.pushAndRemoveUntil(
@@ -875,23 +928,19 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
                           shouldRefresh: true,
                         )),
                 (route) => false);
-            const snackBar = SnackBar(
-              content: Text('Request Submitted!'),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+            showTopToast(context, 'Request Submitted! Please wait for review.');
           }
         }).catchError((error) {
           // Handle error
           print('Error sending connection request: $error');
+          showTopToast(context, 'Request Failed');
         });
       } else {
         setState(() {
           isRequestLoading = false; // Show the loading indicator
         });
-        const snackBar = SnackBar(
-          content: Text('Please fill up all fields properly'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        showTopToast(context, 'Please fill up all fields properly');
       }
     }
   }

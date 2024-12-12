@@ -63,7 +63,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 10
-        versionName '0.83'
+        versionName '0.88'
     }
 
     buildTypes {

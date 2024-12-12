@@ -82,6 +82,8 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
   late String photoUrl = '';
   List<Widget> pendingConnectionRequests = [];
   List<Widget> acceptedConnectionRequests = [];
+  List<Widget> SblConnectionRequests = [];
+  List<Widget> AdslConnectionRequests = [];
   bool _isFetched = false;
   bool _pageLoading = true;
   int? adslCountPending = 0;
@@ -94,6 +96,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
   late Pagination pendingPagination;
   bool canFetchMorePending = false;
   late String url = '';
+  late String provider = '';
 
   Future<void> fetchConnections() async {
     if (_isFetched) return;
@@ -170,6 +173,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
       print('Accepted: $acceptedRequestsData');
 
       final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
+        provider = request['provider'];
         return BCCConnectionsInfoCard(
           Name: request['name'],
           OrganizationName: request['organization'],
@@ -187,7 +191,49 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
         );
       }).toList();
 
+      final List<Widget> sblWidgets = [];
+      final List<Widget> adslWidgets = [];
+
+      for (var request in pendingRequestsData) {
+        String provider = request['provider'];
+
+        if (provider == 'SecureNet Bangladesh Limited') {
+          sblWidgets.add(BCCConnectionsInfoCard(
+            Name: request['name'],
+            OrganizationName: request['organization'],
+            MobileNo: request['mobile'],
+            ConnectionType: request['connection_type'],
+            Provider: request['provider'],
+            FRNumber: request['fr_number'],
+            Status: request['status'],
+            SerivceType: request['service_type'],
+            Capacity: request['capacity'],
+            WorkOrderNumber: request['work_order_number'],
+            ContactDuration: request['contract_duration'],
+            NetPayment: request['net_payment'],
+            OrgAddress: request['client_address'],
+          ));
+        } else if (provider == 'Advanced Digital Solution Limited') {
+          adslWidgets.add(BCCConnectionsInfoCard(
+            Name: request['name'],
+            OrganizationName: request['organization'],
+            MobileNo: request['mobile'],
+            ConnectionType: request['connection_type'],
+            Provider: request['provider'],
+            FRNumber: request['fr_number'],
+            Status: request['status'],
+            SerivceType: request['service_type'],
+            Capacity: request['capacity'],
+            WorkOrderNumber: request['work_order_number'],
+            ContactDuration: request['contract_duration'],
+            NetPayment: request['net_payment'],
+            OrgAddress: request['client_address'],
+          ));
+        }
+      }
+
       final List<Widget> acceptedWidgets = acceptedRequestsData.map((request) {
+        //provider = request['provider'];
         return BCCConnectionsInfoCard(
           Name: request['name'],
           OrganizationName: request['organization'],
@@ -206,6 +252,8 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
       }).toList();
 
       setState(() {
+        SblConnectionRequests = sblWidgets;
+        AdslConnectionRequests = adslWidgets;
         pendingConnectionRequests = pendingWidgets;
         acceptedConnectionRequests = acceptedWidgets;
         _isFetched = true;
@@ -275,6 +323,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
         print('Current count: $currentCount');
 
         final List<Widget> pendingWidgets = pendingRequestsData.map((request) {
+          provider = request['provider'];
           return BCCConnectionsInfoCard(
             Name: request['name'],
             OrganizationName: request['organization'],
@@ -450,16 +499,25 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                     height: 60,
                                     width: 60,
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle, // For a circular image
+                                      shape: BoxShape
+                                          .circle, // For a circular image
                                     ),
                                     child: AspectRatio(
-                                      aspectRatio: 1, // 1:1 ratio for a square or circular image
+                                      aspectRatio: 1,
+                                      // 1:1 ratio for a square or circular image
                                       child: ClipOval(
                                         child: CachedNetworkImage(
-                                          imageUrl: 'https://bcc.touchandsolve.com${userProfile.photo}',
-                                          fit: BoxFit.cover, // Ensures the image covers the available space
-                                          placeholder: (context, url) => CircularProgressIndicator(),
-                                          errorWidget: (context, url, error) => Icon(Icons.person, size: 40),
+                                          imageUrl:
+                                              'https://bcc.touchandsolve.com${userProfile.photo}',
+                                          fit: BoxFit.cover,
+                                          // Ensures the image covers the available space
+                                          placeholder: (context, url) =>
+                                              Padding(
+                                                padding: const EdgeInsets.all(10.0),
+                                                child: CircularProgressIndicator(),
+                                              ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(Icons.person, size: 40),
                                         ),
                                       ),
                                     ),
@@ -645,7 +703,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                               ),
                             ),
                             Container(
-                              height: screenHeight * 0.25,
+                              height: screenHeight * 0.9,
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [
@@ -656,58 +714,6 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 5),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Text(
-                                'All Pending Requests',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'default',
-                                ),
-                              ),
-                            ),
-                            Divider(),
-                            pendingConnectionRequests.isNotEmpty
-                                ? Container(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    child: ListView.separated(
-                                      physics: NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemCount:
-                                          pendingConnectionRequests.length + 1,
-                                      itemBuilder: (context, index) {
-                                        if (index ==
-                                            pendingConnectionRequests.length) {
-                                          return Center(
-                                            child: _isLoading
-                                                ? Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 20),
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  )
-                                                : SizedBox.shrink(),
-                                          );
-                                        }
-                                        return pendingConnectionRequests[index];
-                                      },
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(height: 10),
-                                    ),
-                                  )
-                                : _isLoading
-                                    ? Center(
-                                        child: CircularProgressIndicator(),
-                                      )
-                                    : buildNoRequestsWidget(screenWidth,
-                                        'There is no new connection request at this moment.'),
                           ],
                         ),
                       ),
@@ -897,166 +903,286 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
       int? sblCountActive, int? sblCountPending) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-        child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: screenWidth * 0.43,
-            height: screenHeight * 0.2,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Colors.deepPurple,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(sblCountActive.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                SizedBox(
-                  height: 10,
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Material(
+                elevation: 3,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: screenWidth * 0.43,
+                  height: screenHeight * 0.2,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: Colors.deepPurple,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(sblCountActive.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('Active Connections',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ))
+                    ],
+                  ),
                 ),
-                Text('Active Connections',
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Material(
+                elevation: 3,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: screenWidth * 0.43,
+                  height: screenHeight * 0.2,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: Colors.greenAccent,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(sblCountPending.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('Pending Connections',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ))
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          )),
+          const SizedBox(height: 15),
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    'All Pending Requests',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                      color: Colors.black,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'default',
-                    ))
+                    ),
+                  ),
+                ),
+                Divider(),
+                SblConnectionRequests.isNotEmpty
+                    ? Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: ListView.separated(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: SblConnectionRequests.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == SblConnectionRequests.length) {
+                              return Center(
+                                child: _isLoading
+                                    ? Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 20),
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : SizedBox.shrink(),
+                              );
+                            }
+                            return SblConnectionRequests[index];
+                          },
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 10),
+                        ),
+                      )
+                    : _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : buildNoRequestsWidget(screenWidth,
+                            'There is no new connection request at this moment.'),
+                SizedBox(
+                  height: screenHeight * 0.3,
+                )
               ],
             ),
           ),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: screenWidth * 0.43,
-            height: screenHeight * 0.2,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Colors.greenAccent,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(sblCountPending.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                SizedBox(
-                  height: 10,
-                ),
-                Text('Pending Connections',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'default',
-                    ))
-              ],
-            ),
-          ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 
   Widget buildContentForAdvancedDigitalSolutionLimited(
       int? adslCountActive, int? adslCountPending) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-        child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: screenWidth * 0.45,
-            height: screenHeight * 0.2,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Colors.deepPurple,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(adslCountActive.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                SizedBox(
-                  height: 10,
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Material(
+                elevation: 3,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: screenWidth * 0.45,
+                  height: screenHeight * 0.2,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: Colors.deepPurple,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(adslCountActive.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('Total Active Connection',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ))
+                    ],
+                  ),
                 ),
-                Text('Total Active Connection',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'default',
-                    ))
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: screenWidth * 0.45,
-            height: screenHeight * 0.2,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Colors.greenAccent,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(adslCountPending.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'default',
-                    )),
-                SizedBox(
-                  height: 10,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Material(
+                elevation: 3,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: screenWidth * 0.45,
+                  height: screenHeight * 0.2,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: Colors.greenAccent,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(adslCountPending.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'default',
+                          )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('New Pending Connection',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'default',
+                          ))
+                    ],
+                  ),
                 ),
-                Text('New Pending Connection',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'default',
-                    ))
-              ],
-            ),
+              ),
+            ],
+          )),
+          const SizedBox(height: 15),
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                  'All Pending Requests',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
+                ),
+              ),
+              Divider(),
+              AdslConnectionRequests.isNotEmpty
+                  ? Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: ListView.separated(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: AdslConnectionRequests.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == AdslConnectionRequests.length) {
+                            return Center(
+                              child: _isLoading
+                                  ? Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 20),
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : SizedBox.shrink(),
+                            );
+                          }
+                          return AdslConnectionRequests[index];
+                        },
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
+                      ),
+                    )
+                  : _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : buildNoRequestsWidget(screenWidth,
+                          'There is no new connection request at this moment.'),
+              SizedBox(
+                height: screenHeight * 0.3,
+              )
+            ],
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 
   void _showNotificationsOverlay(BuildContext context) {

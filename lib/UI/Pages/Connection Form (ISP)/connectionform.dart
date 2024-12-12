@@ -418,7 +418,9 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   LabeledTextWithAsterisk(
                     text: "Service Type",
                   ),
-                  SizedBox(height: 5,),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(10),
@@ -450,8 +452,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                       text: selectedServiceType == "Data"
                           ? "Bandwidth"
                           : selectedServiceType == "Core"
-                          ? "Core"
-                          : "Rack Space",
+                              ? "Core"
+                              : "Rack Space",
                     ),
                     SizedBox(height: 5),
                     if (selectedServiceType == "Co-Location") ...[
@@ -493,7 +495,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                 controller: _linkcapcitycontroller,
                                 onChanged: (value) {
                                   setState(() {
-                                    fullLinkCapacity = "${value.trim()} $selectedUnit";
+                                    fullLinkCapacity =
+                                        "${value.trim()} $selectedUnit";
                                   });
                                 },
                                 validator: (input) {
@@ -520,9 +523,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                     fontFamily: 'default',
                                   ),
                                   alignLabelWithHint: true,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 25),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 25),
                                   border: const OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
                               ),
@@ -562,12 +567,15 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                   onChanged: (newUnit) {
                                     setState(() {
                                       selectedUnit = newUnit!;
-                                      fullLinkCapacity = "${_linkcapcitycontroller.text} $selectedUnit";
+                                      fullLinkCapacity =
+                                          "${_linkcapcitycontroller.text} $selectedUnit";
                                     });
                                   },
                                   decoration: InputDecoration(
-                                    border: InputBorder.none, // No border for the dropdown field.
-                                    hintText: 'Unit', // Placeholder text when no item is selected.
+                                    border: InputBorder.none,
+                                    // No border for the dropdown field.
+                                    hintText: 'Unit',
+                                    // Placeholder text when no item is selected.
                                     hintStyle: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
@@ -575,7 +583,9 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                                       fontFamily: 'default',
                                     ),
                                     contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12), // Padding for the dropdown field.
+                                        horizontal: 16,
+                                        vertical:
+                                            12), // Padding for the dropdown field.
                                   ),
                                 ),
                               ),
@@ -614,9 +624,11 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                             ),
                             suffixText: "Core",
                             alignLabelWithHint: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 25),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 25),
                             border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                           onChanged: (value) {
@@ -632,13 +644,17 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                   LabeledTextWithoutAsterisk(
                     text: "Latitude and Longitude of The Location",
                   ),
-                  SizedBox(height: 5,),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 100,
                     child: TextFormField(
                       controller: _latitudeLongtitudeController,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true), // Ensure proper input
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      // Ensure proper input
                       decoration: InputDecoration(
                         labelText: 'Latitude and Longitude of The Location',
                         hintText: 'e.g., 12.3456,65.4321',
@@ -652,8 +668,8 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                           fontFamily: 'default',
                         ),
                         border: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10))
-                        ),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
                       ),
                       style: const TextStyle(
                         color: Color.fromRGBO(143, 150, 158, 1),
@@ -955,20 +971,35 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
                       if (providerValues == 'zero') ...[
                         Builder(
                           builder: (context) {
-                            Future.delayed(Duration.zero, () {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              // Show your toast or perform state update here after the build phase.
+                              showTopToast(context,
+                                  'There are no NTTN Providers in this area');
+                            });
+                            // Disable interaction for 2 seconds
+                            /*Future.delayed(Duration(seconds: 2), () {
+                              // Enable interactions after 2 seconds
+                              setState(() {});
+                            });*/
+                            /*Future.delayed(Duration.zero, () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
                                       'There are no NTTN Providers in this area'),
                                 ),
                               );
-                            });
+                            });*/
                             return SizedBox
                                 .shrink(); // Returning an empty SizedBox as a placeholder
+                            /*  return AbsorbPointer(
+                              absorbing: true, // Set to true to disable interaction
+                              child: SizedBox.shrink(), // Returning an empty SizedBox as a placeholder
+                            );*/
                           },
                         ),
                       ] else if (providerValues != 'zero') ...[
-                        LabeledTextWithAsterisk(text: 'NTTN Providers in this area'),
+                        LabeledTextWithAsterisk(
+                            text: 'NTTN Providers in this area'),
                         SizedBox(height: 5),
                         Material(
                           elevation: 5,
@@ -1160,7 +1191,6 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
     }
   }
 
-
   bool _validateAndSave() {
     final divisionIdIsValid = _divisionID.isNotEmpty;
     final districtIdIsValid = _districtID.isNotEmpty;
@@ -1175,27 +1205,21 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
 
     print(linkCapacityIsValid);
 
-    if(selectedServiceType == null){
+    if (selectedServiceType == null) {
       return false;
     }
 
-
-
     if (selectedServiceType == "Data") {
-      if(selectedUnit == null)
-        return false;
-      if(_linkcapcitycontroller.text.isEmpty)
-        return false;
+      if (selectedUnit == null) return false;
+      if (_linkcapcitycontroller.text.isEmpty) return false;
     }
 
-    if(selectedServiceType == "Core"){
-      if(_linkcapcitycontroller.text.isEmpty)
-        return false;
+    if (selectedServiceType == "Core") {
+      if (_linkcapcitycontroller.text.isEmpty) return false;
     }
 
-    if(selectedServiceType == "Co-Location"){
-      if(_linkcapcitycontroller.text.isEmpty)
-        return false;
+    if (selectedServiceType == "Co-Location") {
+      if (_linkcapcitycontroller.text.isEmpty) return false;
     }
 
     // Check if all fields are valid
@@ -1210,5 +1234,50 @@ class _ConnectionFormUIState extends State<ConnectionFormUI> {
         remarkIsValid;
 
     return allFieldsAreValid;
+  }
+
+  void showTopToast(BuildContext context, String message) {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Modal Barrier to block user interaction
+          GestureDetector(
+            onTap: () {},
+            child: ModalBarrier(
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ),
+
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 50,
+            left: 20,
+            right: 20,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  message,
+                  style: TextStyle(
+                      color: Colors.white, fontFamily: 'default', fontSize: 20),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 2)).then((_) {
+      print("Removing overlay");
+      overlayEntry.remove();
+    });
   }
 }

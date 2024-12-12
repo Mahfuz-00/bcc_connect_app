@@ -37,12 +37,15 @@ class UserRegistrationAPIService {
       request.fields['license_number'] = registerRequestModel.licenseNumber;
       request.fields['type_of_organization'] = registerRequestModel.organiazationType;
 
-      var imageStream = http.ByteStream(imageFile!.openRead());
-      var length = await imageFile.length();
-      var multipartFile = http.MultipartFile('photo', imageStream, length,
-          filename: imageFile.path.split('/').last);
+      if(imageFile != null){
+        var imageStream = http.ByteStream(imageFile!.openRead());
+        var length = await imageFile.length();
+        var multipartFile = http.MultipartFile('photo', imageStream, length,
+            filename: imageFile.path.split('/').last);
 
-      request.files.add(multipartFile);
+        request.files.add(multipartFile);
+      }
+
 
       var response = await request.send();
       print(response.statusCode);

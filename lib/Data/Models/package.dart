@@ -1,6 +1,7 @@
 class Package {
   final int? id;
   final String? name;
+  final String? unit;
   final String? packageName;
   final String? packageDescription;
   final double? charge;
@@ -12,6 +13,7 @@ class Package {
   Package({
     this.id,
     this.name,
+    this.unit,
     this.packageName,
     this.packageDescription,
     this.charge,
@@ -26,6 +28,7 @@ class Package {
     return Package(
       id: json['id'] as int?,
       name: json['name'] as String?,
+      unit: json['unit'] as String?,
       packageName: json['package_name'] as String?,
       packageDescription: json['package_description'] as String?,
       charge: (json['charge'] as num?)?.toDouble(),
@@ -41,6 +44,7 @@ class Package {
     return {
       'id': id,
       'name': name,
+      'unit': unit,
       'package_name': packageName,
       'package_description': packageDescription,
       'charge': charge,

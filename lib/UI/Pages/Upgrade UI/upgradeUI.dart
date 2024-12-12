@@ -190,7 +190,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                         },
                       ),
                       title: const Text(
-                        'Connection List',
+                        'Active Work Order List',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -430,7 +430,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                 // Title for the existing connection list
                                 Center(
                                   child: Text(
-                                    'Your Active Connection List',
+                                    'Your Active Work Order List',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.black,
@@ -444,7 +444,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                                   height: 25,
                                 ),
                                 Container(
-                                  child: const Text('Connection List',
+                                  child: const Text('Work Order List',
                                       //key: requestTextKey,
                                       textAlign: TextAlign.left,
                                       style: TextStyle(

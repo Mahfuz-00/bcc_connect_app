@@ -234,12 +234,6 @@ class _SignupUIState extends State<SignupUI> {
                               CustomTextInput(
                                 controller: _designationController,
                                 label: 'Designation',
-                                validator: (input) {
-                                  if (input == null || input.isEmpty) {
-                                    return 'Please enter your designation';
-                                  }
-                                  return null;
-                                },
                               ),
                               const SizedBox(height: 5),
                               Container(
@@ -696,56 +690,68 @@ class _SignupUIState extends State<SignupUI> {
           setState(() {
             _isButtonLoading = false;
           });
-          const snackBar = SnackBar(
-            content: Text(
-                'The Email is Taken!, Please Try entering a different Email'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          showTopToast(context, 'The Email is Taken!, Please Try entering a different Email');
         } else if (response != null &&
             response == "The phone has already been taken.") {
           setState(() {
             _isButtonLoading = false;
           });
-          const snackBar = SnackBar(
-            content: Text(
-                'The Phone Number is Taken!, Please Try a different Number'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          showTopToast(context, 'The Phone Number is Taken!, Please Try a different Number');
         } else {
           setState(() {
             _isButtonLoading = false;
           });
-          const snackBar = SnackBar(
-            content: Text('Registration Failed!'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          showTopToast(context, 'Registration Failed!');
         }
       }).catchError((error) {
         setState(() {
           _isButtonLoading = false;
         });
         print(error);
-        const snackBar = SnackBar(
-          content: Text('Registration failed!'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        showTopToast(context, 'Registration Failed! Please try again later.');
       });
     } else {
       setState(() {
         _isButtonLoading = false;
       });
       if (_passwordController.text != _confirmPasswordController.text) {
-        const snackBar = SnackBar(
-          content: Text('Passwords do not match'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        showTopToast(context, 'Passwords do not match!');
       } else if (validateAndSave() == false) {
-        const snackBar = SnackBar(
-          content: Text('Fill all Fields'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        showTopToast(context, 'Please Fill all Fields!');
       }
     }
+  }
+
+  void showTopToast(BuildContext context, String message) {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top +
+            10,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3)).then((_) {
+      overlayEntry.remove();
+    });
   }
 
   bool validateAndSave() {

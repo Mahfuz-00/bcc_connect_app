@@ -32,8 +32,11 @@ class PackageAPIService {
         headers: {'Authorization': 'Bearer $authToken'},
       );
 
+      print(response.statusCode);
       if (response.statusCode == 200) {
+        print(response.body);
         final Map<String, dynamic> data = jsonDecode(response.body);
+        print(data);
 
         // Check if data contains 'records' and parse it to a list of Packages
         if (data != null && data.containsKey('records')) {

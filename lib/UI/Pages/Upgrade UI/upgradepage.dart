@@ -46,39 +46,49 @@ class _UpgradePageState extends State<UpgradePage> {
   List<String> PaymentOptions = ['Cash', 'Online'];
   final _formKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-    customCapacityController = TextEditingController();
-    _contractDurationController = TextEditingController();
-    _discountController = TextEditingController();
-    _priceController = TextEditingController();
-    _netPaymentController = TextEditingController();
-    remarkController = TextEditingController();
-    // Add listeners to update the calculation automatically
-    _priceController.addListener(_calculateNetPayment);
-    _discountController.addListener(_calculateNetPayment);
-    _contractDurationController.addListener(_calculateNetPayment);
+  String? number = '';
+  String? unit = '';
 
-    customCapacityController.text = widget.Capacity ?? '';
-    _contractDurationController.text = widget.ContactDuration?.toString() ?? '';
-    _netPaymentController.text = widget.NetPayment.toString() ?? '';
-    fetchPackages();
+  void separateNumberAndUnit(String input) {
+    final regex = RegExp(r'^(\d+)\s*(\w+)$');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      number = match.group(1);
+      unit = match.group(2);
+
+      print('Number: $number');
+      print('Unit: $unit');
+    } else {
+      print('Invalid format');
+    }
   }
 
-  Future<void> fetchPackages() async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> fetchPackages(String unit) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
+
       await initializeApiService();
       final List<Package> fetchedPackages = await apiService.fetchPackages();
+
       setState(() {
-        packages = fetchedPackages;
-        isLoading = false;
+        packages =
+            fetchedPackages.where((package) => package.unit == unit).toList();
       });
+
+      for (Package package in packages) {
+        print('Service Name: ${package.name}');
+        print('Package ID: ${package.id}');
+        print('Package Unit: ${package.unit}');
+        print('Package Name: ${package.packageName}');
+        print('Package Description: ${package.packageDescription}');
+        print('Package Price: ${package.charge}');
+      }
     } catch (e) {
       print('Error fetching packages: $e');
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -93,38 +103,38 @@ class _UpgradePageState extends State<UpgradePage> {
   }
 
   void _calculateNetPayment() {
-    setState(() {
-      int contractDuration = int.parse(_contractDurationController.text);
-      packageRate = double.tryParse(_priceController.text) ?? 0;
-      discount = _parseDiscount(_discountController.text);
+    if (_contractDurationController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty) {
+      setState(() {
+        int contractDuration = int.parse(_contractDurationController.text);
+        packageRate = double.tryParse(_priceController.text) ?? 0;
 
-      double netPayment;
-      if (discount == 0) {
-        // No discount
-        netPayment = contractDuration * packageRate;
-      } else if (discount > 1) {
-        // Absolute discount
-        netPayment = (contractDuration * packageRate) - discount;
-      } else {
-        // Percentage discount
-        netPayment =
-            (packageRate - (packageRate * discount)) * contractDuration;
-      }
-
-      _netPaymentController.text = netPayment.toStringAsFixed(2);
-    });
+        double netPayment;
+        netPayment = contractDuration * packageRate * double.parse(number!);
+        _netPaymentController.text = netPayment.toStringAsFixed(2);
+      });
+    }
   }
 
-  double _parseDiscount(String discountText) {
-    // Check if the discount is a percentage
-    if (discountText.contains('%')) {
-      String percentageText = discountText.replaceAll('%', '').trim();
-      double percentage = double.tryParse(percentageText) ?? 0;
-      return percentage / 100; // Return as a fraction
-    } else {
-      // If no percentage sign, treat it as an absolute discount
-      return double.tryParse(discountText) ?? 0;
-    }
+  @override
+  void initState() {
+    super.initState();
+    customCapacityController = TextEditingController();
+    _contractDurationController = TextEditingController();
+    _discountController = TextEditingController();
+    _priceController = TextEditingController();
+    _netPaymentController = TextEditingController();
+    remarkController = TextEditingController();
+    // Add listeners to update the calculation automatically
+    _priceController.addListener(_calculateNetPayment);
+    _discountController.addListener(_calculateNetPayment);
+    _contractDurationController.addListener(_calculateNetPayment);
+
+    separateNumberAndUnit(widget.Capacity!);
+    customCapacityController.text = widget.Capacity ?? '';
+    _contractDurationController.text = widget.ContactDuration?.toString() ?? '';
+    _netPaymentController.text = widget.NetPayment.toString() ?? '';
+    fetchPackages(unit!);
   }
 
   @override
@@ -394,12 +404,12 @@ class _UpgradePageState extends State<UpgradePage> {
                             await _SubmitData(context);
                           },
                           child: Text('Submit',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'default',
-                                  )),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              )),
                         ),
                       ],
                     ),

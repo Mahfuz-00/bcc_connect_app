@@ -31,6 +31,7 @@ class _PasswordChangeUIState extends State<PasswordChangeUI> {
   bool _isObscuredPassword = true;
   bool _isObscuredConfirmPassword = true;
   bool _isButtonClicked = false;
+  final _formKey = GlobalKey<FormState>();
 
   /// Returns the icon for the current password field based on its obscurity state.
   IconData _getIconCurrentPassword() {
@@ -83,159 +84,162 @@ class _PasswordChangeUIState extends State<PasswordChangeUI> {
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 20),
-              Text(
-                'Current Password',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'default',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 7 characters"
-                    : null,
-                controller: _currentPasswordController,
-                obscureText: _isObscuredCurrentPassword,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter current password',
-                  hintStyle: TextStyle(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                Text(
+                  'Current Password',
+                  style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'default',
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_getIconCurrentPassword()),
-                    onPressed: () {
-                      setState(() {
-                        _isObscuredCurrentPassword =
-                            !_isObscuredCurrentPassword;
-                        _currentPasswordController.text =
-                            _currentPasswordController.text;
-                      });
-                    },
-                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'New Password',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'default',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 7 characters"
-                    : null,
-                controller: _passwordController,
-                obscureText: _isObscuredPassword,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter new password',
-                  hintStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_getIconPassword()),
-                    onPressed: () {
-                      setState(() {
-                        _isObscuredPassword = !_isObscuredPassword;
-                        _passwordController.text = _passwordController.text;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Confirm Password',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'default',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                validator: (input) => input!.length < 8
-                    ? "Password should be more than 7 characters"
-                    : null,
-                controller: _confirmPasswordController,
-                obscureText: _isObscuredConfirmPassword,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Confirm new password',
-                  hintStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'default',
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_getIconConfirmPassword()),
-                    onPressed: () {
-                      setState(() {
-                        _isObscuredConfirmPassword =
-                            !_isObscuredConfirmPassword;
-                        _confirmPasswordController.text =
-                            _confirmPasswordController.text;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: 40),
-              Center(
-                child: Material(
-                  elevation: 5,
-                  borderRadius: BorderRadius.circular(10),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                      fixedSize: Size(MediaQuery.of(context).size.width * 0.8,
-                          MediaQuery.of(context).size.height * 0.08),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                SizedBox(height: 10),
+                TextFormField(
+                  keyboardType: TextInputType.text,
+                  validator: (input) => input!.length < 8
+                      ? "Password should be more than 7 characters"
+                      : null,
+                  controller: _currentPasswordController,
+                  obscureText: _isObscuredCurrentPassword,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter current password',
+                    hintStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
                     ),
-                    onPressed: () {
-                      _updatePassword();
-                    },
-                    child: _isButtonClicked
-                        ? CircularProgressIndicator()
-                        : Text(
-                            'Update',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'default',
-                            ),
-                          ),
+                    suffixIcon: IconButton(
+                      icon: Icon(_getIconCurrentPassword()),
+                      onPressed: () {
+                        setState(() {
+                          _isObscuredCurrentPassword =
+                              !_isObscuredCurrentPassword;
+                          _currentPasswordController.text =
+                              _currentPasswordController.text;
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 20),
+                Text(
+                  'New Password',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  keyboardType: TextInputType.text,
+                  validator: (input) => input!.length < 8
+                      ? "Password should be more than 7 characters"
+                      : null,
+                  controller: _passwordController,
+                  obscureText: _isObscuredPassword,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter new password',
+                    hintStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(_getIconPassword()),
+                      onPressed: () {
+                        setState(() {
+                          _isObscuredPassword = !_isObscuredPassword;
+                          _passwordController.text = _passwordController.text;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Confirm Password',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  keyboardType: TextInputType.text,
+                  validator: (input) => input!.length < 8
+                      ? "Password should be more than 7 characters"
+                      : null,
+                  controller: _confirmPasswordController,
+                  obscureText: _isObscuredConfirmPassword,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Confirm new password',
+                    hintStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'default',
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(_getIconConfirmPassword()),
+                      onPressed: () {
+                        setState(() {
+                          _isObscuredConfirmPassword =
+                              !_isObscuredConfirmPassword;
+                          _confirmPasswordController.text =
+                              _confirmPasswordController.text;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+                Center(
+                  child: Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(10),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.8,
+                            MediaQuery.of(context).size.height * 0.08),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        _updatePassword();
+                      },
+                      child: _isButtonClicked
+                          ? CircularProgressIndicator()
+                          : Text(
+                              'Update',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'default',
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -271,7 +275,8 @@ class _PasswordChangeUIState extends State<PasswordChangeUI> {
       _isButtonClicked =
           true;
     });
-    if (checkConfirmPassword()) {
+    bool valid = _formKey.currentState!.validate();
+    if (checkConfirmPassword() && valid) {
       String currentPassword = _currentPasswordController.text;
       String newPassword = _passwordController.text;
       String confirmPassword = _confirmPasswordController.text;
