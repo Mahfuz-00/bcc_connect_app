@@ -136,13 +136,13 @@ class _WorkOrderUIState extends State<WorkOrderUI> {
   }
 
   void _calculateNetPayment() {
-    if(_contractDurationController.text.isNotEmpty && _priceController.text.isNotEmpty){
+    if(/*_contractDurationController.text.isNotEmpty &&*/ _priceController.text.isNotEmpty){
       setState(() {
         int contractDuration = int.parse(_contractDurationController.text);
         packageRate = double.tryParse(_priceController.text) ?? 0;
 
         double netPayment;
-        netPayment = contractDuration * packageRate * double.parse(number!);
+        netPayment = /*contractDuration **/ packageRate * double.parse(number!);
         _netPaymentController.text = netPayment.toStringAsFixed(2);
       });
     }

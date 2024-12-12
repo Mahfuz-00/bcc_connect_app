@@ -56,6 +56,7 @@ dependencies:
   package_info_plus: ^5.0.1
   file_picker: ^8.0.0+1
   flutter_secure_storage:
+  in_app_update:
 
 
 dev_dependencies:
