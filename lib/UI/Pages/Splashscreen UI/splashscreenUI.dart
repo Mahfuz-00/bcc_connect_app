@@ -53,19 +53,18 @@ class _SplashScreenUIState extends State<SplashScreenUI>
 
     SlideAnimation = Tween(begin: const Offset(0, 3), end: const Offset(0, 0))
         .animate(CurvedAnimation(
-            parent: animationController, curve: Curves.easeInOutCirc));
+        parent: animationController, curve: Curves.easeInOutCirc));
     FadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
         CurvedAnimation(parent: animationController, curve: Curves.easeInOut));
     animatedpadding = Tween(begin: const Offset(0, 0.3), end: Offset.zero)
         .animate(
-            CurvedAnimation(parent: animationController, curve: Curves.easeIn));
+        CurvedAnimation(parent: animationController, curve: Curves.easeIn));
 
     checkForUpdate(context);
     _checkAuthAndNavigate(context);
 
     _checkInternetConnection();
   }
-
 
 
   Future<void> _checkInternetConnection() async {
@@ -114,10 +113,12 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         print('Usertype from State: ' + userType);
 
         print(
-            'User Profile from State: ${userProfile.name}, ${userProfile.organization}, ${userProfile.Id}, ${userProfile.photo}');
+            'User Profile from State: ${userProfile.name}, ${userProfile
+                .organization}, ${userProfile.Id}, ${userProfile.photo}');
         await _fetchUserProfile(token, userType, context);
         print(
-            'User Profile from State: ${userProfile.name}, ${userProfile.organization}, ${userProfile.Id}, ${userProfile.photo}');
+            'User Profile from State: ${userProfile.name}, ${userProfile
+                .organization}, ${userProfile.Id}, ${userProfile.photo}');
         _navigateToAppropriateDashboard(context, userType);
       }
     } catch (e) {
@@ -126,8 +127,8 @@ class _SplashScreenUIState extends State<SplashScreenUI>
     }
   }
 
-  Future<void> _fetchUserProfile(
-      String token, String userType, BuildContext context) async {
+  Future<void> _fetchUserProfile(String token, String userType,
+      BuildContext context) async {
     try {
       // Fetch user profile from the API
       final apiService = ProfileAPIService();
@@ -166,21 +167,21 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         context,
         MaterialPageRoute(
             builder: (context) => ISPDashboardUI(shouldRefresh: true)),
-        (route) => false,
+            (route) => false,
       );
     } else if (userType == 'bcc_staff') {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => BCCDashboardUI(shouldRefresh: true)),
-        (route) => false,
+            (route) => false,
       );
     } else if (userType == 'nttn_sbl_staff' || userType == 'nttn_adsl_staff') {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => NTTNDashboardUI(shouldRefresh: true)),
-        (route) => false,
+            (route) => false,
       );
     } else {
       String errorMessage = 'Invalid User! Please enter a valid email address.';
@@ -193,25 +194,29 @@ class _SplashScreenUIState extends State<SplashScreenUI>
   void showTopToast(BuildContext context, String message) {
     OverlayState? overlayState = Overlay.of(context);
     OverlayEntry overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: MediaQuery.of(context).padding.top + 10,
-        left: 20,
-        right: 20,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              message,
-              style: TextStyle(color: Colors.white),
+      builder: (context) =>
+          Positioned(
+            top: MediaQuery
+                .of(context)
+                .padding
+                .top + 10,
+            left: 20,
+            right: 20,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  message,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
 
     overlayState?.insert(overlayEntry);
@@ -233,12 +238,13 @@ class _SplashScreenUIState extends State<SplashScreenUI>
           return AlertDialog(
             title: Text("Update Available",
               style: TextStyle(
-                color: Color.fromRGBO(0, 162, 222, 1),
+                color: Color.fromRGBO(25, 192, 122, 1),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'default',
               ),),
-            content: Text("A new version of the app is available. Please update to the latest version.",
+            content: Text(
+              "A new version of the app is available. Please update to the latest version.",
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
@@ -264,7 +270,13 @@ class _SplashScreenUIState extends State<SplashScreenUI>
                   // Close the dialog without updating
                   Navigator.of(context).pop();
                 },
-                child: Text("Later"),
+                child: Text("Later",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'default',
+                  ),),
               ),
             ],
           );
@@ -281,8 +293,14 @@ class _SplashScreenUIState extends State<SplashScreenUI>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -291,13 +309,13 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         height: double.infinity,
         decoration: const BoxDecoration(
             gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.fromRGBO(246, 246, 246, 255),
-            Color.fromRGBO(246, 246, 246, 255)
-          ],
-        )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.fromRGBO(246, 246, 246, 255),
+                Color.fromRGBO(246, 246, 246, 255)
+              ],
+            )),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -361,7 +379,7 @@ class _SplashScreenUIState extends State<SplashScreenUI>
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                const Color.fromRGBO(25, 192, 122, 1),
+                            const Color.fromRGBO(25, 192, 122, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
