@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 ///   using the provided [currentPassword], [newPassword], and
 ///   [passwordConfirmation].
 class PasswordUpdateAPIService {
-  String baseURL = 'https://bcc.touchandsolve.com/api';
+  String baseURL = 'http://114.130.240.150/api';
   late final String authToken;
 
   PasswordUpdateAPIService.create(this.authToken);

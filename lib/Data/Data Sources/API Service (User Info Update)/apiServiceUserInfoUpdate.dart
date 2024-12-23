@@ -17,7 +17,7 @@ import '../../Models/userInfoUpdateModel.dart';
 ///   [organization], [designation], [phone], and [licenseNumber].
 class UpdateUserAPIService {
   late final String authToken;
-  String URL = "https://bcc.touchandsolve.com/api/user/profile/update";
+  String URL = "http://114.130.240.150/api/user/profile/update";
 
   UpdateUserAPIService.create(this.authToken);
 

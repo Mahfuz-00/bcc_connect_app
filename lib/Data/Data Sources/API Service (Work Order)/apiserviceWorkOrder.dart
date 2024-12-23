@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 /// - [baseUrl]: The base URL for the API endpoint.
 /// - [authToken]: The authentication token required for making API requests.
 class WorkOrderAPIService {
-  final String baseUrl = 'https://bcc.touchandsolve.com/api';
+  final String baseUrl = 'http://114.130.240.150/api';
   late final String authToken;
 
   WorkOrderAPIService.create(this.authToken);

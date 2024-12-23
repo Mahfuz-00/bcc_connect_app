@@ -13,7 +13,7 @@ import 'package:http/http.dart' as http;
 /// - [baseURL]: The base URL for the API.
 /// - [authToken]: The authentication token used for API requests.
 class FetchedConnectionListAPIService {
-  final String baseURL = 'https://bcc.touchandsolve.com/api';
+  final String baseURL = 'http://114.130.240.150/api';
   late final String authToken;
 
   FetchedConnectionListAPIService.create(this.authToken);

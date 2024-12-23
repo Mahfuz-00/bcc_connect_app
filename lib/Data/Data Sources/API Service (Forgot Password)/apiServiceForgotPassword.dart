@@ -17,7 +17,7 @@ import 'package:http/http.dart' as http;
 /// - [sendForgotPasswordOTP]: Sends a POST request to the API to send an OTP to the provided [email].
 class ForgotPasswordAPIService {
   final String url =
-      'https://bcc.touchandsolve.com/api/send/forget/password/otp';
+      'http://114.130.240.150/api/send/forget/password/otp';
   late final String authToken;
 
   ForgotPasswordAPIService.create();

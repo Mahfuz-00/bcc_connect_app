@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 /// - [create]: Initializes the service and loads the [authToken].
 /// - [NewPassword]: Sends a POST request to the API to create a new password with the provided [email], [password], and [confirmPassword].
 class CreateNewPasswordAPIService {
-  final String url = 'https://bcc.touchandsolve.com/api/forget/password';
+  final String url = 'http://114.130.240.150/api/forget/password';
   late final String authToken;
 
   CreateNewPasswordAPIService.create();

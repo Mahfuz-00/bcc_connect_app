@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 /// - [_loadAuthToken]: A private method to load the [authToken] from [SharedPreferences].
 /// - [signOut]: Sends a GET request to the API to sign out the user. If the request is successful,
 class LogOutApiService {
-  static const String URL = 'https://bcc.touchandsolve.com/api';
+  static const String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   LogOutApiService.create(this.authToken);

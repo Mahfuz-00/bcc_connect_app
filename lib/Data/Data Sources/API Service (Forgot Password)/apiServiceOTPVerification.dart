@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 /// - [create]: Initializes the service and loads the [authToken].
 /// - [OTPVerification]: Sends a POST request to the API to verify the [OTP] for the provided [email].
 class OTPVerificationAPIService {
-  final String url = 'https://bcc.touchandsolve.com/api/verify/otp';
+  final String url = 'http://114.130.240.150/api/verify/otp';
   late final String authToken;
 
   OTPVerificationAPIService.create();

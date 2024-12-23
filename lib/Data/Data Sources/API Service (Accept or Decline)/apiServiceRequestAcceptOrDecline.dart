@@ -18,7 +18,7 @@ import 'package:http/http.dart' as http;
 /// - [body]: The body of the request containing the [type] of action and
 ///   the [isp_connection_id].
 class ConnectionAcceptRejectAPIService {
-  static const String URL = 'https://bcc.touchandsolve.com/api';
+  static const String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   ConnectionAcceptRejectAPIService.create(this.authToken);

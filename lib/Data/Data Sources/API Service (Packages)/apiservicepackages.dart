@@ -14,7 +14,7 @@ import '../../Models/package.dart';
 /// - [URL]: The base URL for the API.
 /// - [authToken]: The authentication token used for API requests.
 class PackageAPIService {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+  final String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   PackageAPIService.create(this.authToken);

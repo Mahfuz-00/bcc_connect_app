@@ -12,7 +12,7 @@ import 'package:http/http.dart' as http;
 /// - [fetchUserProfile]: Sends a GET request to the API to fetch
 /// the user profile data using the provided [authToken].
 class ProfileAPIService {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+  final String URL = 'http://114.130.240.150/api';
 
   Future<Map<String, dynamic>> fetchUserProfile(String authToken) async {
     print('Authen: $authToken');

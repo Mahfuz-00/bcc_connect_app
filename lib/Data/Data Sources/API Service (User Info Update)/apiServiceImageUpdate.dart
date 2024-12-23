@@ -16,7 +16,7 @@ import '../../Models/imageUpdateModel.dart';
 /// the user's profile picture using the provided [image] file.
 class ProfilePictureUpdateAPIService {
   static const String URL =
-      'https://bcc.touchandsolve.com/api/user/profile/photo/update';
+      'http://114.130.240.150/api/user/profile/photo/update';
   late final String authToken;
 
   ProfilePictureUpdateAPIService.create(this.authToken);

@@ -15,7 +15,7 @@ import 'package:http/http.dart' as http;
 /// - [URL]: The base URL for the API.
 /// - [authToken]: The authorization token required for API access.
 class UpgradeConnectionAPIService {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+  final String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   UpgradeConnectionAPIService.create(this.authToken);

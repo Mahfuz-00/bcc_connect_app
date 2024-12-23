@@ -19,7 +19,7 @@ class UserRegistrationAPIService {
   Future<String> register(
       RegisterRequestmodel registerRequestModel, File? imageFile) async {
     try {
-      String url = "https://bcc.touchandsolve.com/api/registration";
+      String url = "http://114.130.240.150/api/registration";
 
       var request = http.MultipartRequest('POST', Uri.parse(url));
 

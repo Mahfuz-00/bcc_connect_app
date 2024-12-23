@@ -20,7 +20,7 @@ import '../../Models/loginmodels.dart';
 class LoginAPIService {
   Future<LoginResponseModel?> login(LoginRequestmodel loginRequestModel) async {
     try {
-      String url = "https://bcc.touchandsolve.com/api/login";
+      String url = "http://114.130.240.150/api/login";
 
       final response = await http.post(
         Uri.parse(url),

@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 /// - [create]: A constructor that initializes the [NotificationReadApiService] class with the [authToken].
 /// - [readNotification]: Sends a GET request to the API to mark the notification as read.
 class NotificationReadApiService {
-  static const String URL = 'https://bcc.touchandsolve.com/api';
+  static const String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   NotificationReadApiService.create(this.authToken);

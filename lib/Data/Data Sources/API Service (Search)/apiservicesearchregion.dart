@@ -24,7 +24,7 @@ import '../../Models/searchmodel.dart';
 /// - [URL]: The base URL for the API.
 /// - [authToken]: The authentication token used for API requests.
 class SearchRegionAPIService {
-  final String URL = 'https://bcc.touchandsolve.com/api';
+  final String URL = 'http://114.130.240.150/api';
   late final String authToken;
 
   SearchRegionAPIService.create(this.authToken);
