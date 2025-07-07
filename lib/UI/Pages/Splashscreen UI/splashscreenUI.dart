@@ -1,4 +1,4 @@
-import 'package:connectivity/connectivity.dart';
+import 'package:bcc_connect_app/Core/Connection%20Checker/internetconnectioncheck.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,18 +62,6 @@ class _SplashScreenUIState extends State<SplashScreenUI>
 
     checkForUpdate(context);
     _checkAuthAndNavigate(context);
-
-    _checkInternetConnection();
-  }
-
-
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
   }
 
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -302,131 +290,133 @@ class _SplashScreenUIState extends State<SplashScreenUI>
         .size
         .height;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromRGBO(246, 246, 246, 255),
-                Color.fromRGBO(246, 246, 246, 255)
-              ],
-            )),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Display the logo image
-            const Image(
-              image: AssetImage(
-                'Assets/Images/BCC-Logo.png',
+    return InternetConnectionChecker(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(246, 246, 246, 255),
+                  Color.fromRGBO(246, 246, 246, 255)
+                ],
+              )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Display the logo image
+              const Image(
+                image: AssetImage(
+                  'Assets/Images/BCC-Logo.png',
+                ),
+                width: 200,
+                height: 200,
               ),
-              width: 200,
-              height: 200,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            // Display the title text with animation
-            SlideTransition(
-              position: animatedpadding,
-              child: const Padding(
-                padding: EdgeInsets.all(30),
-                child: Text(
-                  'BCC Connect Network',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'default',
+              const SizedBox(
+                height: 20,
+              ),
+              // Display the title text with animation
+              SlideTransition(
+                position: animatedpadding,
+                child: const Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Text(
+                    'BCC Connect Network',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontFamily: 'default',
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            // Display buttons with animations
-            Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                FadeTransition(
-                  opacity: FadeAnimation,
-                  child: const Image(
-                    image: AssetImage('Assets/Images/Powered by TNS.png'),
-                    height: 100,
-                    width: 150,
-                    alignment: Alignment.bottomCenter,
+              const SizedBox(
+                height: 50,
+              ),
+              // Display buttons with animations
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  FadeTransition(
+                    opacity: FadeAnimation,
+                    child: const Image(
+                      image: AssetImage('Assets/Images/Powered by TNS.png'),
+                      height: 100,
+                      width: 150,
+                      alignment: Alignment.bottomCenter,
+                    ),
                   ),
-                ),
-                SlideTransition(
-                  position: SlideAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // Login button
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginUI(),
-                                ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                            const Color.fromRGBO(25, 192, 122, 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                  SlideTransition(
+                    position: SlideAnimation,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Login button
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginUI(),
+                                  ));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                              const Color.fromRGBO(25, 192, 122, 1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              fixedSize: Size(screenWidth * 0.9, 70),
                             ),
-                            fixedSize: Size(screenWidth * 0.9, 70),
-                          ),
-                          child: const Text('Login',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontFamily: 'default',
-                              ))),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      // Register button
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignupUI()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(
-                                  color: Colors.black, width: 2),
+                            child: const Text('Login',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'default',
+                                ))),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        // Register button
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignupUI()));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: const BorderSide(
+                                    color: Colors.black, width: 2),
+                              ),
+                              fixedSize: Size(screenWidth * 0.9, 70),
                             ),
-                            fixedSize: Size(screenWidth * 0.9, 70),
-                          ),
-                          child: const Text('Register',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontFamily: 'default',
-                              )))
-                    ],
+                            child: const Text('Register',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  fontFamily: 'default',
+                                )))
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
