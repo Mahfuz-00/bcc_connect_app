@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// A widget that checks the internet connectivity status.
 ///
@@ -24,17 +24,17 @@ class _InternetConnectionCheckerState extends State<InternetConnectionChecker> {
     _connectivity = Connectivity();
     _isConnected = true; // Assume initially connected
     _initConnectivity();
-    _connectivity.onConnectivityChanged.listen((result) {
+    _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
       setState(() {
-        _isConnected = (result != ConnectivityResult.none);
+        _isConnected = !results.contains(ConnectivityResult.none);
       });
     });
   }
 
   Future<void> _initConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
+    final List<ConnectivityResult> results = await _connectivity.checkConnectivity();
     setState(() {
-      _isConnected = (result != ConnectivityResult.none);
+      _isConnected = !results.contains(ConnectivityResult.none);
     });
   }
 
@@ -51,10 +51,10 @@ class _InternetConnectionCheckerState extends State<InternetConnectionChecker> {
                 'Internet connection not found',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'default'
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontFamily: 'default',
                 ),
               ),
               SizedBox(height: 20),
@@ -66,15 +66,15 @@ class _InternetConnectionCheckerState extends State<InternetConnectionChecker> {
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(color: Colors.black, width: 1),
                   ),
-                  //elevation: 3,
                   fixedSize: const Size(150, 30),
                 ),
-                child: Text('Retry',
+                child: Text(
+                  'Retry',
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(25, 192, 122, 1),
-                      fontFamily: 'default'
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(25, 192, 122, 1),
+                    fontFamily: 'default',
                   ),
                 ),
               ),

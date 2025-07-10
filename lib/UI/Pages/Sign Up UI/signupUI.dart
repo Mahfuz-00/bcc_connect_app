@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:footer/footer.dart';
@@ -95,19 +94,9 @@ class _SignupUIState extends State<SignupUI> {
     return _isObscuredConfirmPassword ? Icons.visibility_off : Icons.visibility;
   }
 
-  Future<void> _checkInternetConnection() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _checkInternetConnection();
     _registerRequest = RegisterRequestmodel(
       fullName: '',
       organization: '',
