@@ -40,11 +40,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   fl_chart:
-  fluttertoast:
-  image_picker:
+  fluttertoast: ^8.2.12
+  image_picker: ^1.1.2
   path_provider:
-  shared_preferences:
-  connectivity_plus:
+  shared_preferences: ^2.3.1
+  connectivity_plus: ^6.1.4
   provider:
   rename_app:
   flutter_launcher_icons:
@@ -54,9 +54,21 @@ dependencies:
   cached_network_image:
   flutter_markdown:
   package_info_plus:
-  file_picker:
-  flutter_secure_storage:
+  file_picker: ^10.2.0
+  flutter_secure_storage: ^9.0.0
   in_app_update:
+
+dependency_overrides:
+  image_picker_android: 0.8.12+23
+  image_picker_platform_interface: ^2.10.1
+  path_provider_android: 2.2.17
+  path_provider_platform_interface: ^2.1.2
+  sqflite: ^2.4.2
+  sqflite_common: ^2.5.5
+  url_launcher_android: ^6.3.16
+  url_launcher_platform_interface: ^2.3.2
+  workmanager: ^0.8.0
+  pdf_widget_wrapper: ^1.0.4
 
 
 dev_dependencies:

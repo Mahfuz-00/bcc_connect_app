@@ -24,7 +24,7 @@ class PendingWorkOrderDetails extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String PackageName; // The organization name linked to the connection.
   final String Discount;
-  final int? ContactDuration;
+  final String? ContactDuration;
   final num? NetPayment;
   final String
       LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
@@ -130,7 +130,7 @@ class PendingWorkOrderDetails extends StatelessWidget {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.425,
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.41,
                             MediaQuery.of(context).size.height * 0.08),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -174,7 +174,7 @@ class PendingWorkOrderDetails extends StatelessWidget {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.425,
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.41,
                             MediaQuery.of(context).size.height * 0.08),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

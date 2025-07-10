@@ -31,7 +31,7 @@ class ActiveConnectionDetails extends StatelessWidget {
   final String? SerivceType;
   final String? Capacity;
   final String? WorkOrderNumber;
-  final int? ContactDuration;
+  final String? ContactDuration;
   final num? NetPayment;
 
   const ActiveConnectionDetails({

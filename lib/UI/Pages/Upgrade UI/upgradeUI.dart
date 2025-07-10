@@ -533,7 +533,7 @@ class _ISPDashboardState extends State<UpgradeUI> {
                       ),
                     ),
                     bottomNavigationBar: Container(
-                      height: screenHeight * 0.08,
+                      height: screenHeight * 0.085,
                       color: const Color.fromRGBO(25, 192, 122, 1),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

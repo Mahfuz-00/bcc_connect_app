@@ -36,7 +36,7 @@ class PendingConnectionDetails extends StatelessWidget {
   final String? SerivceType;
   final String? Capacity;
   final String? WorkOrderNumber;
-  final int? ContactDuration;
+  final String? ContactDuration;
   final num? NetPayment;
 
   PendingConnectionDetails({
@@ -141,7 +141,7 @@ class PendingConnectionDetails extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(25, 192, 122, 1),
-                      fixedSize: Size(MediaQuery.of(context).size.width * 0.425,
+                      fixedSize: Size(MediaQuery.of(context).size.width * 0.41,
                           MediaQuery.of(context).size.height * 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -185,7 +185,7 @@ class PendingConnectionDetails extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      fixedSize: Size(MediaQuery.of(context).size.width * 0.425,
+                      fixedSize: Size(MediaQuery.of(context).size.width * 0.41,
                           MediaQuery.of(context).size.height * 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),

@@ -718,7 +718,7 @@ class _BCCDashboardUIState extends State<BCCDashboardUI>
                         ),
                       ),
                       bottomNavigationBar: Container(
-                        height: screenHeight * 0.08,
+                        height: screenHeight * 0.082,
                         color: const Color.fromRGBO(25, 192, 122, 1),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

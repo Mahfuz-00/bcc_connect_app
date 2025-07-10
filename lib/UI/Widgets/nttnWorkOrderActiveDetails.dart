@@ -19,7 +19,7 @@ class ActiveWorkOrderDetails extends StatelessWidget {
   final String Name; // The name associated with the connection.
   final String PackageName; // The organization name linked to the connection.
   final String Discount;
-  final int? ContactDuration;
+  final String? ContactDuration;
   final num? NetPayment;
   final String
       LinkCapacity; // The link capacity (e.g., bandwidth) of the connection.
